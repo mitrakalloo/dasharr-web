@@ -1,4 +1,4 @@
-import { base64ToBytes, bytesToBase64 } from '@/lib/vault/crypto'
+import { base64ToBytes, bytesToBase64, getVaultSubtle } from '@/lib/vault/crypto'
 
 export const BIOMETRIC_STORAGE_KEY = 'dasharr-vault-bio'
 
@@ -141,13 +141,14 @@ export function isPasskeyUnlockMarkedUnsupported(): boolean {
 }
 
 async function aesKeyFromPrf(prfBits: ArrayBuffer): Promise<CryptoKey> {
-  return crypto.subtle.importKey('raw', prfBits, 'AES-GCM', false, ['encrypt', 'decrypt'])
+  return getVaultSubtle().importKey('raw', prfBits, 'AES-GCM', false, ['encrypt', 'decrypt'])
 }
 
 export async function wrapPassphrase(prfBits: ArrayBuffer, passphrase: string) {
+  const subtle = getVaultSubtle()
   const iv = crypto.getRandomValues(new Uint8Array(12))
   const key = await aesKeyFromPrf(prfBits)
-  const encrypted = await crypto.subtle.encrypt(
+  const encrypted = await subtle.encrypt(
     { name: 'AES-GCM', iv },
     key,
     new TextEncoder().encode(passphrase),
@@ -163,11 +164,12 @@ export async function unwrapPassphrase(
   ivB64: string,
   ciphertextB64: string,
 ): Promise<string> {
+  const subtle = getVaultSubtle()
   const key = await aesKeyFromPrf(prfBits)
-  const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: base64ToBytes(ivB64) },
+  const decrypted = await subtle.decrypt(
+    { name: 'AES-GCM', iv: base64ToBytes(ivB64) as BufferSource },
     key,
-    base64ToBytes(ciphertextB64),
+    base64ToBytes(ciphertextB64) as BufferSource,
   )
   return new TextDecoder().decode(decrypted)
 }

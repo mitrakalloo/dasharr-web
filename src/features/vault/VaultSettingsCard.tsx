@@ -36,7 +36,7 @@ export function VaultSettingsCard() {
         <h2 className="text-base font-semibold">Local vault</h2>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
           {hasVault
-            ? 'API keys are encrypted at rest with your passphrase.'
+            ? 'API keys stay encrypted at rest. This tab stays unlocked across refresh until you Lock or close it.'
             : 'Create a passphrase before saving services. Nothing is uploaded.'}
         </p>
       </div>

@@ -19,3 +19,47 @@ export async function getProwlarrStatus(settings: AppSettings, service: ServiceC
 export async function getProwlarrIndexers(settings: AppSettings, service: ServiceConfig) {
   return serviceJson<ProwlarrIndexer[]>(settings, service, '/api/v1/indexer')
 }
+
+export interface ProwlarrRelease {
+  guid: string
+  indexerId: number
+  title: string
+  size: number
+  protocol: string
+  indexer?: string
+  seeders?: number
+  leechers?: number
+  publishDate?: string
+}
+
+export async function searchProwlarrReleases(
+  settings: AppSettings,
+  service: ServiceConfig,
+  query: string,
+) {
+  const params = new URLSearchParams({
+    query,
+    type: 'search',
+    limit: '50',
+  })
+  return serviceJson<ProwlarrRelease[]>(
+    settings,
+    service,
+    `/api/v1/search?${params.toString()}`,
+  )
+}
+
+export async function grabProwlarrRelease(
+  settings: AppSettings,
+  service: ServiceConfig,
+  release: Pick<ProwlarrRelease, 'guid' | 'indexerId'>,
+) {
+  return serviceJson<unknown>(settings, service, '/api/v1/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      guid: release.guid,
+      indexerId: release.indexerId,
+    }),
+  })
+}

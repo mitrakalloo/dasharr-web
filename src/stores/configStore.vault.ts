@@ -29,23 +29,41 @@ export interface VaultAwareState {
   vaultLocked: boolean
 }
 
+async function hydrateFromPassphrase(set: SetState, passphrase: string) {
+  const vault = readVaultBlob()
+  if (!vault) throw new Error('No vault found')
+  const config = await decryptJson<AppConfig>(passphrase, vault)
+  setSessionPassphrase(passphrase)
+  set({
+    settings: { ...DEFAULT_CONFIG.settings, ...config.settings },
+    services: config.services ?? [],
+    vaultPhase: 'ready',
+    hasVault: true,
+    vaultLocked: false,
+    hydrated: true,
+  })
+}
+
 export function createVaultActions(set: SetState, get: GetState) {
   return {
-    bootstrap: () => set({ ...bootVaultState(), hydrated: true }),
+    bootstrap: async () => {
+      const boot = bootVaultState()
+      if (boot.vaultPhase === 'locked') {
+        const passphrase = getSessionPassphrase()
+        if (passphrase) {
+          try {
+            await hydrateFromPassphrase(set, passphrase)
+            return
+          } catch {
+            setSessionPassphrase(null)
+          }
+        }
+      }
+      set({ ...boot, hydrated: true })
+    },
 
     unlock: async (passphrase: string) => {
-      const vault = readVaultBlob()
-      if (!vault) throw new Error('No vault found')
-      const config = await decryptJson<AppConfig>(passphrase, vault)
-      setSessionPassphrase(passphrase)
-      set({
-        settings: { ...DEFAULT_CONFIG.settings, ...config.settings },
-        services: config.services ?? [],
-        vaultPhase: 'ready',
-        hasVault: true,
-        vaultLocked: false,
-        hydrated: true,
-      })
+      await hydrateFromPassphrase(set, passphrase)
     },
 
     setupVault: async (passphrase: string) => {
@@ -73,18 +91,7 @@ export function createVaultActions(set: SetState, get: GetState) {
 
     unlockWithBiometric: async () => {
       const passphrase = await unlockPassphraseWithBiometric()
-      const vault = readVaultBlob()
-      if (!vault) throw new Error('No vault found')
-      const config = await decryptJson<AppConfig>(passphrase, vault)
-      setSessionPassphrase(passphrase)
-      set({
-        settings: { ...DEFAULT_CONFIG.settings, ...config.settings },
-        services: config.services ?? [],
-        vaultPhase: 'ready',
-        hasVault: true,
-        vaultLocked: false,
-        hydrated: true,
-      })
+      await hydrateFromPassphrase(set, passphrase)
     },
 
     enableBiometricUnlock: async () => {

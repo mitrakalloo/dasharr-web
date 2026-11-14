@@ -1,0 +1,82 @@
+import { useState } from 'react'
+import { toast } from 'sonner'
+
+import { DEMO_SEARCH } from '@/data/demoDashboard'
+import { useConfiguredStack } from '@/hooks/useConfiguredStack'
+import { useDiscoverShelves } from '@/hooks/useDiscoverShelves'
+import { useMediaSearch, type MediaSearchItem } from '@/hooks/useMediaSearch'
+import type { DiscoverCard } from '@/lib/services/seerr.discover'
+
+export const SEARCH_SCOPES = ['All', 'Series', 'Movies'] as const
+export type SearchScope = (typeof SEARCH_SCOPES)[number]
+
+export function useSearchPage() {
+  const { isDemo, has, hydrated } = useConfiguredStack()
+  const [query, setQuery] = useState('')
+  const [scope, setScope] = useState<SearchScope>('All')
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const live = useMediaSearch(!isDemo, query)
+  const discover = useDiscoverShelves(!isDemo && has('seerr') && !query.trim())
+  const showDiscover = !isDemo && has('seerr') && !query.trim()
+
+  const demoItems: MediaSearchItem[] = DEMO_SEARCH.filter((item) => {
+    const matchesQuery = item.title.toLowerCase().includes(query.trim().toLowerCase())
+    if (!matchesQuery) return false
+    if (scope === 'All') return true
+    if (scope === 'Series') return item.type === 'series'
+    return item.type === 'movie'
+  }).map((item) => ({
+    id: item.id,
+    titleId: item.titleId,
+    title: item.title,
+    year: item.year,
+    type: item.type as 'series' | 'movie',
+    rating: item.rating,
+    poster: '',
+    overview: '',
+    source: 'library' as const,
+    alreadyAdded: true,
+  }))
+
+  const liveItems = live.items.filter((item) => {
+    if (scope === 'All') return true
+    if (scope === 'Series') return item.type === 'series'
+    return item.type === 'movie'
+  })
+
+  function handleDiscoverSelect(item: DiscoverCard) {
+    const mapped: MediaSearchItem = {
+      id: item.id,
+      title: item.title,
+      year: item.year ?? 0,
+      type: item.type === 'tv' ? 'series' : 'movie',
+      rating: item.rating ?? 0,
+      poster: item.poster,
+      overview: '',
+      source: 'seerr',
+      alreadyAdded: false,
+      tmdbId: item.tmdbId,
+    }
+    void live.addItem(mapped).catch((error: unknown) => {
+      toast.error(error instanceof Error ? error.message : 'Couldn’t add title')
+    })
+  }
+
+  return {
+    isDemo,
+    has,
+    hydrated,
+    query,
+    setQuery,
+    scope,
+    setScope,
+    sheetOpen,
+    setSheetOpen,
+    live,
+    discover,
+    showDiscover,
+    demoItems,
+    liveItems,
+    handleDiscoverSelect,
+  }
+}

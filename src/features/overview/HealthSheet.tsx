@@ -23,7 +23,7 @@ export function HealthSheet({ open, onClose }: HealthSheetProps) {
   const { services, health, online } = useStackHealth()
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="System health">
+    <BottomSheet open={open} onClose={onClose} title="System health" desktop="drawer">
       {services.length === 0 ? (
         <div className="space-y-3 py-2">
           <p className="text-sm text-[var(--color-muted-foreground)]">

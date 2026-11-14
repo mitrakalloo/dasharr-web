@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
 
+import { InsecureContextScreen } from '@/features/vault/InsecureContextScreen'
 import { SetupVaultScreen } from '@/features/vault/SetupVaultScreen'
 import { UnlockScreen } from '@/features/vault/UnlockScreen'
+import { isVaultCryptoAvailable } from '@/lib/vault/crypto'
 import { useConfigStore } from '@/stores/configStore'
 
 interface VaultGateProps {
@@ -13,8 +15,10 @@ export function VaultGate({ children }: VaultGateProps) {
   const bootstrap = useConfigStore((state) => state.bootstrap)
 
   useEffect(() => {
-    bootstrap()
+    void bootstrap()
   }, [bootstrap])
+
+  if (!isVaultCryptoAvailable()) return <InsecureContextScreen />
 
   if (phase === 'booting') {
     return (

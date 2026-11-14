@@ -37,7 +37,6 @@ export function bootVaultState(): {
   const legacy = readLegacyPlainConfig()
 
   if (vault) {
-    setSessionPassphrase(null)
     return {
       settings: DEFAULT_CONFIG.settings,
       services: [],
@@ -48,7 +47,6 @@ export function bootVaultState(): {
   }
 
   if (legacy) {
-    setSessionPassphrase(null)
     return {
       settings: { ...DEFAULT_CONFIG.settings, ...legacy.settings },
       services: legacy.services ?? [],

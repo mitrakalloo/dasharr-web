@@ -21,15 +21,18 @@ interface ProxyPayload {
 function authHeaders(service: ServiceConfig): Record<string, string> {
   const headers: Record<string, string> = {}
 
-  if (service.type === 'qbittorrent') {
+  if (
+    service.type === 'qbittorrent' ||
+    service.type === 'transmission' ||
+    service.type === 'nzbget' ||
+    service.type === 'deluge'
+  ) {
     return headers
   }
 
   if (service.apiKey) {
-    if (service.type === 'sabnzbd') {
-      // SABnzbd uses query param; header unused
-    } else if (service.type === 'seerr') {
-      headers['X-Api-Key'] = service.apiKey
+    if (service.type === 'sabnzbd' || service.type === 'tautulli') {
+      // API key is passed as a query param by the service module
     } else {
       headers['X-Api-Key'] = service.apiKey
     }
@@ -68,7 +71,7 @@ async function parseError(response: Response): Promise<string> {
   }
 }
 
-export async function serviceFetch(
+async function serviceFetchRaw(
   settings: AppSettings,
   service: ServiceConfig,
   path: string,
@@ -85,16 +88,13 @@ export async function serviceFetch(
   const method = init.method ?? 'GET'
 
   if (settings.connectionMode === 'direct') {
-    const response = await fetch(url, {
+    return fetch(url, {
       ...init,
       method,
       headers,
-      credentials: service.type === 'qbittorrent' ? 'include' : 'omit',
+      credentials:
+        service.type === 'qbittorrent' || service.type === 'deluge' ? 'include' : 'omit',
     })
-    if (!response.ok) {
-      throw new ServiceRequestError(await parseError(response), response.status)
-    }
-    return response
   }
 
   const bodyValue =
@@ -118,17 +118,34 @@ export async function serviceFetch(
     proxyHeaders['X-Proxy-Secret'] = settings.proxySecret
   }
 
-  const proxyResponse = await fetch(settings.proxyUrl || '/api/proxy', {
+  return fetch(settings.proxyUrl || '/api/proxy', {
     method: 'POST',
     headers: proxyHeaders,
     body: JSON.stringify(payload),
   })
+}
 
-  if (!proxyResponse.ok) {
-    throw new ServiceRequestError(await parseError(proxyResponse), proxyResponse.status)
+export async function serviceFetch(
+  settings: AppSettings,
+  service: ServiceConfig,
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  const response = await serviceFetchRaw(settings, service, path, init)
+  if (!response.ok) {
+    throw new ServiceRequestError(await parseError(response), response.status)
   }
+  return response
+}
 
-  return proxyResponse
+/** Like serviceFetch but returns non-2xx responses (e.g. Transmission 409 session). */
+export async function serviceFetchUnchecked(
+  settings: AppSettings,
+  service: ServiceConfig,
+  path: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  return serviceFetchRaw(settings, service, path, init)
 }
 
 export async function serviceJson<T>(

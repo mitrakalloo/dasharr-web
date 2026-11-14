@@ -1,76 +1,21 @@
-import type { DemoQueueItem } from '@/data/demoDashboard'
-import { formatBytes, formatEta, formatSpeed } from '@/lib/format'
+import type { DemoQueueItem, DemoSeerrRequest } from '@/data/demoDashboard'
+import { formatBytes } from '@/lib/format'
 import { liveTitleId } from '@/lib/liveTitleId'
-import type { QbitTorrent } from '@/lib/services/qbittorrent'
-import type { SabQueue, SabQueueSlot } from '@/lib/services/sabnzbd'
 import type { ArrQueueItem } from '@/lib/services/sonarr'
+import type { TautulliSession } from '@/lib/services/tautulli'
 
-function qbitStatus(state: string): DemoQueueItem['status'] {
-  const lower = state.toLowerCase()
-  if (lower.includes('paused') || lower.includes('stopped')) return 'paused'
-  if (lower.includes('downloading') || lower.includes('stalleddl') || lower.includes('meta')) {
-    return 'downloading'
-  }
-  return 'queued'
-}
-
-export function mapQbitTorrent(
-  torrent: QbitTorrent,
-  serviceId: string,
-): DemoQueueItem {
-  return {
-    id: `qbit-${torrent.hash}`,
-    title: torrent.name,
-    subtitle: torrent.category || 'qBittorrent',
-    quality: torrent.category || 'Torrent',
-    progress: Math.round(torrent.progress * 100),
-    eta: formatEta(torrent.eta > 8640000 ? -1 : torrent.eta),
-    speed: formatSpeed(torrent.dlspeed),
-    size: formatBytes(torrent.size),
-    status: qbitStatus(torrent.state),
-    service: 'qbittorrent',
-    poster: '',
-    overview: torrent.name,
-    indexers: [],
-    clientServiceId: serviceId,
-    clientItemId: torrent.hash,
-    canPause: true,
-  }
-}
-
-export function mapSabSlot(
-  slot: SabQueueSlot,
-  serviceId: string,
-  queue?: SabQueue,
-): DemoQueueItem {
-  const status = slot.status.toLowerCase()
-  return {
-    id: `sab-${slot.nzo_id}`,
-    title: slot.filename,
-    subtitle: slot.category || 'SABnzbd',
-    quality: slot.category || 'Usenet',
-    progress: Math.round(Number(slot.percentage) || 0),
-    eta: slot.timeleft || queue?.timeleft || '—',
-    speed: queue?.speed ? `${queue.speed}` : '—',
-    size: slot.size,
-    status: status.includes('paused')
-      ? 'paused'
-      : status.includes('downloading')
-        ? 'downloading'
-        : 'queued',
-    service: 'sabnzbd',
-    poster: '',
-    overview: slot.filename,
-    indexers: [],
-    clientServiceId: serviceId,
-    clientItemId: slot.nzo_id,
-    canPause: true,
-  }
-}
+export {
+  mapDelugeTorrent,
+  mapNzbgetGroup,
+  mapQbitTorrent,
+  mapSabSlot,
+  mapTransmissionTorrent,
+} from '@/features/queue/queue.clientMappers'
 
 export function mapArrQueueItem(
   item: ArrQueueItem,
   kind: 'sonarr' | 'radarr',
+  serviceId: string,
 ): DemoQueueItem {
   const done = item.size > 0 ? ((item.size - item.sizeleft) / item.size) * 100 : 0
   const state = (item.trackedDownloadState ?? item.status).toLowerCase()
@@ -100,6 +45,62 @@ export function mapArrQueueItem(
     poster: '',
     overview: item.title,
     indexers: [],
+    clientServiceId: serviceId,
+    clientItemId: String(item.id),
     canPause: false,
+    canRemove: true,
+  }
+}
+
+export function mapSeerrRequestItem(request: DemoSeerrRequest): DemoQueueItem {
+  return {
+    id: `seerr-req-${request.id}`,
+    titleId: request.titleId,
+    title: request.title,
+    subtitle: `${request.requestedBy} · ${request.status}`,
+    quality: request.quality,
+    progress: request.status === 'approved' ? 100 : 0,
+    eta: request.requestedAt,
+    speed: '—',
+    size: '—',
+    status: 'request',
+    service: 'seerr',
+    poster: request.poster,
+    overview: request.overview,
+    indexers: [],
+    canPause: false,
+    canRemove: false,
+  }
+}
+
+export function mapTautulliSession(
+  session: TautulliSession,
+  serviceId: string,
+  index: number,
+): DemoQueueItem {
+  const progress = Number(session.progress_percent) || 0
+  const id = session.session_id ?? session.session_key ?? `session-${index}`
+  return {
+    id: `tautulli-${id}`,
+    title: session.full_title ?? session.title ?? 'Playback',
+    subtitle: `${session.friendly_name ?? session.user ?? 'User'} · ${session.player ?? session.product ?? 'Plex'}`,
+    quality:
+      session.stream_video_full_resolution ??
+      session.quality_profile ??
+      session.transcode_decision ??
+      'Stream',
+    progress: Math.max(0, Math.min(100, Math.round(progress))),
+    eta: session.state ?? 'playing',
+    speed: session.bandwidth ? `${session.bandwidth}` : '—',
+    size: '—',
+    status: 'watching',
+    service: 'tautulli',
+    poster: '',
+    overview: session.full_title ?? session.title ?? '',
+    indexers: [],
+    clientServiceId: serviceId,
+    clientItemId: session.session_id ?? session.session_key,
+    canPause: false,
+    canRemove: Boolean(session.session_id ?? session.session_key),
   }
 }

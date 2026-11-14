@@ -1,37 +1,58 @@
 @import "tailwindcss";
 
 :root {
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-card: #121215;
-  --color-card-elevated: #18181b;
-  --color-muted: #18181b;
-  --color-muted-foreground: #a1a1aa;
-  --color-border: #27272a;
-  --color-border-strong: #3f3f46;
-  --color-primary: #fafafa;
-  --color-on-primary: #09090b;
-  --color-accent: #38bdf8;
-  --color-on-accent: #082f49;
-  --color-destructive: #f43f5e;
+  /* Dasharr native slate desk (theme/colors.ts) */
+  --color-background: #0b0f17;
+  --color-foreground: #f1f5f9;
+  --color-card: #121826;
+  --color-card-elevated: #1a2233;
+  --color-muted: #171e2b;
+  --color-muted-foreground: #a8b4c6;
+  --color-placeholder: #6b7a90;
+  --color-border: #243044;
+  --color-border-strong: #3b4a63;
+  --color-primary: #3b82f6;
+  --color-on-primary: #f8fafc;
+  --color-primary-container: #1e3a8a;
+  --color-on-primary-container: #d6e3ff;
+  --color-secondary: #60a5fa;
+  --color-accent: #f59e0b;
+  --color-on-accent: #1a1203;
+  --color-destructive: #f87171;
   --color-warning: #f59e0b;
-  --color-success: #10b981;
-  --color-overlay: rgba(9, 9, 11, 0.72);
+  --color-info: #38bdf8;
+  --color-success: #34d399;
+  --color-overlay: rgba(11, 15, 23, 0.72);
+  --color-ring: #3b82f6;
+  --color-hairline: rgba(248, 250, 252, 0.08);
+  --color-glow: rgba(59, 130, 246, 0.28);
+  --color-primary-muted: rgba(59, 130, 246, 0.16);
 
   --service-sonarr: #38bdf8;
   --service-radarr: #f59e0b;
-  --service-lidarr: #10b981;
-  --service-prowlarr: #a855f7;
+  --service-lidarr: #a78bfa;
+  --service-prowlarr: #94a3b8;
   --service-qbittorrent: #60a5fa;
   --service-sabnzbd: #fbbf24;
-  --service-seerr: #818cf8;
+  --service-seerr: #3b82f6;
+  --service-download: #60a5fa;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Plus Jakarta Sans", var(--font-sans);
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
   --tap: 44px;
   --shell-max: 480px;
-  --tab-clearance: calc(72px + env(safe-area-inset-bottom, 0px));
+  --sheet-max: 480px;
+  --rail-expanded: 240px;
+  --rail-compact: 72px;
+  --queue-rail: 360px;
+  --radius-dock: 32px;
+  --tab-clearance: calc(88px + env(safe-area-inset-bottom, 0px));
+  --panel-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --elevation-md: 0 8px 24px rgba(11, 15, 23, 0.45);
+  --elevation-float: 0 12px 40px rgba(11, 15, 23, 0.55);
+  --elevation-glow: 0 8px 28px rgba(59, 130, 246, 0.35);
 
   color-scheme: dark;
   font-family: var(--font-sans);
@@ -40,6 +61,14 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --shell-max: none;
+    --sheet-max: 42rem;
+    --tab-clearance: 0px;
+  }
 }
 
 * {
@@ -55,7 +84,7 @@ body,
 body {
   margin: 0;
   overflow-x: hidden;
-  background: #050507;
+  background: var(--color-background);
   color: var(--color-foreground);
 }
 
@@ -66,9 +95,43 @@ textarea {
   font: inherit;
 }
 
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+}
+
 .tabular {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
+}
+
+.panel {
+  border: 1px solid var(--color-border);
+  background: var(--color-card);
+  box-shadow: var(--panel-highlight), var(--elevation-md);
+}
+
+.magnetic {
+  transition:
+    transform 220ms var(--ease-out-expo),
+    box-shadow 220ms var(--ease-out-expo),
+    background-color 220ms var(--ease-out-expo);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .magnetic:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      var(--panel-highlight),
+      0 0 28px -12px var(--glow, var(--color-glow));
+  }
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -80,14 +143,33 @@ textarea {
   scrollbar-width: none;
 }
 
+@media (max-width: 1023px) {
+  * {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}
+
 .app-shell {
   transition: transform 320ms var(--ease-out-expo);
   transform-origin: center center;
 }
 
 .app-shell[data-sheet-open='true'] {
-  transform: scale(0.96);
+  transform: scale(0.985);
   will-change: transform;
+}
+
+@media (min-width: 1024px) {
+  .app-shell[data-sheet-open='true'] {
+    transform: none;
+  }
 }
 
 @keyframes beacon-pulse {

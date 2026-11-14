@@ -1,4 +1,4 @@
-import { Pause, Play, Trash2 } from 'lucide-react'
+import { Pause, Play, RotateCcw, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge'
@@ -11,41 +11,68 @@ import { useLiveSpeed } from '@/hooks/useLiveSpeed'
 import type { DemoQueueItem } from '@/data/demoDashboard'
 import { parseSpeedMBps } from '@/lib/parseSpeed'
 import { serviceAccent } from '@/lib/serviceColors'
+import { cn } from '@/lib/cn'
 
 interface QueueItemCardProps {
   item: DemoQueueItem
   onOpen: () => void
   onPause?: () => void
+  onRemove?: () => void
+  onRetry?: () => void
+  dense?: boolean
 }
 
-export function QueueItemCard({ item, onOpen, onPause }: QueueItemCardProps) {
+export function QueueItemCard({
+  item,
+  onOpen,
+  onPause,
+  onRemove,
+  onRetry,
+  dense = false,
+}: QueueItemCardProps) {
   const accent = serviceAccent(item.service)
   const live = item.status === 'downloading'
   const speed = useLiveSpeed(parseSpeedMBps(item.speed), live)
   const paused = item.status === 'paused'
+  const showPause = Boolean(item.canPause && onPause)
+  const showRemove = Boolean(item.canRemove && onRemove)
+  const showRetry = Boolean(item.canRetry && onRetry)
+
+  function handleRetry() {
+    if (onRetry) onRetry()
+    else toast.message('Force retry queued')
+  }
 
   return (
     <SwipeableQueueRow
       paused={paused}
-      onPauseToggle={item.canPause ? onPause : undefined}
-      onRemove={() => toast.message('Remove isn’t wired for this client yet')}
+      onPauseToggle={showPause ? onPause : undefined}
+      onRetry={showRetry ? handleRetry : item.canRetry ? handleRetry : undefined}
+      onRemove={showRemove ? onRemove : undefined}
     >
-      <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-3">
+      <article
+        className={cn(
+          'magnetic panel group rounded-2xl p-3 transition hover:bg-[var(--color-card-elevated)]',
+          dense && 'p-2.5',
+        )}
+        style={{ ['--glow' as string]: accent }}
+      >
         <button
           type="button"
           onClick={onOpen}
-          className="flex w-full cursor-pointer gap-3 text-left transition active:scale-[0.99]"
+          className="flex w-full cursor-pointer gap-3 text-left transition active:scale-[0.97]"
         >
           <PosterThumb
             src={item.poster}
             label={item.title}
             accent={accent}
-            className="h-[72px] w-12 rounded-lg"
+            className={cn('h-[72px] w-12 rounded-lg', dense && 'h-14 w-10')}
           />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <Badge color={accent}>{item.service}</Badge>
               <Badge>{item.quality}</Badge>
+              {item.releaseGroup ? <Badge>{item.releaseGroup}</Badge> : null}
             </div>
             <h3 className="mt-1.5 truncate text-sm font-semibold">{item.title}</h3>
             <p className="truncate text-xs text-[var(--color-muted-foreground)]">{item.subtitle}</p>
@@ -66,24 +93,28 @@ export function QueueItemCard({ item, onOpen, onPause }: QueueItemCardProps) {
 
         <div className="mt-2 flex items-center justify-between">
           <p className="tabular text-xs text-[var(--color-muted-foreground)]">{item.size}</p>
-          <div className="flex gap-1">
-            <IconButton
-              label={paused ? 'Resume download' : 'Pause download'}
-              onClick={() => {
-                if (item.canPause && onPause) onPause()
-                else toast.message(paused ? 'Resumed' : 'Paused')
-              }}
-            >
-              {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
-            </IconButton>
-            <IconButton
-              label="Remove download"
-              tone="danger"
-              onClick={() => toast.message('Remove isn’t wired for this client yet')}
-            >
-              <Trash2 className="size-4" />
-            </IconButton>
-          </div>
+          {showPause || showRemove || item.canRetry ? (
+            <div className="flex gap-1 opacity-100 lg:opacity-0 lg:transition lg:group-hover:opacity-100 lg:focus-within:opacity-100">
+              {showPause ? (
+                <IconButton
+                  label={paused ? 'Resume download' : 'Pause download'}
+                  onClick={onPause}
+                >
+                  {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
+                </IconButton>
+              ) : null}
+              {item.canRetry ? (
+                <IconButton label="Force retry" onClick={handleRetry}>
+                  <RotateCcw className="size-4" />
+                </IconButton>
+              ) : null}
+              {showRemove ? (
+                <IconButton label="Remove download" tone="danger" onClick={onRemove}>
+                  <Trash2 className="size-4" />
+                </IconButton>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </article>
     </SwipeableQueueRow>

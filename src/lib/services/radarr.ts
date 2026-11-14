@@ -85,6 +85,63 @@ export async function getRadarrQueue(settings: AppSettings, service: ServiceConf
   return Array.isArray(data) ? data : data.records
 }
 
+export async function deleteRadarrQueueItem(
+  settings: AppSettings,
+  service: ServiceConfig,
+  id: number,
+  removeFromClient = true,
+) {
+  const params = new URLSearchParams({
+    removeFromClient: String(removeFromClient),
+    blocklist: 'false',
+  })
+  await serviceJson<unknown>(settings, service, `/api/v3/queue/${id}?${params}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function updateRadarrMovie(
+  settings: AppSettings,
+  service: ServiceConfig,
+  movie: RadarrMovie,
+) {
+  return serviceJson<RadarrMovie>(settings, service, `/api/v3/movie/${movie.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(movie),
+  })
+}
+
+export async function getRadarrWantedMissing(
+  settings: AppSettings,
+  service: ServiceConfig,
+) {
+  const data = await serviceJson<{
+    records: Array<{
+      id: number
+      title: string
+      year?: number
+      hasFile: boolean
+      isAvailable?: boolean
+    }>
+  }>(settings, service, '/api/v3/wanted/missing?page=1&pageSize=50&sortDirection=descending')
+  return data.records
+}
+
+export async function getRadarrHistory(settings: AppSettings, service: ServiceConfig) {
+  const data = await serviceJson<{
+    records: Array<{
+      id: number
+      movieId?: number
+      sourceTitle?: string
+      date: string
+      eventType: string
+      movie?: { title?: string; year?: number }
+    }>
+  }>(settings, service, '/api/v3/history?page=1&pageSize=50&sortDirection=descending')
+  return data.records
+}
+
 export interface RadarrCalendarMovie extends RadarrMovie {
   inCinemas?: string
   physicalRelease?: string

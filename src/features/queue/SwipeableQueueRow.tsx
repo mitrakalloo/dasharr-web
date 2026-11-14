@@ -1,30 +1,35 @@
 import { animate, motion, type PanInfo, useMotionValue, useReducedMotion, useTransform } from 'motion/react'
-import { Pause, Play, Trash2 } from 'lucide-react'
+import { Pause, Play, RotateCcw, Trash2 } from 'lucide-react'
 
+import { useIsDesktop } from '@/hooks/useMediaQuery'
 import { spring } from '@/lib/motion'
 
 interface SwipeableQueueRowProps {
   children: React.ReactNode
   paused?: boolean
   onPauseToggle?: () => void
+  onRetry?: () => void
   onRemove?: () => void
 }
 
-const THRESHOLD = 64
-const OPEN = 80
+const THRESHOLD = 72
+const OPEN = 96
 
 export function SwipeableQueueRow({
   children,
   paused = false,
   onPauseToggle,
+  onRetry,
   onRemove,
 }: SwipeableQueueRowProps) {
   const reduced = useReducedMotion()
+  const isDesktop = useIsDesktop()
   const x = useMotionValue(0)
   const leftOpacity = useTransform(x, [0, 16, OPEN], [0, 0.7, 1])
   const rightOpacity = useTransform(x, [0, -16, -OPEN], [0, 0.7, 1])
   const leftEvents = useTransform(x, (value) => (value > 8 ? 'auto' : 'none'))
   const rightEvents = useTransform(x, (value) => (value < -8 ? 'auto' : 'none'))
+  const leftWidth = onPauseToggle && onRetry ? 128 : 80
 
   function snapTo(target: number) {
     void animate(x, target, spring)
@@ -32,54 +37,74 @@ export function SwipeableQueueRow({
 
   function handleDragEnd(_: unknown, info: PanInfo) {
     const projected = x.get() + info.velocity.x * 0.12
-    if (projected > THRESHOLD) snapTo(OPEN)
+    if (projected > THRESHOLD) snapTo(leftWidth)
     else if (projected < -THRESHOLD) snapTo(-OPEN)
     else snapTo(0)
   }
 
-  if (reduced) return <>{children}</>
+  if (reduced || isDesktop) return <>{children}</>
+  if (!onPauseToggle && !onRetry && !onRemove) return <>{children}</>
 
   return (
     <div className="relative overflow-hidden rounded-2xl">
-      <motion.div
-        style={{ opacity: leftOpacity, pointerEvents: leftEvents }}
-        className="absolute inset-y-0 left-0 flex w-20 flex-col items-center justify-center gap-1 bg-sky-500/25"
-        aria-hidden
-      >
-        <button
-          type="button"
-          className="flex size-[var(--tap)] cursor-pointer flex-col items-center justify-center gap-0.5 text-sky-300 active:scale-95"
-          onClick={() => {
-            onPauseToggle?.()
-            snapTo(0)
-          }}
+      {(onPauseToggle || onRetry) && (
+        <motion.div
+          style={{ opacity: leftOpacity, pointerEvents: leftEvents, width: leftWidth }}
+          className="absolute inset-y-0 left-0 flex items-center justify-evenly bg-sky-500/25"
+          aria-hidden
         >
-          {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
-          <span className="text-[10px] font-medium">{paused ? 'Resume' : 'Pause'}</span>
-        </button>
-      </motion.div>
+          {onPauseToggle ? (
+            <button
+              type="button"
+              className="flex size-[var(--tap)] cursor-pointer flex-col items-center justify-center gap-0.5 text-sky-300 active:scale-95"
+              onClick={() => {
+                onPauseToggle()
+                snapTo(0)
+              }}
+            >
+              {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
+              <span className="text-[10px] font-medium">{paused ? 'Resume' : 'Pause'}</span>
+            </button>
+          ) : null}
+          {onRetry ? (
+            <button
+              type="button"
+              className="flex size-[var(--tap)] cursor-pointer flex-col items-center justify-center gap-0.5 text-amber-200 active:scale-95"
+              onClick={() => {
+                onRetry()
+                snapTo(0)
+              }}
+            >
+              <RotateCcw className="size-4" />
+              <span className="text-[10px] font-medium">Retry</span>
+            </button>
+          ) : null}
+        </motion.div>
+      )}
 
-      <motion.div
-        style={{ opacity: rightOpacity, pointerEvents: rightEvents }}
-        className="absolute inset-y-0 right-0 flex w-20 flex-col items-center justify-center gap-1 bg-rose-500/25"
-        aria-hidden
-      >
-        <button
-          type="button"
-          className="flex size-[var(--tap)] cursor-pointer flex-col items-center justify-center gap-0.5 text-rose-300 active:scale-95"
-          onClick={() => {
-            onRemove?.()
-            snapTo(0)
-          }}
+      {onRemove ? (
+        <motion.div
+          style={{ opacity: rightOpacity, pointerEvents: rightEvents }}
+          className="absolute inset-y-0 right-0 flex w-20 flex-col items-center justify-center gap-1 bg-rose-500/25"
+          aria-hidden
         >
-          <Trash2 className="size-4" />
-          <span className="text-[10px] font-medium">Delete</span>
-        </button>
-      </motion.div>
+          <button
+            type="button"
+            className="flex size-[var(--tap)] cursor-pointer flex-col items-center justify-center gap-0.5 text-rose-300 active:scale-95"
+            onClick={() => {
+              onRemove()
+              snapTo(0)
+            }}
+          >
+            <Trash2 className="size-4" />
+            <span className="text-[10px] font-medium">Delete</span>
+          </button>
+        </motion.div>
+      ) : null}
 
       <motion.div
         drag="x"
-        dragConstraints={{ left: -OPEN, right: OPEN }}
+        dragConstraints={{ left: onRemove ? -OPEN : 0, right: onPauseToggle || onRetry ? leftWidth : 0 }}
         dragElastic={0.14}
         style={{ x }}
         onDragEnd={handleDragEnd}

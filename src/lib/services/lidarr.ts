@@ -35,6 +35,10 @@ export async function getLidarrCalendar(
   )
 }
 
+export async function getLidarrAlbums(settings: AppSettings, service: ServiceConfig) {
+  return serviceJson<LidarrAlbum[]>(settings, service, '/api/v1/album')
+}
+
 export async function getLidarrAlbum(
   settings: AppSettings,
   service: ServiceConfig,

@@ -3,6 +3,11 @@ import { toast } from 'sonner'
 
 import { parseLiveTitleId } from '@/lib/liveTitleId'
 import {
+  commandLidarrAlbumSearch,
+  grabLidarrRelease,
+  searchLidarrAlbumReleases,
+} from '@/lib/services/lidarr.releases'
+import {
   commandRadarrMoviesSearch,
   grabRadarrRelease,
   searchRadarrMovieReleases,
@@ -41,6 +46,13 @@ export function useTitleSearchActions(titleId: string) {
     return searchRadarrMovieReleases(settings, service, parsed.numericId)
   }, [parsed, service, settings])
 
+  const searchAlbumReleases = useCallback(async (): Promise<ArrRelease[]> => {
+    if (!parsed || parsed.service !== 'lidarr' || !service) {
+      throw new Error('Lidarr is required for album search')
+    }
+    return searchLidarrAlbumReleases(settings, service, parsed.numericId)
+  }, [parsed, service, settings])
+
   const grabRelease = useCallback(
     async (release: ArrRelease) => {
       if (!parsed || !service) throw new Error('No *arr service configured')
@@ -48,6 +60,8 @@ export function useTitleSearchActions(titleId: string) {
         await grabSonarrRelease(settings, service, release)
       } else if (parsed.service === 'radarr') {
         await grabRadarrRelease(settings, service, release)
+      } else if (parsed.service === 'lidarr') {
+        await grabLidarrRelease(settings, service, release)
       } else {
         throw new Error('Grab isn’t supported for this service yet')
       }
@@ -86,14 +100,24 @@ export function useTitleSearchActions(titleId: string) {
     toast.success('Automatic movie search queued')
   }, [parsed, service, settings])
 
+  const autoSearchAlbum = useCallback(async () => {
+    if (!parsed || parsed.service !== 'lidarr' || !service) {
+      throw new Error('Lidarr is required')
+    }
+    await commandLidarrAlbumSearch(settings, service, [parsed.numericId])
+    toast.success('Automatic album search queued')
+  }, [parsed, service, settings])
+
   return {
     parsed,
-    canSearch: Boolean(service && parsed && parsed.service !== 'lidarr'),
+    canSearch: Boolean(service && parsed),
     searchEpisodeReleases,
     searchMovieReleases,
+    searchAlbumReleases,
     grabRelease,
     autoSearchEpisodes,
     autoSearchSeason,
     autoSearchMovie,
+    autoSearchAlbum,
   }
 }

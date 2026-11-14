@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { CalendarAgenda } from '@/features/calendar/CalendarAgenda'
@@ -11,15 +12,32 @@ import { useCalendarState } from '@/features/calendar/useCalendarState'
 import { DEMO_RELEASES } from '@/data/demoDashboard'
 import { useCalendarReleases } from '@/hooks/useCalendarReleases'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
+import { syncTitleMonitored } from '@/hooks/useMonitorTitle'
 import { serviceAccent } from '@/lib/serviceColors'
+import { useConfigStore } from '@/stores/configStore'
 
 export function CalendarPage() {
   const { isDemo, hasAny, hydrated, has } = useConfiguredStack()
+  const settings = useConfigStore((state) => state.settings)
+  const services = useConfigStore((state) => state.services)
   const canShow = isDemo || hasAny('sonarr', 'radarr', 'lidarr')
   const live = useCalendarReleases(!isDemo && canShow)
   const events =
     isDemo ? DEMO_RELEASES : live.status === 'success' ? live.data : []
   const cal = useCalendarState(events)
+
+  function handleToggle(id: string) {
+    const event = cal.events.find((entry) => entry.id === id)
+    const next = !(event?.monitored ?? false)
+    cal.toggleMonitored(id)
+    if (isDemo || !event?.titleId) {
+      toast.message(next ? 'Monitored (local)' : 'Unmonitored (local)')
+      return
+    }
+    void syncTitleMonitored(settings, services, event.titleId, next).then((ok) => {
+      if (!ok) cal.toggleMonitored(id)
+    })
+  }
 
   const legend = (['sonarr', 'radarr', 'lidarr'] as const).filter(
     (kind) => isDemo || has(kind),
@@ -123,7 +141,7 @@ export function CalendarPage() {
             isDemo={isDemo}
             loading={!isDemo && live.status === 'loading'}
             onJumpToday={cal.jumpToday}
-            onToggle={cal.toggleMonitored}
+            onToggle={handleToggle}
           />
         </>
       )}

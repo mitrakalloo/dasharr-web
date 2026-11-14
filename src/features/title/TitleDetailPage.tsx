@@ -2,19 +2,21 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
-import { ReleasePickerSheet } from '@/features/title/ReleasePickerSheet'
 import { TitleDetailActions } from '@/features/title/TitleDetailActions'
 import { TitleEpisodes } from '@/features/title/TitleEpisodes'
 import { TitleHero } from '@/features/title/TitleHero'
 import { TitleHeroBar } from '@/features/title/TitleHeroBar'
 import { TitleMetaBadges } from '@/features/title/TitleMetaBadges'
 import { TitleOverview } from '@/features/title/TitleOverview'
+import { TitleReleasePickers } from '@/features/title/TitleReleasePickers'
 import { TitleReleases } from '@/features/title/TitleReleases'
 import { TitleSeasons } from '@/features/title/TitleSeasons'
 import { useTitleScroll } from '@/features/title/useTitleScroll'
 import type { TitleEpisode } from '@/data/demoTitles'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
+import { useMonitorTitle } from '@/hooks/useMonitorTitle'
 import { useTitleDetail } from '@/hooks/useTitleDetail'
+import { useTitleManage } from '@/hooks/useTitleManage'
 import { useTitleSearchActions } from '@/hooks/useTitleSearchActions'
 
 export function TitleDetailPage() {
@@ -23,6 +25,8 @@ export function TitleDetailPage() {
   const { isDemo } = useConfiguredStack()
   const detail = useTitleDetail(id, isDemo)
   const search = useTitleSearchActions(id)
+  const manage = useTitleManage(id)
+  const monitor = useMonitorTitle(id)
   const { rootRef, scrollY } = useTitleScroll()
   const [monitored, setMonitored] = useState(false)
   const [seasonNumber, setSeasonNumber] = useState(1)
@@ -69,8 +73,15 @@ export function TitleDetailPage() {
         scrollY={scrollY}
         onBack={() => navigate(-1)}
         onToggleMonitor={() => {
-          setMonitored((prev) => !prev)
-          toast.message(monitored ? 'Unmonitored (local)' : 'Monitored (local)')
+          const next = !monitored
+          setMonitored(next)
+          if (isDemo || !monitor.canSync) {
+            toast.message(next ? 'Monitored (local)' : 'Unmonitored (local)')
+            return
+          }
+          void monitor.setMonitored(next).then((ok) => {
+            if (!ok) setMonitored(!next)
+          })
         }}
       />
       <TitleHero title={title} scrollY={scrollY} />
@@ -82,16 +93,21 @@ export function TitleDetailPage() {
           kind={title.kind}
           liveSearch={liveSearch}
           isDemo={isDemo}
+          canManage={!isDemo && manage.canManage}
           onManualSearch={() => setMoviePickerOpen(true)}
           onAutoSearch={() => {
             const run =
-              title.kind === 'movie'
-                ? search.autoSearchMovie()
-                : search.autoSearchSeason(seasonNumber)
+              search.parsed?.service === 'lidarr'
+                ? search.autoSearchAlbum()
+                : title.kind === 'movie'
+                  ? search.autoSearchMovie()
+                  : search.autoSearchSeason(seasonNumber)
             void run.catch((err: unknown) =>
               toast.error(err instanceof Error ? err.message : 'Auto-search failed'),
             )
           }}
+          onRefresh={() => void manage.refreshMetadata()}
+          onDelete={(deleteFiles) => void manage.deleteFromLibrary(deleteFiles)}
         />
 
         {title.kind === 'series' && title.seasons ? (
@@ -112,30 +128,13 @@ export function TitleDetailPage() {
         {title.releases.length > 0 ? <TitleReleases releases={title.releases} /> : null}
       </div>
 
-      <ReleasePickerSheet
-        open={Boolean(pickerEpisode)}
-        title={
-          pickerEpisode
-            ? `E${String(pickerEpisode.episodeNumber).padStart(2, '0')} · ${pickerEpisode.title}`
-            : 'Episode search'
-        }
-        onClose={() => setPickerEpisode(null)}
-        loadReleases={() => search.searchEpisodeReleases(Number(pickerEpisode?.id))}
-        onGrab={search.grabRelease}
-        onAutoSearch={
-          pickerEpisode
-            ? () => search.autoSearchEpisodes([Number(pickerEpisode.id)])
-            : undefined
-        }
-      />
-
-      <ReleasePickerSheet
-        open={moviePickerOpen}
-        title={`Search · ${title.title}`}
-        onClose={() => setMoviePickerOpen(false)}
-        loadReleases={search.searchMovieReleases}
-        onGrab={search.grabRelease}
-        onAutoSearch={search.autoSearchMovie}
+      <TitleReleasePickers
+        pickerEpisode={pickerEpisode}
+        moviePickerOpen={moviePickerOpen}
+        titleLabel={title.title}
+        search={search}
+        onCloseEpisode={() => setPickerEpisode(null)}
+        onCloseMovie={() => setMoviePickerOpen(false)}
       />
     </div>
   )

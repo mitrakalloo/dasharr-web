@@ -2,6 +2,20 @@ const PBKDF2_ITERATIONS = 310_000
 const SALT_BYTES = 16
 const IV_BYTES = 12
 
+export const VAULT_SECURE_CONTEXT_MESSAGE =
+  'Vault encryption needs a secure context. Open Dasharr on https:// or http://localhost (plain http://LAN IPs block Web Crypto).'
+
+export function isVaultCryptoAvailable(): boolean {
+  return typeof globalThis.crypto?.subtle?.importKey === 'function'
+}
+
+export function getVaultSubtle(): SubtleCrypto {
+  if (!isVaultCryptoAvailable()) {
+    throw new Error(VAULT_SECURE_CONTEXT_MESSAGE)
+  }
+  return globalThis.crypto.subtle
+}
+
 export function bytesToBase64(bytes: Uint8Array): string {
   let binary = ''
   bytes.forEach((byte) => {
@@ -20,7 +34,8 @@ export function base64ToBytes(value: string): Uint8Array {
 }
 
 async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
-  const material = await crypto.subtle.importKey(
+  const subtle = getVaultSubtle()
+  const material = await subtle.importKey(
     'raw',
     new TextEncoder().encode(passphrase),
     'PBKDF2',
@@ -28,10 +43,10 @@ async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKe
     ['deriveKey'],
   )
 
-  return crypto.subtle.deriveKey(
+  return subtle.deriveKey(
     {
       name: 'PBKDF2',
-      salt,
+      salt: salt as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: 'SHA-256',
     },
@@ -57,7 +72,11 @@ export async function encryptJson(
   const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES))
   const key = await deriveKey(passphrase, salt)
   const plaintext = new TextEncoder().encode(JSON.stringify(payload))
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext)
+  const encrypted = await getVaultSubtle().encrypt(
+    { name: 'AES-GCM', iv: iv as BufferSource },
+    key,
+    plaintext,
+  )
 
   return {
     version: 1,
@@ -75,9 +94,14 @@ export async function decryptJson<T>(passphrase: string, blob: VaultBlobV1): Pro
   const key = await deriveKey(passphrase, salt)
 
   try {
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext)
+    const decrypted = await getVaultSubtle().decrypt(
+      { name: 'AES-GCM', iv: iv as BufferSource },
+      key,
+      ciphertext as BufferSource,
+    )
     return JSON.parse(new TextDecoder().decode(decrypted)) as T
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.message === VAULT_SECURE_CONTEXT_MESSAGE) throw error
     throw new Error('Wrong passphrase or corrupted vault')
   }
 }

@@ -67,3 +67,38 @@ export async function qbitResume(settings: AppSettings, service: ServiceConfig, 
     body,
   })
 }
+
+export async function qbitDelete(
+  settings: AppSettings,
+  service: ServiceConfig,
+  hashes: string,
+  deleteFiles = false,
+) {
+  const body = new URLSearchParams({
+    hashes,
+    deleteFiles: deleteFiles ? 'true' : 'false',
+  }).toString()
+  await serviceFetch(settings, service, '/api/v2/torrents/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+}
+
+export async function qbitForceRetry(
+  settings: AppSettings,
+  service: ServiceConfig,
+  hashes: string,
+) {
+  const body = new URLSearchParams({ hashes }).toString()
+  await serviceFetch(settings, service, '/api/v2/torrents/reannounce', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  await serviceFetch(settings, service, '/api/v2/torrents/recheck', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+}

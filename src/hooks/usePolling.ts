@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 type FetchState<T> =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'success'; data: T }
+  | { status: 'success'; data: T; updatedAt: number }
   | { status: 'error'; error: string }
 
 export function usePolling<T>(
@@ -29,7 +29,7 @@ export function usePolling<T>(
       if (isInitial) setState({ status: 'loading' })
       try {
         const data = await fetcherRef.current()
-        if (!cancelled) setState({ status: 'success', data })
+        if (!cancelled) setState({ status: 'success', data, updatedAt: Date.now() })
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Request failed'
         if (!cancelled) setState({ status: 'error', error: message })

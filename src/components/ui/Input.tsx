@@ -14,7 +14,7 @@ export function Input({ className, label, hint, id, ...props }: InputProps) {
       <input
         id={inputId}
         className={cn(
-          'min-h-[var(--tap)] rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 text-base text-[var(--color-foreground)] outline-none transition placeholder:text-[var(--color-muted-foreground)] focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)]',
+          'min-h-[52px] rounded-[14px] border border-[var(--color-border)] bg-[var(--color-muted)] px-3 text-base text-[var(--color-foreground)] outline-none transition placeholder:text-[var(--color-placeholder)] focus:border-[var(--color-ring)] focus:ring-1 focus:ring-[var(--color-ring)]',
           className,
         )}
         {...props}

@@ -9,12 +9,26 @@ export function useOverviewSections() {
   const stack = useConfiguredStack()
   const { isDemo, has, hasAny } = stack
   const calendar = useCalendarReleases(!isDemo && hasAny('sonarr', 'radarr', 'lidarr'))
-  const queue = useDownloadQueue(!isDemo && hasAny('sabnzbd', 'qbittorrent', 'sonarr', 'radarr'))
+  const queue = useDownloadQueue(
+    !isDemo &&
+      hasAny(
+        'sabnzbd',
+        'qbittorrent',
+        'transmission',
+        'nzbget',
+        'deluge',
+        'sonarr',
+        'radarr',
+      ),
+  )
 
-  const showQueue = isDemo || hasAny('sabnzbd', 'qbittorrent', 'sonarr', 'radarr')
+  const showQueue =
+    isDemo ||
+    hasAny('sabnzbd', 'qbittorrent', 'transmission', 'nzbget', 'deluge', 'sonarr', 'radarr')
   const showCalendar = isDemo || hasAny('sonarr', 'radarr', 'lidarr')
   const showStorage = isDemo || hasAny('sonarr', 'radarr', 'lidarr')
   const showSeerr = isDemo || has('seerr')
+  const showWatching = !isDemo && has('tautulli')
 
   const queuePreview = useMemo(() => {
     if (isDemo) return DEMO_QUEUE.slice(0, 3)
@@ -26,14 +40,14 @@ export function useOverviewSections() {
       return DEMO_RELEASES.filter(
         (release) =>
           new Date(release.airDate) >= new Date(new Date().setHours(0, 0, 0, 0)),
-      ).slice(0, 3)
+      ).slice(0, 18)
     }
     if (calendar.status !== 'success') return []
     const start = new Date()
     start.setHours(0, 0, 0, 0)
     return calendar.data
       .filter((release) => new Date(release.airDate) >= start)
-      .slice(0, 3)
+      .slice(0, 18)
   }, [isDemo, calendar])
 
   return {
@@ -42,6 +56,7 @@ export function useOverviewSections() {
     showCalendar,
     showStorage,
     showSeerr,
+    showWatching,
     queuePreview,
     upcoming,
     calendarStatus: calendar.status,
@@ -49,5 +64,7 @@ export function useOverviewSections() {
     queueStatus: queue.status,
     queueError: queue.status === 'error' ? queue.error : undefined,
     pauseOrResume: queue.pauseOrResume,
+    retryItem: queue.retryItem,
+    removeItem: queue.removeItem,
   }
 }

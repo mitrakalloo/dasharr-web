@@ -16,7 +16,7 @@ interface ConfigState {
   vaultPhase: 'booting' | 'locked' | 'setup' | 'ready'
   hasVault: boolean
   vaultLocked: boolean
-  bootstrap: () => void
+  bootstrap: () => Promise<void>
   unlock: (passphrase: string) => Promise<void>
   unlockWithBiometric: () => Promise<void>
   setupVault: (passphrase: string) => Promise<void>

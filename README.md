@@ -1,14 +1,13 @@
 # Dasharr Web
 
-Mobile-first companion dashboard for your *arr stack — inspired by [Dasharr](../dasharr) and [nzb360](https://nzb360.com/). Configs live in `localStorage` (no accounts, no DB).
+Mobile-first companion dashboard for your *arr stack — inspired by [Dasharr](../dasharr) and [nzb360](https://nzb360.com/). Configs live in an encrypted local vault (no accounts, no DB).
 
 ## UI
 
-- Sticky top bar with health pill + add media
-- Bottom tabs: **Overview · Queue · Calendar · Search**
-- Slide-up bottom sheets for details / manual search
+- Mobile: sticky bottom tabs (Overview · Queue · Calendar · Search)
+- Desktop (`lg+`): collapsible left rail, command palette (`⌘K`), live queue sidebar
 - OLED dark theme with *arr accent badges
-- Desktop centers a `480px` phone shell on a dark backdrop
+- Screens: Requests, Library, Wanted, History, title detail, Settings
 
 ## Supported services
 
@@ -38,6 +37,10 @@ npm run build && npm start
 ```
 
 Or Docker — see `Dockerfile`. Set `PROXY_SECRET` if exposing beyond LAN.
+
+**Secure context:** the vault needs Web Crypto, so open Dasharr on `https://` or `http://localhost`. Plain `http://192.168.x.x` will block encryption (and passkeys).
+
+**PWA:** production builds register a service worker for installable standalone use.
 
 ### CI image (linux/amd64)
 

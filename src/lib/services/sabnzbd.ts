@@ -57,3 +57,19 @@ export async function sabResume(settings: AppSettings, service: ServiceConfig, n
     : '/api?mode=resume&output=json'
   return serviceJson<SabResponse>(settings, service, path)
 }
+
+export async function sabDelete(settings: AppSettings, service: ServiceConfig, nzoId: string) {
+  return serviceJson<SabResponse>(
+    settings,
+    service,
+    `/api?mode=queue&name=delete&value=${encodeURIComponent(nzoId)}&output=json`,
+  )
+}
+
+export async function sabForceRetry(settings: AppSettings, service: ServiceConfig, nzoId: string) {
+  return serviceJson<SabResponse>(
+    settings,
+    service,
+    `/api?mode=retry&value=${encodeURIComponent(nzoId)}&output=json`,
+  )
+}

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { LayoutGroup, motion } from 'motion/react'
 
@@ -6,65 +5,33 @@ import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
 import { AddMediaSheet } from '@/features/search/AddMediaSheet'
+import { DiscoverShelves } from '@/features/search/DiscoverShelves'
 import { SearchResultList } from '@/features/search/SearchResultList'
-import { DEMO_SEARCH } from '@/data/demoDashboard'
-import { useConfiguredStack } from '@/hooks/useConfiguredStack'
-import { useMediaSearch } from '@/hooks/useMediaSearch'
+import { SEARCH_SCOPES, useSearchPage } from '@/features/search/useSearchPage'
 import { spring } from '@/lib/motion'
 import { cn } from '@/lib/cn'
 
-const scopes = ['All', 'Series', 'Movies'] as const
-
 export function SearchPage() {
-  const { isDemo, has, hydrated } = useConfiguredStack()
-  const [query, setQuery] = useState('')
-  const [scope, setScope] = useState<(typeof scopes)[number]>('All')
-  const [sheetOpen, setSheetOpen] = useState(false)
-  const live = useMediaSearch(!isDemo, query)
+  const s = useSearchPage()
 
-  const demoItems = DEMO_SEARCH.filter((item) => {
-    const matchesQuery = item.title.toLowerCase().includes(query.trim().toLowerCase())
-    if (!matchesQuery) return false
-    if (scope === 'All') return true
-    if (scope === 'Series') return item.type === 'series'
-    return item.type === 'movie'
-  }).map((item) => ({
-    id: item.id,
-    titleId: item.titleId,
-    title: item.title,
-    year: item.year,
-    type: item.type as 'series' | 'movie',
-    rating: item.rating,
-    poster: '',
-    overview: '',
-    source: 'library' as const,
-    alreadyAdded: true,
-  }))
-
-  const liveItems = live.items.filter((item) => {
-    if (scope === 'All') return true
-    if (scope === 'Series') return item.type === 'series'
-    return item.type === 'movie'
-  })
-
-  if (!hydrated) {
+  if (!s.hydrated) {
     return <div className="px-4 pt-8 text-sm text-[var(--color-muted-foreground)]">Loading…</div>
   }
 
   return (
     <div className="space-y-4 px-4 pt-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Search</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Find</h1>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          {isDemo
+          {s.isDemo
             ? 'Find titles · demo'
-            : has('seerr')
-              ? 'Seerr discover + library browse'
+            : s.has('seerr')
+              ? 'Discover shelves + library search'
               : 'Library browse and *arr lookup'}
         </p>
       </div>
 
-      {!isDemo && !live.canSearch ? (
+      {!s.isDemo && !s.live.canSearch && !s.has('seerr') ? (
         <EmptyState
           title="Nothing to search"
           description="Add Seerr, Sonarr, or Radarr in Settings."
@@ -73,28 +40,28 @@ export function SearchPage() {
         <>
           <Input
             placeholder="Search library or discover…"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            value={s.query}
+            onChange={(event) => s.setQuery(event.target.value)}
           />
 
           <LayoutGroup id="search-scopes">
             <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
-              {scopes.map((value) => (
+              {SEARCH_SCOPES.map((value) => (
                 <button
                   key={value}
                   type="button"
-                  onClick={() => setScope(value)}
+                  onClick={() => s.setScope(value)}
                   className={cn(
                     'relative min-h-[var(--tap)] shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium transition active:scale-95',
-                    scope === value
-                      ? 'border-transparent text-black'
+                    s.scope === value
+                      ? 'border-transparent text-[var(--color-on-primary-container)]'
                       : 'border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-muted-foreground)]',
                   )}
                 >
-                  {scope === value ? (
+                  {s.scope === value ? (
                     <motion.span
                       layoutId="search-scope-pill"
-                      className="absolute inset-0 rounded-full bg-white"
+                      className="absolute inset-0 rounded-full bg-[var(--color-primary-container)]"
                       transition={spring}
                     />
                   ) : null}
@@ -104,26 +71,34 @@ export function SearchPage() {
             </div>
           </LayoutGroup>
 
-          {!isDemo && live.status === 'loading' ? (
-            <p className="text-sm text-[var(--color-muted-foreground)]">Searching…</p>
+          {s.showDiscover ? (
+            <DiscoverShelves
+              shelves={s.discover.shelves}
+              status={s.discover.status === 'idle' ? 'loading' : s.discover.status}
+              error={s.discover.status === 'error' ? s.discover.error : undefined}
+              onSelect={s.handleDiscoverSelect}
+            />
           ) : null}
 
-          {!isDemo && live.status === 'error' ? (
-            <EmptyState title="Search failed" description={live.error} />
-          ) : (
-            <SearchResultList
-              items={isDemo ? demoItems : liveItems}
-              emptyTitle={query ? 'No matches' : 'Library is empty'}
-              emptyDescription={
-                query
-                  ? 'Try another query.'
-                  : 'Add titles via Seerr or *arr lookup.'
-              }
-              onAdd={isDemo ? undefined : (item) => void live.addItem(item)}
-            />
-          )}
+          {s.query.trim() ? (
+            <>
+              {!s.isDemo && s.live.status === 'loading' ? (
+                <p className="text-sm text-[var(--color-muted-foreground)]">Searching…</p>
+              ) : null}
+              {!s.isDemo && s.live.status === 'error' ? (
+                <EmptyState title="Search failed" description={s.live.error} />
+              ) : (
+                <SearchResultList
+                  items={s.isDemo ? s.demoItems : s.liveItems}
+                  emptyTitle="No matches"
+                  emptyDescription="Try another query."
+                  onAdd={s.isDemo ? undefined : (item) => void s.live.addItem(item)}
+                />
+              )}
+            </>
+          ) : null}
 
-          {has('seerr') && !isDemo ? (
+          {s.has('seerr') && !s.isDemo ? (
             <Link
               to="/requests"
               className="inline-flex min-h-[var(--tap)] w-full items-center justify-center rounded-2xl border border-[var(--color-border)] text-sm font-medium text-[var(--color-accent)]"
@@ -132,13 +107,22 @@ export function SearchPage() {
             </Link>
           ) : null}
 
-          <Button className="w-full" onClick={() => setSheetOpen(true)}>
+          {s.has('prowlarr') && !s.isDemo ? (
+            <Link
+              to="/indexers"
+              className="inline-flex min-h-[var(--tap)] w-full items-center justify-center rounded-2xl border border-[var(--color-border)] text-sm font-medium text-[var(--color-accent)]"
+            >
+              Browse Prowlarr releases
+            </Link>
+          ) : null}
+
+          <Button className="w-full" onClick={() => s.setSheetOpen(true)}>
             Manual search & quality profile
           </Button>
         </>
       )}
 
-      <AddMediaSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+      <AddMediaSheet open={s.sheetOpen} onClose={() => s.setSheetOpen(false)} />
     </div>
   )
 }

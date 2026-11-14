@@ -36,7 +36,7 @@ export function AddMediaSheet({ open, onClose }: AddMediaSheetProps) {
   }))
 
   return (
-    <BottomSheet open={open} onClose={onClose} title="Add media">
+    <BottomSheet open={open} onClose={onClose} title="Add media" size="lg">
       <Input
         label="Search"
         placeholder="Show, movie, or album…"

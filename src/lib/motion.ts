@@ -22,7 +22,7 @@ export const fadeUp = {
 
 export const staggerContainer = {
   animate: {
-    transition: { staggerChildren: 0.04, delayChildren: 0.04 },
+    transition: { staggerChildren: 0.03, delayChildren: 0.03 },
   },
 }
 

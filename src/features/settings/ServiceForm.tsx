@@ -46,7 +46,7 @@ export function ServiceForm() {
         />
         {form.meta.needsApiKey ? (
           <Input
-            label="API key"
+            label={form.type === 'deluge' ? 'Web password' : 'API key'}
             type="password"
             value={form.apiKey}
             onChange={(e) => form.setApiKey(e.target.value)}

@@ -99,6 +99,66 @@ export async function getSonarrQueue(settings: AppSettings, service: ServiceConf
   return Array.isArray(data) ? data : data.records
 }
 
+export async function deleteSonarrQueueItem(
+  settings: AppSettings,
+  service: ServiceConfig,
+  id: number,
+  removeFromClient = true,
+) {
+  const params = new URLSearchParams({
+    removeFromClient: String(removeFromClient),
+    blocklist: 'false',
+  })
+  await serviceJson<unknown>(settings, service, `/api/v3/queue/${id}?${params}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function updateSonarrSeries(
+  settings: AppSettings,
+  service: ServiceConfig,
+  series: SonarrSeries,
+) {
+  return serviceJson<SonarrSeries>(settings, service, `/api/v3/series/${series.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(series),
+  })
+}
+
+export async function getSonarrWantedMissing(
+  settings: AppSettings,
+  service: ServiceConfig,
+) {
+  const data = await serviceJson<{
+    records: Array<{
+      id: number
+      seriesId: number
+      seasonNumber: number
+      episodeNumber: number
+      title?: string
+      airDate?: string
+      series?: { title?: string }
+    }>
+  }>(settings, service, '/api/v3/wanted/missing?page=1&pageSize=50&sortDirection=descending')
+  return data.records
+}
+
+export async function getSonarrHistory(settings: AppSettings, service: ServiceConfig) {
+  const data = await serviceJson<{
+    records: Array<{
+      id: number
+      seriesId?: number
+      episodeId?: number
+      sourceTitle?: string
+      date: string
+      eventType: string
+      series?: { title?: string }
+    }>
+  }>(settings, service, '/api/v3/history?page=1&pageSize=50&sortDirection=descending')
+  return data.records
+}
+
 export function sonarrPosterUrl(series: SonarrSeries, baseUrl: string): string | undefined {
   const poster = series.images?.find((image) => image.coverType === 'poster')
   const url = poster?.remoteUrl ?? poster?.url

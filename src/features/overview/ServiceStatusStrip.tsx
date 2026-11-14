@@ -61,7 +61,7 @@ export function ServiceStatusStrip({ activeId, onSelect }: ServiceStatusStripPro
   }
 
   return (
-    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:grid lg:grid-cols-2 lg:overflow-visible lg:px-0 xl:grid-cols-4">
       {items.map((service, index) => (
         <ServiceStatusCard
           key={service.id}

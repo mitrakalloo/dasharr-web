@@ -46,6 +46,8 @@ export function SeerrPendingSection({ demo = false, onOpen }: SeerrPendingSectio
               request={request}
               compact
               onOpen={() => onOpen(request)}
+              onApprove={demo ? undefined : live.approve}
+              onDecline={demo ? undefined : live.decline}
             />
           ))}
         </div>

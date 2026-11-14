@@ -1,6 +1,17 @@
 export type DemoServiceStatus = {
   id: string
-  type: 'sonarr' | 'radarr' | 'lidarr' | 'prowlarr' | 'qbittorrent' | 'sabnzbd' | 'seerr'
+  type:
+    | 'sonarr'
+    | 'radarr'
+    | 'lidarr'
+    | 'prowlarr'
+    | 'qbittorrent'
+    | 'sabnzbd'
+    | 'seerr'
+    | 'tautulli'
+    | 'transmission'
+    | 'nzbget'
+    | 'deluge'
   name: string
   online: boolean
   queueCount: number
@@ -28,20 +39,32 @@ export type DemoQueueItem = {
   title: string
   subtitle: string
   quality: string
+  releaseGroup?: string
   progress: number
   eta: string
   speed: string
   size: string
-  status: 'downloading' | 'paused' | 'queued'
-  service: 'sonarr' | 'radarr' | 'sabnzbd' | 'qbittorrent'
+  status: 'downloading' | 'paused' | 'queued' | 'request' | 'watching'
+  service:
+    | 'sonarr'
+    | 'radarr'
+    | 'sabnzbd'
+    | 'qbittorrent'
+    | 'transmission'
+    | 'nzbget'
+    | 'deluge'
+    | 'seerr'
+    | 'tautulli'
   poster: string
   overview: string
   indexers: Array<{ name: string; seeders: number; size: string; score: number }>
-  /** Configured service id used for pause/resume */
+  /** Configured service id used for pause/resume/remove */
   clientServiceId?: string
-  /** qBittorrent hash or SABnzbd nzo_id */
+  /** qBittorrent hash, SABnzbd nzo_id, or *arr queue id */
   clientItemId?: string
   canPause?: boolean
+  canRemove?: boolean
+  canRetry?: boolean
 }
 
 export type DemoRelease = {
@@ -223,6 +246,7 @@ export const DEMO_QUEUE: DemoQueueItem[] = [
     title: 'Severance',
     subtitle: 'S02E04 · Woe’s Hollow',
     quality: 'WEB-DL 1080p',
+    releaseGroup: 'NTb',
     progress: 67,
     eta: '12m',
     speed: '28.4 MB/s',
@@ -236,13 +260,15 @@ export const DEMO_QUEUE: DemoQueueItem[] = [
       { name: 'TorrentLeech', seeders: 214, size: '2.7 GB', score: 98 },
       { name: 'NZBGeek', seeders: 0, size: '2.6 GB', score: 91 },
     ],
+    canRetry: true,
   },
   {
     id: 'q2',
     titleId: 'dune-part-two',
     title: 'Dune: Part Two',
     subtitle: 'Movies · Arrakis',
-    quality: 'REMUX 2160p',
+    quality: 'REMUX 2160p DV/HDR',
+    releaseGroup: 'FraMeSToR',
     progress: 41,
     eta: '48m',
     speed: '19.7 MB/s',
@@ -255,6 +281,9 @@ export const DEMO_QUEUE: DemoQueueItem[] = [
       { name: 'Usenet-Crawler', seeders: 0, size: '45.2 GB', score: 100 },
       { name: 'SceneHD', seeders: 42, size: '44.8 GB', score: 88 },
     ],
+    canPause: true,
+    canRemove: true,
+    canRetry: true,
   },
   {
     id: 'q3',
@@ -262,6 +291,7 @@ export const DEMO_QUEUE: DemoQueueItem[] = [
     title: 'Shogun',
     subtitle: 'S01E08 · The Abyss of Life',
     quality: 'Bluray-1080p',
+    releaseGroup: 'CtrlHD',
     progress: 100,
     eta: '—',
     speed: '0 MB/s',
@@ -271,6 +301,9 @@ export const DEMO_QUEUE: DemoQueueItem[] = [
     poster: 'https://image.tmdb.org/t/p/w185/7O4iVfOMTuHJl0gPzH4vA9nAgcn.jpg',
     overview: 'Lord Toranaga’s plans reach a breaking point as Blackthorne’s loyalties are tested.',
     indexers: [{ name: 'BeyondHD', seeders: 88, size: '3.1 GB', score: 95 }],
+    canPause: true,
+    canRemove: true,
+    canRetry: true,
   },
   {
     id: 'q4',
@@ -278,6 +311,7 @@ export const DEMO_QUEUE: DemoQueueItem[] = [
     title: 'The Bear',
     subtitle: 'S03E01 · Tomorrow',
     quality: 'WEBRip-720p',
+    releaseGroup: 'FLUX',
     progress: 12,
     eta: '1h 05m',
     speed: '6.2 MB/s',
@@ -287,6 +321,7 @@ export const DEMO_QUEUE: DemoQueueItem[] = [
     poster: 'https://image.tmdb.org/t/p/w185/sHFlbKS3WLqMnp9t2XFa2Vfc1OW.jpg',
     overview: 'Carmy returns from Copenhagen with a new vision that upends the entire kitchen.',
     indexers: [{ name: 'IPT', seeders: 56, size: '1.4 GB', score: 82 }],
+    canRetry: true,
   },
 ]
 

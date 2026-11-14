@@ -1,5 +1,4 @@
 import { Check, X } from 'lucide-react'
-import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -11,15 +10,24 @@ import { serviceAccent } from '@/lib/serviceColors'
 interface SeerrRequestCardProps {
   request: DemoSeerrRequest
   onOpen?: () => void
+  onApprove?: (id: string) => void | Promise<void>
+  onDecline?: (id: string) => void | Promise<void>
   compact?: boolean
 }
 
-export function SeerrRequestCard({ request, onOpen, compact = false }: SeerrRequestCardProps) {
+export function SeerrRequestCard({
+  request,
+  onOpen,
+  onApprove,
+  onDecline,
+  compact = false,
+}: SeerrRequestCardProps) {
   const accent = serviceAccent('seerr')
   const statusColor = seerrStatusColor(request.status)
+  const canModerate = request.status === 'pending' && (onApprove || onDecline)
 
   return (
-    <article className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-3">
+    <article className="panel rounded-2xl p-3">
       <button
         type="button"
         onClick={onOpen}
@@ -50,24 +58,28 @@ export function SeerrRequestCard({ request, onOpen, compact = false }: SeerrRequ
         </div>
       </button>
 
-      {request.status === 'pending' ? (
+      {canModerate ? (
         <div className="mt-3 grid grid-cols-2 gap-2">
-          <Button
-            variant="secondary"
-            className="gap-1.5 text-xs"
-            onClick={() => toast.success(`Approved ${request.title}`)}
-          >
-            <Check className="size-4" />
-            Approve
-          </Button>
-          <Button
-            variant="danger"
-            className="gap-1.5 text-xs"
-            onClick={() => toast.message(`Declined ${request.title}`)}
-          >
-            <X className="size-4" />
-            Decline
-          </Button>
+          {onApprove ? (
+            <Button
+              variant="secondary"
+              className="gap-1.5 text-xs"
+              onClick={() => void onApprove(request.id)}
+            >
+              <Check className="size-4" />
+              Approve
+            </Button>
+          ) : null}
+          {onDecline ? (
+            <Button
+              variant="danger"
+              className="gap-1.5 text-xs"
+              onClick={() => void onDecline(request.id)}
+            >
+              <X className="size-4" />
+              Decline
+            </Button>
+          ) : null}
         </div>
       ) : null}
     </article>

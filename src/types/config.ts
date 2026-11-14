@@ -6,6 +6,10 @@ export type ServiceType =
   | 'qbittorrent'
   | 'seerr'
   | 'prowlarr'
+  | 'tautulli'
+  | 'transmission'
+  | 'nzbget'
+  | 'deluge'
 
 export type ConnectionMode = 'direct' | 'proxy'
 
@@ -48,6 +52,15 @@ export const SERVICE_META: Record<
   },
   seerr: { label: 'Seerr', defaultPort: 5055, needsApiKey: true, needsBasicAuth: false },
   prowlarr: { label: 'Prowlarr', defaultPort: 9696, needsApiKey: true, needsBasicAuth: false },
+  tautulli: { label: 'Tautulli', defaultPort: 8181, needsApiKey: true, needsBasicAuth: false },
+  transmission: {
+    label: 'Transmission',
+    defaultPort: 9091,
+    needsApiKey: false,
+    needsBasicAuth: true,
+  },
+  nzbget: { label: 'NZBGet', defaultPort: 6789, needsApiKey: false, needsBasicAuth: true },
+  deluge: { label: 'Deluge', defaultPort: 8112, needsApiKey: true, needsBasicAuth: false },
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {

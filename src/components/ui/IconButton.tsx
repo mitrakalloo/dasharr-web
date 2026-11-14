@@ -8,7 +8,7 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
 const toneClass = {
   default: 'text-[var(--color-muted-foreground)] hover:bg-white/5 hover:text-[var(--color-foreground)]',
   danger: 'text-[var(--color-destructive)] hover:bg-rose-500/10',
-  accent: 'text-[var(--color-accent)] hover:bg-sky-400/10',
+  accent: 'text-[var(--color-primary)] hover:bg-[var(--color-primary-muted)]',
 }
 
 export function IconButton({

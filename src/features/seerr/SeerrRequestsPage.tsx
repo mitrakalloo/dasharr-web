@@ -70,14 +70,14 @@ export function SeerrRequestsPage() {
               className={cn(
                 'relative min-h-[var(--tap)] shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium capitalize transition active:scale-95',
                 filter === value
-                  ? 'border-transparent text-black'
+                  ? 'border-transparent text-[var(--color-on-primary-container)]'
                   : 'border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-muted-foreground)]',
               )}
             >
               {filter === value ? (
                 <motion.span
                   layoutId="seerr-filter-pill"
-                  className="absolute inset-0 rounded-full bg-white"
+                  className="absolute inset-0 rounded-full bg-[var(--color-primary-container)]"
                   transition={spring}
                 />
               ) : null}
@@ -103,7 +103,12 @@ export function SeerrRequestsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.04, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
-            <SeerrRequestCard request={request} onOpen={() => setSelected(request)} />
+            <SeerrRequestCard
+              request={request}
+              onOpen={() => setSelected(request)}
+              onApprove={isDemo ? undefined : live.approve}
+              onDecline={isDemo ? undefined : live.decline}
+            />
           </motion.div>
         ))}
         {items.length === 0 && live.status !== 'loading' ? (
