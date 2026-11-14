@@ -16,8 +16,8 @@ export function AppShell() {
   const shell = useAppShell()
 
   return (
-    <div className="flex h-dvh overflow-x-hidden bg-[var(--color-background)] text-[var(--color-foreground)]">
-      {!shell.hideChrome ? (
+    <div className="flex h-dvh max-h-dvh overflow-hidden bg-[var(--color-background)] text-[var(--color-foreground)]">
+      {!shell.hideSideNav ? (
         <SideNavRail
           collapsed={shell.railCollapsed}
           onCollapsedChange={shell.setRailCollapsed}
@@ -27,14 +27,14 @@ export function AppShell() {
 
       <div
         className={cn(
-          'app-shell flex h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-background)]',
+          'app-shell flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-background)]',
           'mx-auto w-full max-w-[var(--shell-max)] border-x border-[var(--color-border)] lg:mx-0 lg:max-w-none lg:border-x-0',
         )}
         data-sheet-open={sheetOpen ? 'true' : 'false'}
       >
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <div className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-            {!shell.hideChrome ? (
+            {!shell.hideTopBar ? (
               <TopBar
                 healthLabel={shell.stackHealth.label}
                 healthTone={shell.stackHealth.tone}
@@ -48,20 +48,16 @@ export function AppShell() {
             <main
               ref={shell.setScrollEl}
               className={cn(
-                'no-scrollbar min-h-0 flex-1 overflow-x-hidden overflow-y-auto',
-                shell.hideChrome
-                  ? 'pb-8'
-                  : 'pb-[var(--tab-clearance)] lg:pb-6',
+                'scroll-pane no-scrollbar min-h-0 flex-1 overflow-x-hidden overflow-y-auto',
+                shell.hideBottomNav
+                  ? 'pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]'
+                  : 'pb-4',
               )}
             >
               <Outlet />
             </main>
 
-            {!shell.hideChrome ? (
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-40 lg:hidden">
-                <BottomTabBar queueBadge={shell.activeQueue} />
-              </div>
-            ) : null}
+            {!shell.hideBottomNav ? <BottomTabBar queueBadge={shell.activeQueue} /> : null}
           </div>
 
           {shell.showQueueSidebar ? <QueueSidebar /> : null}

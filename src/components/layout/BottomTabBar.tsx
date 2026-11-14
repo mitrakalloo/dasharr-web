@@ -9,17 +9,17 @@ interface BottomTabBarProps {
   queueBadge?: number
 }
 
-/** Floating glass dock — mirrors native Dasharr FloatingTabBar. */
+/** Floating glass dock in normal document flow (not fixed) for iOS Safari stability. */
 export function BottomTabBar({ queueBadge }: BottomTabBarProps) {
   const location = useLocation()
 
   return (
     <nav
       aria-label="Primary"
-      className="pointer-events-none absolute inset-x-0 bottom-0 z-40 px-4 pb-[max(12px,env(safe-area-inset-bottom,0px))]"
+      className="shrink-0 px-4 pb-[max(10px,env(safe-area-inset-bottom,0px))] pt-1 lg:hidden"
     >
       <div
-        className="pointer-events-auto mx-auto max-w-[var(--shell-max)] overflow-hidden border border-[var(--color-hairline)] bg-[var(--color-card)]/78 shadow-[var(--elevation-float)] backdrop-blur-2xl"
+        className="mx-auto max-w-[var(--shell-max)] overflow-hidden border border-[var(--color-hairline)] bg-[var(--color-card)]/92 shadow-[var(--elevation-float)] backdrop-blur-2xl"
         style={{ borderRadius: 'var(--radius-dock)' }}
       >
         <LayoutGroup id="bottom-tabs">

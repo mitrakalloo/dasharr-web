@@ -14,7 +14,7 @@ export {
 
 export function mapArrQueueItem(
   item: ArrQueueItem,
-  kind: 'sonarr' | 'radarr',
+  kind: 'sonarr' | 'radarr' | 'lidarr',
   serviceId: string,
 ): DemoQueueItem {
   const done = item.size > 0 ? ((item.size - item.sizeleft) / item.size) * 100 : 0
@@ -24,7 +24,9 @@ export function mapArrQueueItem(
       ? liveTitleId('sonarr', item.seriesId)
       : kind === 'radarr' && item.movieId
         ? liveTitleId('radarr', item.movieId)
-        : undefined
+        : kind === 'lidarr' && item.albumId
+          ? liveTitleId('lidarr', item.albumId)
+          : undefined
 
   return {
     id: `${kind}-queue-${item.id}`,
@@ -68,8 +70,10 @@ export function mapSeerrRequestItem(request: DemoSeerrRequest): DemoQueueItem {
     poster: request.poster,
     overview: request.overview,
     indexers: [],
+    clientItemId: request.id,
     canPause: false,
     canRemove: false,
+    canRetry: request.status === 'pending',
   }
 }
 

@@ -2,6 +2,8 @@ export type ServiceType =
   | 'sonarr'
   | 'radarr'
   | 'lidarr'
+  | 'readarr'
+  | 'whisparr'
   | 'sabnzbd'
   | 'qbittorrent'
   | 'seerr'
@@ -10,14 +12,22 @@ export type ServiceType =
   | 'transmission'
   | 'nzbget'
   | 'deluge'
+  | 'bazarr'
+  | 'unraid'
 
 export type ConnectionMode = 'direct' | 'proxy'
+export type ServiceUrlMode = 'auto' | 'local' | 'remote'
 
 export interface ServiceConfig {
   id: string
   type: ServiceType
   name: string
   baseUrl: string
+  /** Optional LAN URL when remote differs from local. */
+  localUrl?: string
+  /** Optional WAN / tunnel URL. */
+  remoteUrl?: string
+  urlMode?: ServiceUrlMode
   apiKey: string
   username?: string
   password?: string
@@ -43,6 +53,8 @@ export const SERVICE_META: Record<
   sonarr: { label: 'Sonarr', defaultPort: 8989, needsApiKey: true, needsBasicAuth: false },
   radarr: { label: 'Radarr', defaultPort: 7878, needsApiKey: true, needsBasicAuth: false },
   lidarr: { label: 'Lidarr', defaultPort: 8686, needsApiKey: true, needsBasicAuth: false },
+  readarr: { label: 'Readarr', defaultPort: 8787, needsApiKey: true, needsBasicAuth: false },
+  whisparr: { label: 'Whisparr', defaultPort: 6969, needsApiKey: true, needsBasicAuth: false },
   sabnzbd: { label: 'SABnzbd', defaultPort: 8080, needsApiKey: true, needsBasicAuth: false },
   qbittorrent: {
     label: 'qBittorrent',
@@ -61,6 +73,8 @@ export const SERVICE_META: Record<
   },
   nzbget: { label: 'NZBGet', defaultPort: 6789, needsApiKey: false, needsBasicAuth: true },
   deluge: { label: 'Deluge', defaultPort: 8112, needsApiKey: true, needsBasicAuth: false },
+  bazarr: { label: 'Bazarr', defaultPort: 6767, needsApiKey: true, needsBasicAuth: false },
+  unraid: { label: 'Unraid', defaultPort: 80, needsApiKey: true, needsBasicAuth: false },
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -73,4 +87,18 @@ export const DEFAULT_CONFIG: AppConfig = {
   version: 1,
   settings: DEFAULT_SETTINGS,
   services: [],
+}
+
+/** Resolve which URL to call for a service (local / remote / base). */
+export function effectiveServiceUrl(service: ServiceConfig): string {
+  const mode = service.urlMode ?? 'auto'
+  if (mode === 'local') {
+    return (service.localUrl || service.baseUrl).replace(/\/+$/, '')
+  }
+  if (mode === 'remote') {
+    return (service.remoteUrl || service.baseUrl).replace(/\/+$/, '')
+  }
+  // auto: prefer remote when set (companion often reaches via tunnel), else local, else base
+  const pick = service.remoteUrl || service.localUrl || service.baseUrl
+  return pick.replace(/\/+$/, '')
 }

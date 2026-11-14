@@ -35,6 +35,12 @@ export function CommandPalette({ open, onOpenChange, onAddMedia }: CommandPalett
           run: () => onAddMedia(),
         },
         {
+          id: 'edit-home',
+          label: 'Edit home dashboards',
+          hint: undefined as string | undefined,
+          run: () => navigate('/edit-home'),
+        },
+        {
           id: 'requests',
           label: 'Seerr requests',
           hint: undefined as string | undefined,
@@ -81,7 +87,7 @@ export function CommandPalette({ open, onOpenChange, onAddMedia }: CommandPalett
             value={query}
             onValueChange={setQuery}
             placeholder="Jump to… or open Add media"
-            className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-[var(--color-muted-foreground)]"
+            className="h-12 w-full bg-transparent text-base outline-none placeholder:text-[var(--color-muted-foreground)]"
             autoFocus
           />
         </div>

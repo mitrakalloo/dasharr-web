@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { LayoutGroup, motion } from 'motion/react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SeerrIssuesSection } from '@/features/seerr/SeerrIssuesSection'
 import { SeerrRequestCard } from '@/features/seerr/SeerrRequestCard'
 import { SeerrRequestSheet } from '@/features/seerr/SeerrRequestSheet'
 import { DEMO_SEERR_REQUESTS, type DemoSeerrRequest } from '@/data/demoDashboard'
@@ -118,6 +119,8 @@ export function SeerrRequestsPage() {
           />
         ) : null}
       </div>
+
+      <SeerrIssuesSection enabled={!isDemo && has('seerr')} />
 
       <SeerrRequestSheet
         request={selected}

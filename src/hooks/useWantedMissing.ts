@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 
 import { liveTitleId } from '@/lib/liveTitleId'
+import { getLidarrWantedMissing } from '@/lib/services/lidarr'
 import { getRadarrWantedMissing } from '@/lib/services/radarr'
 import { getSonarrWantedMissing } from '@/lib/services/sonarr'
 import { usePolling } from '@/hooks/usePolling'
@@ -11,7 +12,7 @@ export interface WantedItem {
   titleId: string
   title: string
   subtitle: string
-  service: 'sonarr' | 'radarr'
+  service: 'sonarr' | 'radarr' | 'lidarr'
 }
 
 export function useWantedMissing(enabled: boolean) {
@@ -21,7 +22,10 @@ export function useWantedMissing(enabled: boolean) {
     () =>
       services.filter(
         (service) =>
-          service.enabled && (service.type === 'sonarr' || service.type === 'radarr'),
+          service.enabled &&
+          (service.type === 'sonarr' ||
+            service.type === 'radarr' ||
+            service.type === 'lidarr'),
       ),
     [services],
   )
@@ -41,6 +45,18 @@ export function useWantedMissing(enabled: boolean) {
                 title: record.series?.title ?? `Series ${record.seriesId}`,
                 subtitle: `S${String(record.seasonNumber).padStart(2, '0')}E${String(record.episodeNumber).padStart(2, '0')} · ${record.title ?? 'Episode'}`,
                 service: 'sonarr',
+              }),
+            )
+          }
+          if (service.type === 'lidarr') {
+            const records = await getLidarrWantedMissing(settings, service)
+            return records.map(
+              (record): WantedItem => ({
+                id: `lidarr-wanted-${record.id}`,
+                titleId: liveTitleId('lidarr', record.id),
+                title: record.title,
+                subtitle: record.artist?.artistName ?? 'Album missing',
+                service: 'lidarr',
               }),
             )
           }

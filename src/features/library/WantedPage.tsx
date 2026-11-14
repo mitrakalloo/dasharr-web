@@ -21,19 +21,19 @@ export function WantedPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Wanted</h1>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Missing monitored episodes and movies
+          Missing monitored episodes, movies, and albums
         </p>
       </div>
 
       {isDemo ? (
         <EmptyState
           title="Demo mode"
-          description="Add Sonarr or Radarr in Settings to load missing items."
+          description="Add Sonarr, Radarr, or Lidarr in Settings to load missing items."
         />
       ) : !wanted.hasSources ? (
         <EmptyState
           title="No *arr services"
-          description="Configure Sonarr or Radarr to see wanted/missing."
+          description="Configure Sonarr, Radarr, or Lidarr to see wanted/missing."
         />
       ) : wanted.status === 'loading' ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">Loading missing…</p>

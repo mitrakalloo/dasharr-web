@@ -19,6 +19,8 @@ interface QueueItemCardProps {
   onPause?: () => void
   onRemove?: () => void
   onRetry?: () => void
+  onApprove?: () => void
+  onDecline?: () => void
   dense?: boolean
 }
 
@@ -28,6 +30,8 @@ export function QueueItemCard({
   onPause,
   onRemove,
   onRetry,
+  onApprove,
+  onDecline,
   dense = false,
 }: QueueItemCardProps) {
   const accent = serviceAccent(item.service)
@@ -93,8 +97,18 @@ export function QueueItemCard({
 
         <div className="mt-2 flex items-center justify-between">
           <p className="tabular text-xs text-[var(--color-muted-foreground)]">{item.size}</p>
-          {showPause || showRemove || item.canRetry ? (
+          {showPause || showRemove || item.canRetry || onApprove || onDecline ? (
             <div className="flex gap-1 opacity-100 lg:opacity-0 lg:transition lg:group-hover:opacity-100 lg:focus-within:opacity-100">
+              {onApprove ? (
+                <IconButton label="Approve request" tone="accent" onClick={onApprove}>
+                  <span className="text-sm font-bold">✓</span>
+                </IconButton>
+              ) : null}
+              {onDecline ? (
+                <IconButton label="Decline request" tone="danger" onClick={onDecline}>
+                  <span className="text-sm font-bold">✕</span>
+                </IconButton>
+              ) : null}
               {showPause ? (
                 <IconButton
                   label={paused ? 'Resume download' : 'Pause download'}
@@ -103,7 +117,7 @@ export function QueueItemCard({
                   {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
                 </IconButton>
               ) : null}
-              {item.canRetry ? (
+              {item.canRetry && onRetry ? (
                 <IconButton label="Force retry" onClick={handleRetry}>
                   <RotateCcw className="size-4" />
                 </IconButton>

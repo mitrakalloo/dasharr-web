@@ -44,6 +44,32 @@ export function ServiceForm() {
           placeholder="http://192.168.1.10:8989"
           className="md:col-span-2"
         />
+        <Input
+          label="Local URL (optional)"
+          value={form.localUrl}
+          onChange={(e) => form.setLocalUrl(e.target.value)}
+          placeholder="http://192.168.1.10:8989"
+        />
+        <Input
+          label="Remote URL (optional)"
+          value={form.remoteUrl}
+          onChange={(e) => form.setRemoteUrl(e.target.value)}
+          placeholder="https://sonarr.example.com"
+        />
+        <div className="md:col-span-2">
+          <Select
+            label="URL mode"
+            value={form.urlMode}
+            options={[
+              { value: 'auto', label: 'Auto' },
+              { value: 'local', label: 'Local' },
+              { value: 'remote', label: 'Remote' },
+            ]}
+            onChange={(event) =>
+              form.setUrlMode(event.target.value as 'auto' | 'local' | 'remote')
+            }
+          />
+        </div>
         {form.meta.needsApiKey ? (
           <Input
             label={form.type === 'deluge' ? 'Web password' : 'API key'}

@@ -4,18 +4,24 @@ import { toast } from 'sonner'
 import { DEMO_SEARCH } from '@/data/demoDashboard'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useDiscoverShelves } from '@/hooks/useDiscoverShelves'
-import { useMediaSearch, type MediaSearchItem } from '@/hooks/useMediaSearch'
+import {
+  useMediaSearch,
+  type MediaSearchItem,
+  type SearchServiceFilter,
+} from '@/hooks/useMediaSearch'
 import type { DiscoverCard } from '@/lib/services/seerr.discover'
+import type { ServiceType } from '@/types/config'
 
-export const SEARCH_SCOPES = ['All', 'Series', 'Movies'] as const
+export const SEARCH_SCOPES = ['All', 'Series', 'Movies', 'Music', 'Books'] as const
 export type SearchScope = (typeof SEARCH_SCOPES)[number]
 
 export function useSearchPage() {
   const { isDemo, has, hydrated } = useConfiguredStack()
   const [query, setQuery] = useState('')
   const [scope, setScope] = useState<SearchScope>('All')
+  const [serviceFilter, setServiceFilter] = useState<SearchServiceFilter>('all')
   const [sheetOpen, setSheetOpen] = useState(false)
-  const live = useMediaSearch(!isDemo, query)
+  const live = useMediaSearch(!isDemo, query, serviceFilter)
   const discover = useDiscoverShelves(!isDemo && has('seerr') && !query.trim())
   const showDiscover = !isDemo && has('seerr') && !query.trim()
 
@@ -24,7 +30,8 @@ export function useSearchPage() {
     if (!matchesQuery) return false
     if (scope === 'All') return true
     if (scope === 'Series') return item.type === 'series'
-    return item.type === 'movie'
+    if (scope === 'Movies') return item.type === 'movie'
+    return false
   }).map((item) => ({
     id: item.id,
     titleId: item.titleId,
@@ -41,7 +48,10 @@ export function useSearchPage() {
   const liveItems = live.items.filter((item) => {
     if (scope === 'All') return true
     if (scope === 'Series') return item.type === 'series'
-    return item.type === 'movie'
+    if (scope === 'Movies') return item.type === 'movie'
+    if (scope === 'Music') return item.type === 'album'
+    if (scope === 'Books') return item.type === 'book'
+    return true
   })
 
   function handleDiscoverSelect(item: DiscoverCard) {
@@ -57,10 +67,18 @@ export function useSearchPage() {
       alreadyAdded: false,
       tmdbId: item.tmdbId,
     }
-    void live.addItem(mapped).catch((error: unknown) => {
+    void live.beginAdd(mapped).catch((error: unknown) => {
       toast.error(error instanceof Error ? error.message : 'Couldn’t add title')
     })
   }
+
+  const serviceChips: Array<{ id: SearchServiceFilter; label: string }> = [
+    { id: 'all', label: 'All services' },
+    ...live.searchableServices.map((service) => ({
+      id: service.type as ServiceType,
+      label: service.name || service.type,
+    })),
+  ]
 
   return {
     isDemo,
@@ -70,6 +88,9 @@ export function useSearchPage() {
     setQuery,
     scope,
     setScope,
+    serviceFilter,
+    setServiceFilter,
+    serviceChips,
     sheetOpen,
     setSheetOpen,
     live,

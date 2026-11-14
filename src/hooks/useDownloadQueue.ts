@@ -30,6 +30,10 @@ import {
   qbitPause,
   qbitResume,
 } from '@/lib/services/qbittorrent'
+import {
+  deleteLidarrQueueItem,
+  getLidarrQueue,
+} from '@/lib/services/lidarr'
 import { deleteRadarrQueueItem, getRadarrQueue } from '@/lib/services/radarr'
 import { getSabQueue, sabDelete, sabForceRetry, sabPause, sabResume } from '@/lib/services/sabnzbd'
 import { deleteSonarrQueueItem, getSonarrQueue } from '@/lib/services/sonarr'
@@ -47,6 +51,7 @@ const DOWNLOAD_TYPES = new Set([
   'sabnzbd',
   'sonarr',
   'radarr',
+  'lidarr',
   'transmission',
   'nzbget',
   'deluge',
@@ -85,6 +90,10 @@ async function fetchQueue(
       if (service.type === 'radarr') {
         const items = await getRadarrQueue(settings, service)
         return items.map((item) => mapArrQueueItem(item, 'radarr', service.id))
+      }
+      if (service.type === 'lidarr') {
+        const items = await getLidarrQueue(settings, service)
+        return items.map((item) => mapArrQueueItem(item, 'lidarr', service.id))
       }
       return [] as DemoQueueItem[]
     }),
@@ -175,7 +184,7 @@ export function useDownloadQueue(enabled: boolean) {
   )
 
   const removeItem = useCallback(
-    async (item: DemoQueueItem) => {
+    async (item: DemoQueueItem, blocklist = false) => {
       if (!item.clientServiceId || !item.clientItemId || !item.canRemove) {
         toast.message('Remove isn’t available for this download source')
         return
@@ -195,14 +204,34 @@ export function useDownloadQueue(enabled: boolean) {
         } else if (service.type === 'deluge') {
           await delugeRemove(settings, service, [item.clientItemId])
         } else if (service.type === 'sonarr') {
-          await deleteSonarrQueueItem(settings, service, Number(item.clientItemId))
+          await deleteSonarrQueueItem(
+            settings,
+            service,
+            Number(item.clientItemId),
+            true,
+            blocklist,
+          )
         } else if (service.type === 'radarr') {
-          await deleteRadarrQueueItem(settings, service, Number(item.clientItemId))
+          await deleteRadarrQueueItem(
+            settings,
+            service,
+            Number(item.clientItemId),
+            true,
+            blocklist,
+          )
+        } else if (service.type === 'lidarr') {
+          await deleteLidarrQueueItem(
+            settings,
+            service,
+            Number(item.clientItemId),
+            true,
+            blocklist,
+          )
         } else {
           toast.message('Remove isn’t available for this download source')
           return
         }
-        toast.success('Removed from queue')
+        toast.success(blocklist ? 'Removed and blocklisted' : 'Removed from queue')
       } catch (error) {
         toast.error(error instanceof Error ? error.message : 'Remove failed')
       }

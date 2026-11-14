@@ -1,6 +1,11 @@
 import { serviceJson } from '@/lib/http/client'
 import type { AppSettings, ServiceConfig } from '@/types/config'
-import type { ArrStatus } from '@/lib/services/sonarr'
+import type {
+  ArrQualityProfile,
+  ArrQueueItem,
+  ArrRootFolder,
+  ArrStatus,
+} from '@/lib/services/sonarr'
 
 export interface LidarrAlbum {
   id: number
@@ -45,6 +50,79 @@ export async function getLidarrAlbum(
   id: number,
 ) {
   return serviceJson<LidarrAlbum>(settings, service, `/api/v1/album/${id}`)
+}
+
+export async function lookupLidarrAlbums(
+  settings: AppSettings,
+  service: ServiceConfig,
+  term: string,
+) {
+  return serviceJson<LidarrAlbum[]>(
+    settings,
+    service,
+    `/api/v1/album/lookup?term=${encodeURIComponent(term)}`,
+  )
+}
+
+export async function getLidarrRootFolders(settings: AppSettings, service: ServiceConfig) {
+  return serviceJson<ArrRootFolder[]>(settings, service, '/api/v1/rootfolder')
+}
+
+export async function getLidarrQualityProfiles(settings: AppSettings, service: ServiceConfig) {
+  return serviceJson<ArrQualityProfile[]>(settings, service, '/api/v1/qualityprofile')
+}
+
+export async function addLidarrAlbum(
+  settings: AppSettings,
+  service: ServiceConfig,
+  body: Record<string, unknown>,
+) {
+  return serviceJson<LidarrAlbum>(settings, service, '/api/v1/album', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
+export async function getLidarrQueue(settings: AppSettings, service: ServiceConfig) {
+  const data = await serviceJson<{ records?: ArrQueueItem[] } | ArrQueueItem[]>(
+    settings,
+    service,
+    '/api/v1/queue?page=1&pageSize=50',
+  )
+  return Array.isArray(data) ? data : (data.records ?? [])
+}
+
+export async function deleteLidarrQueueItem(
+  settings: AppSettings,
+  service: ServiceConfig,
+  id: number,
+  removeFromClient = true,
+  blocklist = false,
+) {
+  const params = new URLSearchParams({
+    removeFromClient: String(removeFromClient),
+    blocklist: String(blocklist),
+  })
+  await serviceJson<unknown>(settings, service, `/api/v1/queue/${id}?${params}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function getLidarrWantedMissing(
+  settings: AppSettings,
+  service: ServiceConfig,
+) {
+  const data = await serviceJson<{
+    records: Array<{
+      id: number
+      title: string
+      artistId?: number
+      artist?: { artistName?: string }
+      releaseDate?: string
+    }>
+  }>(settings, service, '/api/v1/wanted/missing?page=1&pageSize=50&sortDirection=descending')
+  return data.records
 }
 
 export function lidarrCoverUrl(

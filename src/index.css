@@ -48,7 +48,7 @@
   --rail-compact: 72px;
   --queue-rail: 360px;
   --radius-dock: 32px;
-  --tab-clearance: calc(88px + env(safe-area-inset-bottom, 0px));
+  --tab-clearance: 0px;
   --panel-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --elevation-md: 0 8px 24px rgba(11, 15, 23, 0.45);
   --elevation-float: 0 12px 40px rgba(11, 15, 23, 0.55);
@@ -58,6 +58,8 @@
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
+  --space-row: 0.75rem;
+  --space-section: 1.25rem;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -78,21 +80,40 @@
 html,
 body,
 #root {
-  min-height: 100%;
+  height: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
   margin: 0;
-  overflow-x: hidden;
   background: var(--color-background);
   color: var(--color-foreground);
+  /* iOS Safari: keep the document locked; only inner panes scroll */
+  position: relative;
+  height: 100dvh;
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
-button,
+#root {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  touch-action: manipulation;
+}
+
 input,
 select,
 textarea {
   font: inherit;
+  font-size: 16px; /* prevent iOS Safari focus zoom */
+  touch-action: manipulation;
 }
 
 :focus-visible {
@@ -157,19 +178,28 @@ h3,
 }
 
 .app-shell {
-  transition: transform 320ms var(--ease-out-expo);
-  transform-origin: center center;
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
-.app-shell[data-sheet-open='true'] {
-  transform: scale(0.985);
-  will-change: transform;
-}
-
+/* Sheet scale is desktop-only — transforms on iOS Safari feel zoomed and break touch targets */
 @media (min-width: 1024px) {
-  .app-shell[data-sheet-open='true'] {
-    transform: none;
+  .app-shell {
+    transition: transform 320ms var(--ease-out-expo);
+    transform-origin: center center;
   }
+
+  .app-shell[data-sheet-open='true'] {
+    transform: scale(0.985);
+    will-change: transform;
+  }
+}
+
+.scroll-pane {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
 }
 
 @keyframes beacon-pulse {
@@ -230,6 +260,30 @@ h3,
   pointer-events: none;
 }
 
+html[data-density='compact'] {
+  --tap: 40px;
+  --space-row: 0.5rem;
+  --space-section: 0.875rem;
+  font-size: 15px;
+}
+
+html[data-theme='light'] {
+  --color-background: #f4f7fb;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-card-elevated: #f8fafc;
+  --color-muted: #e2e8f0;
+  --color-muted-foreground: #64748b;
+  --color-placeholder: #94a3b8;
+  --color-border: #d0d8e6;
+  --color-border-strong: #94a3b8;
+  --color-overlay: rgba(15, 23, 42, 0.45);
+  --color-hairline: rgba(15, 23, 42, 0.08);
+  --elevation-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --elevation-float: 0 12px 40px rgba(15, 23, 42, 0.12);
+  color-scheme: light;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -239,7 +293,6 @@ h3,
     transition-duration: 0.01ms !important;
   }
 
-  .app-shell,
   .app-shell[data-sheet-open='true'] {
     transform: none;
   }

@@ -43,11 +43,9 @@ export function BottomSheet({
       if (event.key === 'Escape') onClose()
     }
     document.addEventListener('keydown', onKey)
-    document.body.style.overflow = 'hidden'
     return () => {
       registerClose()
       document.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
     }
   }, [open, onClose, registerOpen, registerClose])
 

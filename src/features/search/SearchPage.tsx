@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
 import { AddMediaSheet } from '@/features/search/AddMediaSheet'
+import { AddOptionsSheet } from '@/features/search/AddOptionsSheet'
 import { DiscoverShelves } from '@/features/search/DiscoverShelves'
 import { SearchResultList } from '@/features/search/SearchResultList'
 import { SEARCH_SCOPES, useSearchPage } from '@/features/search/useSearchPage'
@@ -26,7 +27,7 @@ export function SearchPage() {
           {s.isDemo
             ? 'Find titles · demo'
             : s.has('seerr')
-              ? 'Discover shelves + library search'
+              ? 'Discover shelves + multi-service search'
               : 'Library browse and *arr lookup'}
         </p>
       </div>
@@ -34,7 +35,7 @@ export function SearchPage() {
       {!s.isDemo && !s.live.canSearch && !s.has('seerr') ? (
         <EmptyState
           title="Nothing to search"
-          description="Add Seerr, Sonarr, or Radarr in Settings."
+          description="Add Seerr, Sonarr, Radarr, or Lidarr in Settings."
         />
       ) : (
         <>
@@ -43,6 +44,26 @@ export function SearchPage() {
             value={s.query}
             onChange={(event) => s.setQuery(event.target.value)}
           />
+
+          {!s.isDemo && s.serviceChips.length > 1 ? (
+            <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+              {s.serviceChips.map((chip) => (
+                <button
+                  key={chip.id}
+                  type="button"
+                  onClick={() => s.setServiceFilter(chip.id)}
+                  className={cn(
+                    'min-h-9 shrink-0 rounded-full border px-3 text-xs font-medium transition active:scale-95',
+                    s.serviceFilter === chip.id
+                      ? 'border-[var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-secondary)]'
+                      : 'border-[var(--color-border)] text-[var(--color-muted-foreground)]',
+                  )}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           <LayoutGroup id="search-scopes">
             <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
@@ -92,7 +113,7 @@ export function SearchPage() {
                   items={s.isDemo ? s.demoItems : s.liveItems}
                   emptyTitle="No matches"
                   emptyDescription="Try another query."
-                  onAdd={s.isDemo ? undefined : (item) => void s.live.addItem(item)}
+                  onAdd={s.isDemo ? undefined : (item) => void s.live.beginAdd(item)}
                 />
               )}
             </>
@@ -100,19 +121,10 @@ export function SearchPage() {
 
           {s.has('seerr') && !s.isDemo ? (
             <Link
-              to="/requests"
+              to="/discover"
               className="inline-flex min-h-[var(--tap)] w-full items-center justify-center rounded-2xl border border-[var(--color-border)] text-sm font-medium text-[var(--color-accent)]"
             >
-              Open Seerr requests
-            </Link>
-          ) : null}
-
-          {s.has('prowlarr') && !s.isDemo ? (
-            <Link
-              to="/indexers"
-              className="inline-flex min-h-[var(--tap)] w-full items-center justify-center rounded-2xl border border-[var(--color-border)] text-sm font-medium text-[var(--color-accent)]"
-            >
-              Browse Prowlarr releases
+              Browse Discover
             </Link>
           ) : null}
 
@@ -123,6 +135,14 @@ export function SearchPage() {
       )}
 
       <AddMediaSheet open={s.sheetOpen} onClose={() => s.setSheetOpen(false)} />
+      <AddOptionsSheet
+        open={Boolean(s.live.pendingItem)}
+        title={s.live.pendingItem ? `Add · ${s.live.pendingItem.title}` : 'Add options'}
+        bundle={s.live.addBundle}
+        defaults={s.live.defaultAdd}
+        onClose={s.live.cancelAdd}
+        onConfirm={(options) => void s.live.confirmAdd(options)}
+      />
     </div>
   )
 }

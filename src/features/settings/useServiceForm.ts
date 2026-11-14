@@ -3,7 +3,12 @@ import { toast } from 'sonner'
 
 import { probeService } from '@/lib/services/probe'
 import { useConfigStore } from '@/stores/configStore'
-import { SERVICE_META, type ServiceConfig, type ServiceType } from '@/types/config'
+import {
+  SERVICE_META,
+  type ServiceConfig,
+  type ServiceType,
+  type ServiceUrlMode,
+} from '@/types/config'
 
 export type TestState =
   | { status: 'idle' }
@@ -17,6 +22,9 @@ export function useServiceForm() {
   const [type, setType] = useState<ServiceType>('sonarr')
   const [name, setName] = useState('Sonarr')
   const [baseUrl, setBaseUrl] = useState('http://127.0.0.1:8989')
+  const [localUrl, setLocalUrl] = useState('')
+  const [remoteUrl, setRemoteUrl] = useState('')
+  const [urlMode, setUrlMode] = useState<ServiceUrlMode>('auto')
   const [apiKey, setApiKey] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -43,6 +51,9 @@ export function useServiceForm() {
       type,
       name: name.trim() || meta.label,
       baseUrl: baseUrl.trim().replace(/\/+$/, ''),
+      localUrl: localUrl.trim().replace(/\/+$/, '') || undefined,
+      remoteUrl: remoteUrl.trim().replace(/\/+$/, '') || undefined,
+      urlMode,
       apiKey: apiKey.trim(),
       username: username.trim() || undefined,
       password: password || undefined,
@@ -99,12 +110,18 @@ export function useServiceForm() {
     type,
     name,
     baseUrl,
+    localUrl,
+    remoteUrl,
+    urlMode,
     apiKey,
     username,
     password,
     test,
     setName,
     setBaseUrl: touchField(setBaseUrl),
+    setLocalUrl: touchField(setLocalUrl),
+    setRemoteUrl: touchField(setRemoteUrl),
+    setUrlMode: touchField(setUrlMode),
     setApiKey: touchField(setApiKey),
     setUsername: touchField(setUsername),
     setPassword: touchField(setPassword),

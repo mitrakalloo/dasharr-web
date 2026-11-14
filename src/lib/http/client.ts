@@ -1,5 +1,5 @@
 import { joinUrl } from '@/lib/format'
-import type { AppSettings, ServiceConfig } from '@/types/config'
+import { effectiveServiceUrl, type AppSettings, type ServiceConfig } from '@/types/config'
 
 export class ServiceRequestError extends Error {
   status: number
@@ -33,6 +33,11 @@ function authHeaders(service: ServiceConfig): Record<string, string> {
   if (service.apiKey) {
     if (service.type === 'sabnzbd' || service.type === 'tautulli') {
       // API key is passed as a query param by the service module
+    } else if (service.type === 'bazarr') {
+      headers['X-API-KEY'] = service.apiKey
+    } else if (service.type === 'unraid') {
+      headers.Authorization = `Bearer ${service.apiKey}`
+      headers['Content-Type'] = 'application/json'
     } else {
       headers['X-Api-Key'] = service.apiKey
     }
@@ -77,7 +82,7 @@ async function serviceFetchRaw(
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  let url = joinUrl(service.baseUrl, path)
+  let url = joinUrl(effectiveServiceUrl(service), path)
 
   if (service.type === 'sabnzbd' && service.apiKey) {
     const separator = url.includes('?') ? '&' : '?'

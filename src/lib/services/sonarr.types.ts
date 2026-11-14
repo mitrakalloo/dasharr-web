@@ -46,6 +46,7 @@ export interface ArrQueueItem {
   status: string
   seriesId?: number
   movieId?: number
+  albumId?: number
   trackedDownloadStatus?: string
   trackedDownloadState?: string
   size: number

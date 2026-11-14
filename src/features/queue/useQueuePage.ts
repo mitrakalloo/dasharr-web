@@ -20,6 +20,16 @@ export const QUEUE_FILTERS = [
 
 export type QueueFilter = (typeof QUEUE_FILTERS)[number]
 
+function dedupeQueue(items: DemoQueueItem[]): DemoQueueItem[] {
+  const seen = new Set<string>()
+  return items.filter((item) => {
+    const key = `${item.service}:${item.title}:${item.size}:${item.status}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 export function useQueuePage() {
   const navigate = useNavigate()
   const { isDemo, hydrated, has } = useConfiguredStack()
@@ -38,7 +48,7 @@ export function useQueuePage() {
 
   const source = useMemo(() => {
     if (isDemo) return DEMO_QUEUE
-    return [...live.items, ...requestItems, ...watching.items]
+    return dedupeQueue([...live.items, ...requestItems, ...watching.items])
   }, [isDemo, live.items, requestItems, watching.items])
 
   const canShowQueue =
@@ -69,12 +79,22 @@ export function useQueuePage() {
     setSelected(item)
   }
 
-  function handleRemove(item: DemoQueueItem) {
+  function handleRemove(item: DemoQueueItem, blocklist = false) {
     if (item.status === 'watching') {
       void watching.terminate(item)
       return
     }
-    void live.removeItem(item)
+    void live.removeItem(item, blocklist)
+  }
+
+  function approveRequest(item: DemoQueueItem) {
+    if (!item.clientItemId) return
+    void requests.approve(item.clientItemId)
+  }
+
+  function declineRequest(item: DemoQueueItem) {
+    if (!item.clientItemId) return
+    void requests.decline(item.clientItemId)
   }
 
   return {
@@ -91,5 +111,7 @@ export function useQueuePage() {
     visibleFilters,
     openItem,
     handleRemove,
+    approveRequest,
+    declineRequest,
   }
 }

@@ -1,17 +1,8 @@
+import type { ServiceType } from '@/types/config'
+
 export type DemoServiceStatus = {
   id: string
-  type:
-    | 'sonarr'
-    | 'radarr'
-    | 'lidarr'
-    | 'prowlarr'
-    | 'qbittorrent'
-    | 'sabnzbd'
-    | 'seerr'
-    | 'tautulli'
-    | 'transmission'
-    | 'nzbget'
-    | 'deluge'
+  type: ServiceType
   name: string
   online: boolean
   queueCount: number
@@ -48,6 +39,7 @@ export type DemoQueueItem = {
   service:
     | 'sonarr'
     | 'radarr'
+    | 'lidarr'
     | 'sabnzbd'
     | 'qbittorrent'
     | 'transmission'

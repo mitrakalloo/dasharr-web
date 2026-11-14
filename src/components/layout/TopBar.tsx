@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'motion/react'
 import { Plus, Settings } from 'lucide-react'
 
 import { DasharrWordmark } from '@/components/brand/DasharrMark'
@@ -29,20 +28,18 @@ export function TopBar({
   const scrolled = useScrollY(24, scrollTarget) > 0
 
   return (
-    <motion.header
+    <header
       className={cn(
         'z-30 shrink-0 border-b px-4 pt-[env(safe-area-inset-top,0px)] transition-[border-color,background-color] duration-300 ease-[var(--ease-out-expo)]',
         scrolled
-          ? 'border-[var(--color-border)] bg-[var(--color-background)]/72 backdrop-blur-xl'
-          : 'border-transparent bg-[var(--color-background)]/90 backdrop-blur-md',
+          ? 'border-[var(--color-border)] bg-[var(--color-background)]/92 backdrop-blur-xl'
+          : 'border-transparent bg-[var(--color-background)]/95 backdrop-blur-md',
       )}
-      animate={{ height: scrolled ? 52 : 56 }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
     >
       <div
         className={cn(
           'flex items-center gap-2 transition-[height] duration-300 ease-[var(--ease-out-expo)]',
-          scrolled ? 'h-10' : 'h-14',
+          scrolled ? 'h-12' : 'h-14',
         )}
       >
         <div className="min-w-0 flex-1 lg:hidden">
@@ -94,7 +91,12 @@ export function TopBar({
           </kbd>
         </button>
 
-        <IconButton label="Open command palette" tone="accent" onClick={onAddClick} className="md:hidden">
+        <IconButton
+          label="Open command palette"
+          tone="accent"
+          onClick={onAddClick}
+          className="md:hidden"
+        >
           <Plus className="size-5" />
         </IconButton>
         <Link
@@ -105,6 +107,6 @@ export function TopBar({
           <Settings className="size-5" />
         </Link>
       </div>
-    </motion.header>
+    </header>
   )
 }

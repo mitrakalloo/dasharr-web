@@ -1,7 +1,10 @@
 import type { MediaSearchItem } from '@/hooks/useMediaSearch'
 import { liveTitleId } from '@/lib/liveTitleId'
+import type { LidarrAlbum } from '@/lib/services/lidarr'
+import { lidarrCoverUrl } from '@/lib/services/lidarr'
 import type { RadarrMovie } from '@/lib/services/radarr'
 import { radarrPosterUrl } from '@/lib/services/radarr'
+import type { ReadarrBook } from '@/lib/services/readarr'
 import type { SeerrSearchResult } from '@/lib/services/seerr'
 import type { SonarrSeries } from '@/lib/services/sonarr'
 import { sonarrPosterUrl } from '@/lib/services/sonarr'
@@ -89,7 +92,46 @@ export function mapRadarrLookup(item: RadarrMovie, baseUrl: string): MediaSearch
     poster: radarrPosterUrl(item, baseUrl) ?? '',
     overview: item.overview ?? '',
     source: 'radarr',
-    alreadyAdded: Boolean(item.id && item.id > 0),
+    tmdbId: item.tmdbId,
+    alreadyAdded: Boolean(item.id),
     raw: item,
+  }
+}
+
+export function mapLidarrLookup(item: LidarrAlbum, baseUrl: string): MediaSearchItem {
+  return {
+    id: `lookup-lidarr-${item.id || item.title}`,
+    title: item.title,
+    year: item.releaseDate ? Number(item.releaseDate.slice(0, 4)) || 0 : 0,
+    type: 'album',
+    rating: 0,
+    poster: lidarrCoverUrl(item, baseUrl) ?? '',
+    overview: item.overview ?? item.artist?.artistName ?? '',
+    source: 'lidarr',
+    alreadyAdded: Boolean(item.id),
+    raw: item,
+  }
+}
+
+export function mapReadarrLookup(item: ReadarrBook): MediaSearchItem {
+  return {
+    id: `lookup-readarr-${item.id || item.title}`,
+    title: item.title,
+    year: item.releaseDate ? Number(item.releaseDate.slice(0, 4)) || 0 : 0,
+    type: 'book',
+    rating: 0,
+    poster: '',
+    overview: item.overview ?? item.author?.authorName ?? '',
+    source: 'readarr',
+    alreadyAdded: Boolean(item.id),
+    raw: item,
+  }
+}
+
+export function mapWhisparrLookup(item: RadarrMovie, baseUrl: string): MediaSearchItem {
+  return {
+    ...mapRadarrLookup(item, baseUrl),
+    id: `lookup-whisparr-${item.tmdbId ?? item.title}`,
+    source: 'whisparr',
   }
 }

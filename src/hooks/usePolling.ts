@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useRefreshStore } from '@/stores/refreshStore'
 
 type FetchState<T> =
   | { status: 'idle' }
@@ -13,6 +15,8 @@ export function usePolling<T>(
   enabled = true,
 ) {
   const [state, setState] = useState<FetchState<T>>({ status: 'idle' })
+  const [localTick, setLocalTick] = useState(0)
+  const globalNonce = useRefreshStore((store) => store.nonce)
   const fetcherRef = useRef(fetcher)
   fetcherRef.current = fetcher
 
@@ -45,7 +49,9 @@ export function usePolling<T>(
       cancelled = true
       if (timer) window.clearInterval(timer)
     }
-  }, [key, intervalMs, enabled])
+  }, [key, intervalMs, enabled, localTick, globalNonce])
 
-  return state
+  const refresh = useCallback(() => setLocalTick((tick) => tick + 1), [])
+
+  return { ...state, refresh }
 }

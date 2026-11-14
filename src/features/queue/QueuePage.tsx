@@ -1,13 +1,12 @@
 import { Link } from 'react-router-dom'
-import { LayoutGroup, motion } from 'motion/react'
+import { motion } from 'motion/react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { QueueFilterBar } from '@/features/queue/QueueFilterBar'
 import { QueueItemCard } from '@/features/queue/QueueItemCard'
 import { QueueItemSheet } from '@/features/queue/QueueItemSheet'
 import { useQueuePage } from '@/features/queue/useQueuePage'
 import { DEMO_QUEUE } from '@/data/demoDashboard'
-import { spring } from '@/lib/motion'
-import { cn } from '@/lib/cn'
 
 export function QueuePage() {
   const q = useQueuePage()
@@ -38,32 +37,11 @@ export function QueuePage() {
         />
       ) : (
         <>
-          <LayoutGroup id="queue-filters">
-            <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
-              {q.visibleFilters.map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => q.setFilter(value)}
-                  className={cn(
-                    'relative min-h-[var(--tap)] shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium capitalize transition active:scale-95',
-                    q.filter === value
-                      ? 'border-transparent text-[var(--color-on-primary-container)]'
-                      : 'border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-muted-foreground)]',
-                  )}
-                >
-                  {q.filter === value ? (
-                    <motion.span
-                      layoutId="queue-filter-pill"
-                      className="absolute inset-0 rounded-full bg-[var(--color-primary-container)]"
-                      transition={spring}
-                    />
-                  ) : null}
-                  <span className="relative z-10">{value}</span>
-                </button>
-              ))}
-            </div>
-          </LayoutGroup>
+          <QueueFilterBar
+            filters={q.visibleFilters}
+            value={q.filter}
+            onChange={q.setFilter}
+          />
 
           {!q.isDemo &&
           q.live.status === 'error' &&
@@ -88,8 +66,37 @@ export function QueuePage() {
                         ? () => void q.live.pauseOrResume(item, item.status === 'paused')
                         : undefined
                     }
-                    onRemove={item.canRemove ? () => q.handleRemove(item) : undefined}
-                    onRetry={item.canRetry ? () => void q.live.retryItem(item) : undefined}
+                    onRemove={
+                      item.canRemove
+                        ? () => {
+                            const canBlock =
+                              item.service === 'sonarr' ||
+                              item.service === 'radarr' ||
+                              item.service === 'lidarr'
+                            q.handleRemove(
+                              item,
+                              canBlock ? window.confirm('Also add to blocklist?') : false,
+                            )
+                          }
+                        : undefined
+                    }
+                    onRetry={
+                      item.status === 'request'
+                        ? undefined
+                        : item.canRetry
+                          ? () => void q.live.retryItem(item)
+                          : undefined
+                    }
+                    onApprove={
+                      item.status === 'request' && item.canRetry
+                        ? () => q.approveRequest(item)
+                        : undefined
+                    }
+                    onDecline={
+                      item.status === 'request' && item.canRetry
+                        ? () => q.declineRequest(item)
+                        : undefined
+                    }
                   />
                 </motion.div>
               ))}

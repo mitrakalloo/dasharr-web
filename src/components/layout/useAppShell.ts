@@ -32,10 +32,19 @@ export function useAppShell() {
     }
   })
 
-  const hideChrome =
-    location.pathname.startsWith('/settings') || location.pathname.startsWith('/title/')
+  const onTitle = location.pathname.startsWith('/title/')
+  const onSubpage =
+    location.pathname.startsWith('/settings') ||
+    location.pathname.startsWith('/edit-home') ||
+    location.pathname.startsWith('/discover') ||
+    location.pathname.startsWith('/manual-import') ||
+    location.pathname.startsWith('/service/')
+  /** Title/subpages use their own sticky header; tabs stay available. */
+  const hideTopBar = onTitle || onSubpage
+  const hideBottomNav = false
+  const hideSideNav = false
   const showQueueSidebar =
-    isDesktop && !hideChrome && QUEUE_SIDEBAR_PATHS.has(location.pathname)
+    isDesktop && !onTitle && !onSubpage && QUEUE_SIDEBAR_PATHS.has(location.pathname)
 
   const activeQueue = useMemo(
     () =>
@@ -72,7 +81,9 @@ export function useAppShell() {
   }, [navigate])
 
   return {
-    hideChrome,
+    hideTopBar,
+    hideBottomNav,
+    hideSideNav,
     showQueueSidebar,
     healthOpen,
     setHealthOpen,

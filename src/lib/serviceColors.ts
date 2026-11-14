@@ -13,6 +13,10 @@ export const SERVICE_ACCENT: Record<string, string> = {
   transmission: '#D35400',
   nzbget: '#34D399',
   deluge: '#4B7BEC',
+  readarr: '#E879F9',
+  whisparr: '#FB7185',
+  bazarr: '#38BDF8',
+  unraid: '#F97316',
 }
 
 export function serviceAccent(type: ServiceType | string): string {

@@ -1,10 +1,12 @@
-import { Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 
+import { SubpageHeader } from '@/components/layout/SubpageHeader'
 import { Button } from '@/components/ui/Button'
 import { ConnectionSettings } from '@/features/settings/ConnectionSettings'
+import { ExperiencePrefsCard } from '@/features/settings/ExperiencePrefsCard'
+import { LayoutTransferCard } from '@/features/settings/LayoutTransferCard'
 import { ServiceForm } from '@/features/settings/ServiceForm'
+import { ServiceImportCard } from '@/features/settings/ServiceImportCard'
 import { ServiceList } from '@/features/settings/ServiceList'
 import { VaultSettingsCard } from '@/features/vault/VaultSettingsCard'
 import { useConfigStore } from '@/stores/configStore'
@@ -51,61 +53,56 @@ export function SettingsPage() {
   }
 
   return (
-    <section className="space-y-6 px-4 pb-10 pt-[max(16px,env(safe-area-inset-top))]">
-      <div className="flex items-center gap-2">
-        <Link
-          to="/"
-          aria-label="Back"
-          className="inline-flex size-[var(--tap)] items-center justify-center rounded-xl text-[var(--color-muted-foreground)] transition hover:bg-white/5 active:scale-95"
-        >
-          <ArrowLeft className="size-5" />
-        </Link>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-          <p className="text-sm text-[var(--color-muted-foreground)]">
-            Encrypted locally in this browser — no account
-          </p>
-        </div>
-      </div>
+    <div>
+      <SubpageHeader
+        title="Settings"
+        subtitle="Encrypted locally in this browser — no account"
+        backTo="/more"
+      />
 
-      <VaultSettingsCard />
-      {hasVault ? (
-        <>
-          <ConnectionSettings />
-          <ServiceForm />
-        </>
-      ) : null}
+      <section className="space-y-6 px-4 pb-10 pt-4">
+        <VaultSettingsCard />
+        <ExperiencePrefsCard />
+        <LayoutTransferCard />
+        {hasVault ? (
+          <>
+            <ConnectionSettings />
+            <ServiceImportCard />
+            <ServiceForm />
+          </>
+        ) : null}
 
-      {hasVault ? (
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold">Configured services</h2>
-          <ServiceList />
+        {hasVault ? (
+          <section className="space-y-3">
+            <h2 className="text-base font-semibold">Configured services</h2>
+            <ServiceList />
+          </section>
+        ) : null}
+
+        <section className="flex flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+          <Button variant="secondary" onClick={handleExport}>
+            Export JSON
+          </Button>
+          <label className="inline-flex min-h-[var(--tap)] cursor-pointer items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-card-elevated)] px-4 text-sm font-semibold">
+            Import JSON
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="hidden"
+              onChange={handleImport}
+            />
+          </label>
+          <Button
+            variant="danger"
+            onClick={() => {
+              resetConfig()
+              toast.message('Vault and local config cleared')
+            }}
+          >
+            Reset
+          </Button>
         </section>
-      ) : null}
-
-      <section className="flex flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-        <Button variant="secondary" onClick={handleExport}>
-          Export JSON
-        </Button>
-        <label className="inline-flex min-h-[var(--tap)] cursor-pointer items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-card-elevated)] px-4 text-sm font-semibold">
-          Import JSON
-          <input
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={handleImport}
-          />
-        </label>
-        <Button
-          variant="danger"
-          onClick={() => {
-            resetConfig()
-            toast.message('Vault and local config cleared')
-          }}
-        >
-          Reset
-        </Button>
       </section>
-    </section>
+    </div>
   )
 }

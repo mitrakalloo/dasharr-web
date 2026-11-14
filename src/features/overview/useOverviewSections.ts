@@ -19,12 +19,22 @@ export function useOverviewSections() {
         'deluge',
         'sonarr',
         'radarr',
+        'lidarr',
       ),
   )
 
   const showQueue =
     isDemo ||
-    hasAny('sabnzbd', 'qbittorrent', 'transmission', 'nzbget', 'deluge', 'sonarr', 'radarr')
+    hasAny(
+      'sabnzbd',
+      'qbittorrent',
+      'transmission',
+      'nzbget',
+      'deluge',
+      'sonarr',
+      'radarr',
+      'lidarr',
+    )
   const showCalendar = isDemo || hasAny('sonarr', 'radarr', 'lidarr')
   const showStorage = isDemo || hasAny('sonarr', 'radarr', 'lidarr')
   const showSeerr = isDemo || has('seerr')
@@ -63,6 +73,7 @@ export function useOverviewSections() {
     calendarError: calendar.status === 'error' ? calendar.error : undefined,
     queueStatus: queue.status,
     queueError: queue.status === 'error' ? queue.error : undefined,
+    queueUpdatedAt: queue.status === 'success' ? queue.updatedAt : undefined,
     pauseOrResume: queue.pauseOrResume,
     retryItem: queue.retryItem,
     removeItem: queue.removeItem,

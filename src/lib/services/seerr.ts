@@ -100,7 +100,15 @@ export async function getSeerrTv(settings: AppSettings, service: ServiceConfig, 
 export async function createSeerrRequest(
   settings: AppSettings,
   service: ServiceConfig,
-  body: { mediaType: 'movie' | 'tv'; mediaId: number },
+  body: {
+    mediaType: 'movie' | 'tv'
+    mediaId: number
+    serverId?: number
+    profileId?: number
+    rootFolder?: string
+    is4k?: boolean
+    seasons?: number[] | 'all'
+  },
 ) {
   return serviceJson<SeerrRequest>(settings, service, '/api/v1/request', {
     method: 'POST',

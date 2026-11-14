@@ -90,10 +90,11 @@ export async function deleteRadarrQueueItem(
   service: ServiceConfig,
   id: number,
   removeFromClient = true,
+  blocklist = false,
 ) {
   const params = new URLSearchParams({
     removeFromClient: String(removeFromClient),
-    blocklist: 'false',
+    blocklist: String(blocklist),
   })
   await serviceJson<unknown>(settings, service, `/api/v3/queue/${id}?${params}`, {
     method: 'DELETE',
