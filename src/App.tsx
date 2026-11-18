@@ -46,7 +46,15 @@ export function App() {
         <PrefsEffects />
         <AppRouter />
       </AccountGate>
-      <Toaster theme="dark" richColors position="bottom-right" />
+      <Toaster
+        theme="system"
+        richColors
+        position="bottom-right"
+        toastOptions={{
+          className:
+            '!rounded-[var(--radius-lg)] !border-[var(--color-border)] !bg-[var(--color-card)] !text-[var(--color-foreground)] !shadow-[var(--elevation-float)]',
+        }}
+      />
     </>
   )
 }

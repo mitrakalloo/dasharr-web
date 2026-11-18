@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { AuthShell } from '@/features/auth/AuthShell'
 import { apiJson } from '@/lib/api/server'
 
 interface BootstrapScreenProps {
@@ -34,13 +35,11 @@ export function BootstrapScreen({ onDone }: BootstrapScreenProps) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-10">
-      <h1 className="font-display text-2xl font-extrabold tracking-tight">Set up Dasharr</h1>
-      <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-        Create the first admin account. You’ll need the <code>SETUP_TOKEN</code> from your server
-        environment.
-      </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
+    <AuthShell
+      title="Set up Dasharr"
+      description="Create the first admin account. You’ll need the SETUP_TOKEN from your server environment."
+    >
+      <form onSubmit={handleSubmit} className="space-y-3.5">
         <Input
           label="Setup token"
           type="password"
@@ -48,12 +47,7 @@ export function BootstrapScreen({ onDone }: BootstrapScreenProps) {
           onChange={(event) => setSetupToken(event.target.value)}
           required
         />
-        <Input
-          label="Name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          required
-        />
+        <Input label="Name" value={name} onChange={(event) => setName(event.target.value)} required />
         <Input
           label="Email"
           type="email"
@@ -69,10 +63,10 @@ export function BootstrapScreen({ onDone }: BootstrapScreenProps) {
           required
           minLength={12}
         />
-        <Button type="submit" className="w-full" disabled={busy}>
+        <Button type="submit" className="w-full" loading={busy}>
           {busy ? 'Creating…' : 'Create admin'}
         </Button>
       </form>
-    </div>
+    </AuthShell>
   )
 }

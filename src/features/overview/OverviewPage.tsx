@@ -24,7 +24,7 @@ export function OverviewPage() {
 
   if (needsSetup) {
     return (
-      <div className="space-y-5 px-4 pt-4 lg:px-6 lg:pt-6">
+      <div className="page-pad space-y-5">
         <OnboardingHome />
       </div>
     )
@@ -32,7 +32,7 @@ export function OverviewPage() {
 
   return (
     <motion.div
-      className="space-y-5 px-4 pt-4 lg:px-6 lg:pt-6"
+      className="page-pad space-y-5"
       variants={staggerContainer}
       initial="initial"
       animate="animate"

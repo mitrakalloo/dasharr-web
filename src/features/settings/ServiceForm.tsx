@@ -15,10 +15,10 @@ export function ServiceForm() {
   return (
     <form
       onSubmit={form.handleSubmit}
-      className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4"
+      className="space-y-4 panel rounded-[var(--radius-2xl)] p-4"
     >
       <div>
-        <h2 className="text-base font-semibold">Add service</h2>
+        <h2 className="font-display text-base font-semibold tracking-tight">Add service</h2>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
           Credentials never leave this browser except when calling your services (or the local
           proxy).

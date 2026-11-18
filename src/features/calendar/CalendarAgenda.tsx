@@ -62,7 +62,7 @@ export function CalendarAgenda({
           }
         />
       ) : (
-        <div className="divide-y divide-[var(--color-border)] rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3">
+        <div className="panel divide-y divide-[var(--color-hairline)] rounded-[var(--radius-2xl)] px-3">
           {dayEvents.map((event) => (
             <CalendarEventRow
               key={event.id}

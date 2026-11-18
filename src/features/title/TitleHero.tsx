@@ -22,7 +22,7 @@ export function TitleHero({ title, scrollY }: TitleHeroProps) {
   const posterOpacity = useTransform(scrollY, [0, 160], [1, 0.35])
 
   return (
-    <div className="relative -mt-14 overflow-hidden border-b border-[var(--color-border)]">
+    <div className="relative -mt-14 overflow-hidden border-b border-[var(--color-hairline)]">
       <motion.div
         aria-hidden
         className="absolute inset-0 origin-top will-change-transform"
@@ -31,7 +31,7 @@ export function TitleHero({ title, scrollY }: TitleHeroProps) {
           scale: backdropScale,
           opacity: backdropOpacity,
           filter: backdropFilter,
-          background: `radial-gradient(ellipse 90% 70% at 30% 0%, ${accent}66, transparent 58%), linear-gradient(180deg, #1a1a1f 0%, #09090b 100%)`,
+          background: `radial-gradient(ellipse 90% 70% at 30% 0%, ${accent}66, transparent 58%), linear-gradient(180deg, #161d2a 0%, #07090f 100%)`,
         }}
       />
 
@@ -42,14 +42,14 @@ export function TitleHero({ title, scrollY }: TitleHeroProps) {
               src={title.poster}
               label={title.title}
               accent={accent}
-              className="h-40 w-[106px] rounded-xl"
+              className="h-40 w-[106px] rounded-[var(--radius-lg)] shadow-[var(--elevation-md)]"
             />
           </motion.div>
           <div className="min-w-0 flex-1 self-end">
-            <p className="text-xs font-medium uppercase tracking-wide" style={{ color: accent }}>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: accent }}>
               {title.service} · {title.kind}
             </p>
-            <h1 className="mt-1 text-2xl font-semibold leading-tight tracking-tight">
+            <h1 className="font-display mt-1 text-2xl font-semibold leading-tight tracking-tight">
               {title.title}
             </h1>
             <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">

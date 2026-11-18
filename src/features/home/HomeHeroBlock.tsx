@@ -29,7 +29,6 @@ export function HomeHeroBlock({ name, tagline, isDemo }: HomeHeroBlockProps) {
       if (release.poster) posters.push(release.poster)
     }
     for (const item of history.items) {
-      // history may not have posters; skip
       void item
     }
     return [...new Set(posters)].slice(0, 8)
@@ -46,17 +45,24 @@ export function HomeHeroBlock({ name, tagline, isDemo }: HomeHeroBlockProps) {
   const backdrop = slides[index]
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-[var(--color-border)]">
+    <div className="relative overflow-hidden rounded-[var(--radius-2xl)] border border-[var(--color-hairline)] shadow-[var(--elevation-md)]">
       {backdrop ? (
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-35 transition-opacity duration-700"
+          className="absolute inset-0 bg-cover bg-center opacity-40 transition-opacity duration-700"
           style={{ backgroundImage: `url(${backdrop})` }}
         />
-      ) : null}
-      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-background)] via-[var(--color-background)]/80 to-transparent" />
-      <div className="relative px-4 py-6 sm:px-5 sm:py-8">
-        <h1 className="font-display text-2xl font-extrabold tracking-tight lg:text-3xl">{name}</h1>
-        <p className="mt-1 max-w-xl text-sm text-[var(--color-muted-foreground)]">
+      ) : (
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(91,157,255,0.18),transparent_55%)]" />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-[var(--color-background)] via-[var(--color-background)]/75 to-[var(--color-background)]/20" />
+      <div className="relative px-5 py-7 sm:px-6 sm:py-9">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+          Dashboard
+        </p>
+        <h1 className="font-display mt-2 text-2xl font-semibold tracking-tight lg:text-3xl">
+          {name}
+        </h1>
+        <p className="mt-2 max-w-xl text-sm leading-relaxed text-[var(--color-muted-foreground)]">
           {tagline?.trim() ||
             (isDemo
               ? 'Demo desk · add a service in Settings to go live'

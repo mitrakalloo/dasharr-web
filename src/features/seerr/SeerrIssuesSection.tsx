@@ -34,7 +34,7 @@ export function SeerrIssuesSection({ enabled }: SeerrIssuesSectionProps) {
             href={issue.url}
             target="_blank"
             rel="noreferrer"
-            className="block rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-3 transition hover:bg-white/5"
+            className="block panel rounded-[var(--radius-2xl)] px-4 py-3 transition hover:bg-white/5"
           >
             <p className="text-sm font-medium">{issue.title}</p>
             <p className="mt-0.5 text-xs text-[var(--color-muted-foreground)]">

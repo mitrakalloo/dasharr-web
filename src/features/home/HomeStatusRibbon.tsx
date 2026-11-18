@@ -23,13 +23,13 @@ export function HomeStatusRibbon({ items, updatedAt }: HomeStatusRibbonProps) {
           <Link
             key={item.label}
             to={item.to}
-            className="panel flex min-h-[var(--tap)] flex-col justify-center rounded-2xl px-3 py-2.5 transition active:scale-[0.98]"
+            className="magnetic panel flex min-h-[var(--tap)] flex-col justify-center rounded-[var(--radius-xl)] px-3 py-2.5 active:scale-[0.98]"
             style={{ ['--glow' as string]: item.accent }}
           >
-            <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--color-muted-foreground)]">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">
               {item.label}
             </span>
-            <span className="tabular mt-0.5 text-lg font-semibold" style={{ color: item.accent }}>
+            <span className="tabular mt-0.5 text-lg font-semibold tracking-tight" style={{ color: item.accent }}>
               {item.value}
             </span>
           </Link>

@@ -43,7 +43,7 @@ export function SearchResultList({
       {items.map((item, index) => (
         <div
           key={item.id}
-          className="flex min-h-[64px] items-center gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3"
+          className="flex min-h-[64px] items-center gap-2 panel rounded-[var(--radius-2xl)] px-3"
         >
           <motion.button
             type="button"

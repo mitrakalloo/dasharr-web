@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { QueueFilterBar } from '@/features/queue/QueueFilterBar'
 import { QueueItemCard } from '@/features/queue/QueueItemCard'
@@ -14,17 +15,15 @@ export function QueuePage() {
   if (!q.hydrated) return <PageSkeleton rows={4} />
 
   return (
-    <div className="space-y-4 px-4 pt-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Queue</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          {`${q.source.length} item${q.source.length === 1 ? '' : 's'}${
-            q.live.updatedAt
-              ? ` · updated ${new Date(q.live.updatedAt).toLocaleTimeString()}`
-              : ''
-          }`}
-        </p>
-      </div>
+    <div className="page-pad space-y-4">
+      <PageHeader
+        title="Queue"
+        description={`${q.source.length} item${q.source.length === 1 ? '' : 's'}${
+          q.live.updatedAt
+            ? ` · updated ${new Date(q.live.updatedAt).toLocaleTimeString()}`
+            : ''
+        }`}
+      />
 
       {!q.canShowQueue ? (
         <EmptyState

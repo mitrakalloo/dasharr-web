@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { LayoutGroup, motion } from 'motion/react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { SeerrIssuesSection } from '@/features/seerr/SeerrIssuesSection'
 import { SeerrRequestCard } from '@/features/seerr/SeerrRequestCard'
 import { SeerrRequestSheet } from '@/features/seerr/SeerrRequestSheet'
@@ -41,8 +42,8 @@ export function SeerrRequestsPage() {
 
   if (!isDemo && !has('seerr')) {
     return (
-      <div className="space-y-4 px-4 pt-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Seerr</h1>
+      <div className="page-pad space-y-4">
+        <PageHeader title="Seerr" />
         <EmptyState
           title="Seerr not configured"
           description="Add a Seerr service in Settings to manage media requests."
@@ -52,14 +53,11 @@ export function SeerrRequestsPage() {
   }
 
   return (
-    <div className="space-y-4 px-4 pt-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Seerr</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Media requests · {pendingCount} pending
-          {isDemo ? ' · demo' : ''}
-        </p>
-      </div>
+    <div className="page-pad space-y-4">
+      <PageHeader
+        title="Seerr"
+        description={`Media requests · ${pendingCount} pending${isDemo ? ' · demo' : ''}`}
+      />
 
       <LayoutGroup id="seerr-filters">
         <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">

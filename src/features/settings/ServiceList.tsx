@@ -43,7 +43,7 @@ export function ServiceList() {
       {services.map((service) => (
         <article
           key={service.id}
-          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4"
+          className="flex flex-wrap items-center justify-between gap-3 panel rounded-[var(--radius-2xl)] p-4"
         >
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">

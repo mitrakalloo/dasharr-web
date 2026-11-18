@@ -5,6 +5,7 @@ import { LayoutGroup, motion } from 'motion/react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { AddMediaSheet } from '@/features/search/AddMediaSheet'
 import { AddOptionsSheet } from '@/features/search/AddOptionsSheet'
@@ -22,13 +23,8 @@ export function SearchPage() {
 
   if (s.needsSetup) {
     return (
-      <div className="space-y-4 px-4 pt-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Find</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-            Search your library and request new titles
-          </p>
-        </div>
+      <div className="page-pad space-y-4">
+        <PageHeader title="Find" description="Search your library and request new titles" />
         <EmptyState
           title="Connect a search source"
           description="Add Seerr, Sonarr, Radarr, or Lidarr to search."
@@ -40,15 +36,15 @@ export function SearchPage() {
   }
 
   return (
-    <div className="space-y-4 px-4 pt-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Find</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          {s.has('seerr')
+    <div className="page-pad space-y-4">
+      <PageHeader
+        title="Find"
+        description={
+          s.has('seerr')
             ? 'Discover shelves + multi-service search'
-            : 'Library browse and *arr lookup'}
-        </p>
-      </div>
+            : 'Library browse and *arr lookup'
+        }
+      />
 
       {!s.live.canSearch && !s.has('seerr') ? (
         <EmptyState
@@ -152,7 +148,7 @@ export function SearchPage() {
               {s.has('seerr') ? (
                 <Link
                   to="/discover"
-                  className="inline-flex min-h-[var(--tap)] w-full items-center justify-center rounded-2xl border border-[var(--color-border)] text-sm font-medium text-[var(--color-accent)]"
+                  className="inline-flex min-h-[var(--tap)] w-full items-center justify-center rounded-[var(--radius-xl)] border border-[var(--color-border)] text-sm font-medium text-[var(--color-primary)] transition hover:bg-[var(--color-primary-muted)]"
                 >
                   Browse Discover
                 </Link>

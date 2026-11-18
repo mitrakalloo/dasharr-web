@@ -71,7 +71,7 @@ export function AccountCard() {
   }
 
   return (
-    <section className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+    <section className="space-y-4 panel rounded-[var(--radius-2xl)] p-4">
       <div>
         <h2 className="text-base font-semibold">Account</h2>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">

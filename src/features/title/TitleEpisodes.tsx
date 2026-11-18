@@ -21,7 +21,7 @@ export function TitleEpisodes({
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]">
+    <div className="overflow-hidden panel rounded-[var(--radius-2xl)]">
       {episodes.map((episode, index) => (
         <TitleEpisodeRow
           key={episode.id}

@@ -103,7 +103,7 @@ export function ManualImportPage() {
             return (
               <label
                 key={row.path}
-                className="flex cursor-pointer gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-3"
+                className="flex cursor-pointer gap-3 panel rounded-[var(--radius-2xl)] px-3 py-3"
               >
                 <input
                   type="checkbox"

@@ -29,7 +29,7 @@ export function TitleReleases({ releases }: TitleReleasesProps) {
         {releases.map((release) => (
           <article
             key={release.id}
-            className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-3"
+            className="panel rounded-[var(--radius-2xl)] p-3"
           >
             <div className="flex flex-wrap gap-2">
               <Badge>{release.quality}</Badge>

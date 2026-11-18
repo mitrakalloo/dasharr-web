@@ -11,11 +11,14 @@ import {
   Settings,
   ChevronRight,
 } from 'lucide-react'
+import { motion } from 'motion/react'
 
+import { PageHeader } from '@/components/ui/PageHeader'
 import { ArrOpsCard } from '@/features/more/ArrOpsCard'
 import { MoreServicesList } from '@/features/more/MoreServicesList'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useSeerrRequests } from '@/hooks/useSeerrRequests'
+import { staggerContainer, staggerItem } from '@/lib/motion'
 
 const links = [
   {
@@ -72,38 +75,42 @@ export function MorePage() {
     seerr.status === 'success'
       ? seerr.data.filter((item) => item.status === 'pending').length
       : 0
-  const visible = links.filter(
-    (link) => link.need == null || isDemo || has(link.need),
-  )
+  const visible = links.filter((link) => link.need == null || isDemo || has(link.need))
 
   return (
-    <div className="space-y-4 px-4 pt-4 lg:px-6">
-      <div>
-        <h1 className="font-display text-2xl font-extrabold tracking-tight">More</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Services, library tools, and settings
-        </p>
-      </div>
+    <motion.div
+      className="page-pad space-y-4"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+    >
+      <motion.div variants={staggerItem}>
+        <PageHeader title="More" description="Services, library tools, and settings" />
+      </motion.div>
 
-      <ArrOpsCard />
-      <MoreServicesList />
+      <motion.div variants={staggerItem}>
+        <ArrOpsCard />
+      </motion.div>
+      <motion.div variants={staggerItem}>
+        <MoreServicesList />
+      </motion.div>
 
-      <div className="panel overflow-hidden rounded-2xl">
+      <motion.div variants={staggerItem} className="panel overflow-hidden rounded-[var(--radius-2xl)]">
         {visible.map((link, index) => {
           const Icon = link.icon
           return (
             <Link
               key={link.to}
               to={link.to}
-              className={`flex min-h-[var(--tap)] items-center gap-3 px-4 py-3 transition hover:bg-white/5 active:scale-[0.99] ${
-                index < visible.length - 1 ? 'border-b border-[var(--color-border)]' : ''
+              className={`surface-interactive flex min-h-[var(--tap)] items-center gap-3 px-4 py-3 hover:bg-white/[0.04] ${
+                index < visible.length - 1 ? 'border-b border-[var(--color-hairline)]' : ''
               }`}
             >
-              <span className="inline-flex size-10 items-center justify-center rounded-xl bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+              <span className="inline-flex size-10 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
                 <Icon className="size-5" aria-hidden />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold">
+                <span className="block text-sm font-semibold tracking-tight">
                   {link.label}
                   {link.to === '/requests' && pending > 0 ? ` (${pending})` : ''}
                 </span>
@@ -115,7 +122,7 @@ export function MorePage() {
             </Link>
           )
         })}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

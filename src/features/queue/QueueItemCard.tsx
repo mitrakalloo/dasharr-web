@@ -56,7 +56,7 @@ export function QueueItemCard({
     >
       <article
         className={cn(
-          'magnetic panel group rounded-2xl p-3 transition hover:bg-[var(--color-card-elevated)]',
+          'magnetic panel group rounded-[var(--radius-2xl)] p-3 hover:bg-[var(--color-card-elevated)]',
           dense && 'p-2.5',
         )}
         style={{ ['--glow' as string]: accent }}
@@ -104,7 +104,7 @@ export function QueueItemCard({
           {showPause || showRemove || item.canRetry || onApprove || onDecline ? (
             <div className="flex gap-1 opacity-100 lg:opacity-0 lg:transition lg:group-hover:opacity-100 lg:focus-within:opacity-100">
               {onApprove ? (
-                <IconButton label="Approve request" tone="accent" onClick={onApprove}>
+                <IconButton label="Approve request" tone="primary" onClick={onApprove}>
                   <span className="text-sm font-bold">✓</span>
                 </IconButton>
               ) : null}

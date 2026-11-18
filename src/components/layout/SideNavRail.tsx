@@ -29,7 +29,7 @@ export function SideNavRail({ collapsed, onCollapsedChange, queueBadge = 0 }: Si
   return (
     <aside
       className={cn(
-        'hidden h-dvh shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-card)]/90 backdrop-blur-xl lg:flex',
+        'hidden h-dvh shrink-0 flex-col border-r border-[var(--color-hairline)] bg-[var(--color-card)]/70 backdrop-blur-2xl transition-[width] duration-300 ease-[var(--ease-out-expo)] lg:flex',
         collapsed ? 'w-[var(--rail-compact)]' : 'w-[var(--rail-expanded)]',
       )}
     >
@@ -51,17 +51,17 @@ export function SideNavRail({ collapsed, onCollapsedChange, queueBadge = 0 }: Si
                 end={end}
                 title={collapsed ? label : undefined}
                 className={cn(
-                  'relative flex min-h-[var(--tap)] items-center gap-3 rounded-xl px-3 text-sm font-medium transition active:scale-[0.97]',
+                  'relative flex min-h-[var(--tap)] items-center gap-3 rounded-[var(--radius-md)] px-3 text-sm font-medium tracking-tight transition active:scale-[0.97]',
                   collapsed && 'justify-center px-0',
                   active
                     ? 'text-[var(--color-primary)]'
-                    : 'text-[var(--color-muted-foreground)] hover:bg-white/5 hover:text-[var(--color-foreground)]',
+                    : 'text-[var(--color-muted-foreground)] hover:bg-white/[0.04] hover:text-[var(--color-foreground)]',
                 )}
               >
                 {active ? (
                   <motion.span
                     layoutId="side-nav-pill"
-                    className="absolute inset-0 rounded-xl bg-[var(--color-primary-muted)]"
+                    className="absolute inset-0 rounded-[var(--radius-md)] bg-[var(--color-primary-muted)]"
                     transition={spring}
                   />
                 ) : null}
@@ -89,12 +89,12 @@ export function SideNavRail({ collapsed, onCollapsedChange, queueBadge = 0 }: Si
         </nav>
       </LayoutGroup>
 
-      <div className="space-y-1 border-t border-[var(--color-border)] p-2">
+      <div className="space-y-1 border-t border-[var(--color-hairline)] p-2">
         <NavLink
           to="/settings"
           title={collapsed ? 'Settings' : undefined}
           className={cn(
-            'flex min-h-[var(--tap)] items-center gap-3 rounded-xl px-3 text-sm text-[var(--color-muted-foreground)] transition hover:bg-white/5 hover:text-[var(--color-foreground)] active:scale-[0.97]',
+            'flex min-h-[var(--tap)] items-center gap-3 rounded-[var(--radius-md)] px-3 text-sm text-[var(--color-muted-foreground)] transition hover:bg-white/[0.04] hover:text-[var(--color-foreground)] active:scale-[0.97]',
             collapsed && 'justify-center px-0',
           )}
         >
@@ -105,7 +105,7 @@ export function SideNavRail({ collapsed, onCollapsedChange, queueBadge = 0 }: Si
           type="button"
           onClick={toggle}
           className={cn(
-            'flex min-h-[var(--tap)] w-full cursor-pointer items-center gap-3 rounded-xl px-3 text-sm text-[var(--color-muted-foreground)] transition hover:bg-white/5 hover:text-[var(--color-foreground)] active:scale-[0.97]',
+            'flex min-h-[var(--tap)] w-full cursor-pointer items-center gap-3 rounded-[var(--radius-md)] px-3 text-sm text-[var(--color-muted-foreground)] transition hover:bg-white/[0.04] hover:text-[var(--color-foreground)] active:scale-[0.97]',
             collapsed && 'justify-center px-0',
           )}
           aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}

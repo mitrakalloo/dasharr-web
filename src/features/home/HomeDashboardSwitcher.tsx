@@ -39,10 +39,10 @@ export function HomeDashboardSwitcher({
                 type="button"
                 onClick={() => onSelect(dashboard.id)}
                 className={cn(
-                  'relative min-h-[var(--tap)] shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium transition active:scale-95',
+                  'relative min-h-9 shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium tracking-tight transition active:scale-95',
                   selected
                     ? 'border-transparent text-[var(--color-on-primary-container)]'
-                    : 'border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-muted-foreground)]',
+                    : 'border-[var(--color-border)] bg-[var(--color-card)]/80 text-[var(--color-muted-foreground)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-foreground)]',
                 )}
               >
                 {selected ? (

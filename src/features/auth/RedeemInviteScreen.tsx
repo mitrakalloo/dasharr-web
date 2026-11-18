@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { AuthShell } from '@/features/auth/AuthShell'
 import { apiJson } from '@/lib/api/server'
 
 interface RedeemInviteScreenProps {
@@ -35,24 +36,27 @@ export function RedeemInviteScreen({ onDone, onBack }: RedeemInviteScreenProps) 
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-10">
-      <h1 className="font-display text-2xl font-extrabold tracking-tight">Redeem invite</h1>
-      <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-        Join this Dasharr household with an invite token from an admin.
-      </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
+    <AuthShell
+      title="Redeem invite"
+      description="Join this Dasharr household with an invite token from an admin."
+      footer={
+        <button
+          type="button"
+          onClick={onBack}
+          className="cursor-pointer text-sm font-medium text-[var(--color-secondary)] transition hover:text-[var(--color-primary)]"
+        >
+          Back to sign in
+        </button>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-3.5">
         <Input
           label="Invite token"
           value={token}
           onChange={(event) => setToken(event.target.value)}
           required
         />
-        <Input
-          label="Name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          required
-        />
+        <Input label="Name" value={name} onChange={(event) => setName(event.target.value)} required />
         <Input
           label="Email"
           type="email"
@@ -68,13 +72,10 @@ export function RedeemInviteScreen({ onDone, onBack }: RedeemInviteScreenProps) 
           required
           minLength={12}
         />
-        <Button type="submit" className="w-full" disabled={busy}>
+        <Button type="submit" className="w-full" loading={busy}>
           {busy ? 'Creating…' : 'Create account'}
         </Button>
       </form>
-      <button type="button" onClick={onBack} className="mt-4 text-sm text-[var(--color-secondary)]">
-        Back to sign in
-      </button>
-    </div>
+    </AuthShell>
   )
 }

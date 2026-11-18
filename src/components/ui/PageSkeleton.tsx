@@ -1,12 +1,15 @@
 export function PageSkeleton({ rows = 4 }: { rows?: number }) {
   return (
-    <div className="space-y-3 px-4 pt-6" aria-busy aria-label="Loading">
-      <div className="h-7 w-40 animate-pulse rounded-lg bg-white/8" />
-      <div className="h-4 w-56 animate-pulse rounded bg-white/5" />
+    <div className="page-pad space-y-4" aria-busy aria-label="Loading">
+      <div className="space-y-2">
+        <div className="skeleton h-8 w-36 rounded-lg" />
+        <div className="skeleton h-4 w-52 rounded-md" />
+      </div>
       {Array.from({ length: rows }).map((_, index) => (
         <div
           key={index}
-          className="h-20 animate-pulse rounded-2xl border border-[var(--color-border)] bg-white/5"
+          className="skeleton h-[5.5rem] rounded-[var(--radius-2xl)] border border-[var(--color-hairline)]"
+          style={{ animationDelay: `${index * 80}ms` }}
         />
       ))}
     </div>

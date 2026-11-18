@@ -35,7 +35,7 @@ export function LayoutTransferCard() {
   }
 
   return (
-    <section className="space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+    <section className="space-y-3 panel rounded-[var(--radius-2xl)] p-4">
       <div>
         <h2 className="text-base font-semibold">Layout transfer</h2>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">

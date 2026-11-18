@@ -30,17 +30,17 @@ export function QueueSidebar() {
   }
 
   return (
-    <aside className="hidden h-full w-[var(--queue-rail)] shrink-0 flex-col border-l border-[var(--color-border)] bg-[var(--color-card)]/40 xl:flex">
-      <div className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 py-3">
+    <aside className="hidden h-full w-[var(--queue-rail)] shrink-0 flex-col border-l border-[var(--color-hairline)] bg-[var(--color-card)]/55 backdrop-blur-xl xl:flex">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--color-hairline)] px-4 py-3.5">
         <div>
-          <h2 className="text-sm font-semibold">Live queue</h2>
+          <h2 className="font-display text-sm font-semibold tracking-tight">Live queue</h2>
           <p className="tabular text-xs text-[var(--color-muted-foreground)]">
             ↓ <SpeedValue value={speed} />
           </p>
         </div>
         <Link
           to="/queue"
-          className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]"
+          className="min-h-[var(--tap)] content-center text-sm font-medium text-[var(--color-primary)] transition hover:text-[var(--color-secondary)]"
         >
           See all
         </Link>

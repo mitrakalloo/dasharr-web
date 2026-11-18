@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { formatBytes } from '@/lib/format'
 import {
@@ -64,13 +65,8 @@ export function ProwlarrBrowsePage() {
   }
 
   return (
-    <div className="space-y-4 px-4 pt-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Prowlarr</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Search indexers and grab releases
-        </p>
-      </div>
+    <div className="page-pad space-y-4">
+      <PageHeader title="Prowlarr" description="Search indexers and grab releases" />
 
       <form onSubmit={(event) => void handleSearch(event)} className="flex gap-2">
         <Input
@@ -94,7 +90,7 @@ export function ProwlarrBrowsePage() {
         {results.map((release) => (
           <div
             key={`${release.indexerId}-${release.guid}`}
-            className="flex items-center gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-3"
+            className="flex items-center gap-3 panel rounded-[var(--radius-2xl)] px-3 py-3"
           >
             <div className="min-w-0 flex-1">
               <p className="line-clamp-2 text-sm font-medium">{release.title}</p>

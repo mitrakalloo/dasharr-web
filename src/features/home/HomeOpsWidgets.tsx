@@ -39,7 +39,7 @@ export function HomeTorrentQueueWidget() {
           {torrents.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-2.5"
+              className="panel rounded-[var(--radius-2xl)] px-3 py-2.5"
             >
               <p className="truncate text-sm font-medium">{item.title}</p>
               <p className="tabular text-xs text-[var(--color-muted-foreground)]">

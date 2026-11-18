@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'Dasharr Web',
         short_name: 'Dasharr',
         description: 'Mobile companion for your *arr stack',
-        theme_color: '#09090B',
-        background_color: '#09090B',
+        theme_color: '#07090f',
+        background_color: '#07090f',
         display: 'standalone',
         start_url: '/',
         icons: [

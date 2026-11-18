@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { Inbox } from 'lucide-react'
 
 import { Button } from '@/components/ui/Button'
 
@@ -8,6 +9,7 @@ interface EmptyStateProps {
   actionLabel?: string
   actionTo?: string
   onAction?: () => void
+  icon?: React.ReactNode
 }
 
 export function EmptyState({
@@ -16,21 +18,25 @@ export function EmptyState({
   actionLabel,
   actionTo,
   onAction,
+  icon,
 }: EmptyStateProps) {
   return (
-    <div className="rounded-2xl border border-dashed border-[var(--color-border)] bg-[var(--color-card)]/40 px-4 py-8 text-center">
-      <p className="text-sm font-medium">{title}</p>
-      <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">{description}</p>
+    <div className="flex flex-col items-center rounded-[var(--radius-2xl)] border border-dashed border-[var(--color-border)] bg-[var(--color-card)]/50 px-5 py-10 text-center">
+      <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-[var(--color-hairline)] bg-[var(--color-muted)] text-[var(--color-muted-foreground)]">
+        {icon ?? <Inbox className="size-5" aria-hidden />}
+      </div>
+      <p className="font-display text-base font-semibold tracking-tight">{title}</p>
+      <p className="mt-1.5 max-w-sm text-sm text-[var(--color-muted-foreground)]">{description}</p>
       {actionLabel && actionTo ? (
-        <Link to={actionTo} className="mt-4 inline-flex">
-          <Button variant="secondary" className="min-h-10 px-4 text-xs">
+        <Link to={actionTo} className="mt-5 inline-flex">
+          <Button variant="secondary" size="sm">
             {actionLabel}
           </Button>
         </Link>
       ) : null}
       {actionLabel && onAction && !actionTo ? (
-        <div className="mt-4 flex justify-center">
-          <Button variant="secondary" className="min-h-10 px-4 text-xs" onClick={onAction}>
+        <div className="mt-5 flex justify-center">
+          <Button variant="secondary" size="sm" onClick={onAction}>
             {actionLabel}
           </Button>
         </div>

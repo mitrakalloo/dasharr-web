@@ -43,8 +43,11 @@ export function AccountGate({ children }: { children: React.ReactNode }) {
 
   if (phase === 'loading') {
     return (
-      <div className="flex min-h-dvh items-center justify-center text-sm text-[var(--color-muted-foreground)]">
-        Loading…
+      <div className="auth-canvas flex min-h-dvh flex-col items-center justify-center gap-4">
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <div className="size-10 animate-spin rounded-full border-2 border-[var(--color-primary)] border-r-transparent" />
+          <p className="text-sm text-[var(--color-muted-foreground)]">Preparing your desk…</p>
+        </div>
       </div>
     )
   }

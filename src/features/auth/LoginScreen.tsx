@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
+import { AuthShell } from '@/features/auth/AuthShell'
 import { apiJson } from '@/lib/api/server'
 import { authClient } from '@/lib/auth/client'
 
@@ -40,7 +41,6 @@ export function LoginScreen({ onDone, onRedeemInvite }: LoginScreenProps) {
   async function signInOidc() {
     setBusy(true)
     try {
-      // providerId from server genericOAuth config
       await authClient.signIn.social({
         provider: 'oidc' as 'github',
         callbackURL: '/',
@@ -52,15 +52,24 @@ export function LoginScreen({ onDone, onRedeemInvite }: LoginScreenProps) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-10">
-      <h1 className="font-display text-2xl font-extrabold tracking-tight">Sign in</h1>
-      <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-        Household accounts only. Service API keys stay on the server.
-      </p>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
+    <AuthShell
+      title="Welcome back"
+      description="Household accounts only. Service API keys stay encrypted on the server."
+      footer={
+        <button
+          type="button"
+          onClick={onRedeemInvite}
+          className="cursor-pointer text-sm font-medium text-[var(--color-secondary)] transition hover:text-[var(--color-primary)]"
+        >
+          Have an invite? Redeem it
+        </button>
+      }
+    >
+      <form onSubmit={handleSubmit} className="space-y-3.5">
         <Input
           label="Email"
           type="email"
+          autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           required
@@ -68,11 +77,12 @@ export function LoginScreen({ onDone, onRedeemInvite }: LoginScreenProps) {
         <Input
           label="Password"
           type="password"
+          autoComplete="current-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           required
         />
-        <Button type="submit" className="w-full" disabled={busy}>
+        <Button type="submit" className="w-full" loading={busy}>
           {busy ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
@@ -87,13 +97,6 @@ export function LoginScreen({ onDone, onRedeemInvite }: LoginScreenProps) {
           Sign in with SSO
         </Button>
       ) : null}
-      <button
-        type="button"
-        onClick={onRedeemInvite}
-        className="mt-4 text-sm text-[var(--color-secondary)]"
-      >
-        Have an invite?
-      </button>
-    </div>
+    </AuthShell>
   )
 }

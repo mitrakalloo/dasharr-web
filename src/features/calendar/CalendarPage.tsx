@@ -1,4 +1,5 @@
 import { EmptyState } from '@/components/ui/EmptyState'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { CalendarAgenda } from '@/features/calendar/CalendarAgenda'
 import { CalendarDayStrip } from '@/features/calendar/CalendarDayStrip'
 import { CalendarMonthGrid } from '@/features/calendar/CalendarMonthGrid'
@@ -39,13 +40,11 @@ export function CalendarPage() {
 
   if (!canShow) {
     return (
-      <div className="space-y-4 px-4 pt-4 pb-2">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Calendar</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-            Universal schedule across Sonarr, Radarr, and Lidarr
-          </p>
-        </div>
+      <div className="page-pad space-y-4 pb-2">
+        <PageHeader
+          title="Calendar"
+          description="Universal schedule across Sonarr, Radarr, and Lidarr"
+        />
         <EmptyState
           title="No calendar sources"
           description="Add Sonarr, Radarr, or Lidarr in Settings to see upcoming releases."
@@ -65,20 +64,18 @@ export function CalendarPage() {
         : `${events.length} release${events.length === 1 ? '' : 's'} in range`
 
   return (
-    <div className="space-y-4 px-4 pt-4 pb-2">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Calendar</h1>
-          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">{subtitle}</p>
-        </div>
-        <CalendarViewToggle value={cal.view} onChange={cal.setView} />
-      </div>
+    <div className="page-pad space-y-4 pb-2">
+      <PageHeader
+        title="Calendar"
+        description={subtitle}
+        actions={<CalendarViewToggle value={cal.view} onChange={cal.setView} />}
+      />
 
       {!isDemo && live.status === 'error' ? (
         <EmptyState title="Couldn’t load calendar" description={live.error} />
       ) : (
         <>
-          <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-3">
+          <section className="panel rounded-[var(--radius-2xl)] p-3">
             {cal.view === 'month' ? (
               <>
                 <CalendarMonthHeader

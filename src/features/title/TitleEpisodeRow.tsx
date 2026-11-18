@@ -48,7 +48,7 @@ export function TitleEpisodeRow({
         {episode.hasFile ? 'On disk' : episode.monitored ? 'Missing' : 'Off'}
       </span>
       {canSearch ? (
-        <IconButton label={`Manual search E${episode.episodeNumber}`} tone="accent" onClick={onSearch}>
+        <IconButton label={`Manual search E${episode.episodeNumber}`} tone="primary" onClick={onSearch}>
           <Search className="size-4" />
         </IconButton>
       ) : null}

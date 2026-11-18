@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 
-import { EmptyState } from '@/components/ui/EmptyState'
 import { Badge } from '@/components/ui/Badge'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { titlePath } from '@/data/demoTitles'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useWantedMissing } from '@/hooks/useWantedMissing'
@@ -17,13 +18,11 @@ export function WantedPage() {
   }
 
   return (
-    <div className="space-y-4 px-4 pt-4 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Wanted</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Missing monitored episodes, movies, and albums
-        </p>
-      </div>
+    <div className="page-pad space-y-4">
+      <PageHeader
+        title="Wanted"
+        description="Missing monitored episodes, movies, and albums"
+      />
 
       {isDemo ? (
         <EmptyState
@@ -42,7 +41,7 @@ export function WantedPage() {
       ) : wanted.items.length === 0 ? (
         <EmptyState title="Nothing missing" description="Monitored library looks complete." />
       ) : (
-        <div className="panel divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl">
+        <div className="panel divide-y divide-[var(--color-hairline)] overflow-hidden rounded-[var(--radius-2xl)]">
           {wanted.items.map((item) => (
             <button
               key={item.id}

@@ -81,10 +81,13 @@ export function BottomSheet({
             aria-modal
             aria-label={title}
             className={cn(
-              'relative z-10 flex max-h-[88dvh] w-full flex-col border border-[var(--color-border)] bg-[var(--color-card)] shadow-[var(--panel-highlight)]',
+              'relative z-10 flex max-h-[88dvh] w-full flex-col border border-[var(--color-border)] bg-[var(--color-card)] shadow-[var(--panel-highlight),var(--elevation-float)]',
               asDrawer
                 ? 'h-full max-h-none w-full max-w-[var(--queue-rail)] rounded-none border-y-0 border-r-0'
-                : cn('max-w-[var(--sheet-max)] rounded-t-3xl md:rounded-3xl', sizeClass),
+                : cn(
+                    'max-w-[var(--sheet-max)] rounded-t-[var(--radius-2xl)] md:rounded-[var(--radius-2xl)]',
+                    sizeClass,
+                  ),
             )}
             initial={
               reduced
@@ -119,9 +122,9 @@ export function BottomSheet({
             dragElastic={{ top: 0.05, bottom: 0.55 }}
             onDragEnd={handleDragEnd}
           >
-            <div className="mx-auto mt-2 h-1 w-10 shrink-0 rounded-full bg-white/20 md:hidden" />
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 py-2">
-              <h2 className="text-base font-semibold">{title}</h2>
+            <div className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-white/20 md:hidden" />
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--color-hairline)] px-4 py-2.5">
+              <h2 className="font-display text-base font-semibold tracking-tight">{title}</h2>
               <IconButton label="Close" onClick={onClose}>
                 <X className="size-5" />
               </IconButton>

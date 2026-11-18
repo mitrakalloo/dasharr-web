@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { Select } from '@/components/ui/Select'
 import { titlePath } from '@/data/demoTitles'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
@@ -36,13 +37,8 @@ export function HistoryPage() {
   }
 
   return (
-    <div className="space-y-4 px-4 pt-4 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">History</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Recent grabs, imports, and *arr events
-        </p>
-      </div>
+    <div className="page-pad space-y-4">
+      <PageHeader title="History" description="Recent grabs, imports, and *arr events" />
 
       {history.hasSources ? (
         <div className="grid gap-3 sm:grid-cols-2">

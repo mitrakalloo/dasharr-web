@@ -11,7 +11,14 @@ export const softSpring = {
   damping: 28,
 }
 
-/** Custom easing from the mobile UX brief — cubic-bezier(0.22, 1, 0.36, 1) */
+export const snappySpring = {
+  type: 'spring' as const,
+  stiffness: 460,
+  damping: 34,
+  mass: 0.75,
+}
+
+/** Custom easing — cubic-bezier(0.22, 1, 0.36, 1) */
 export const easeOutExpo = [0.22, 1, 0.36, 1] as const
 
 export const fadeUp = {
@@ -20,9 +27,23 @@ export const fadeUp = {
   exit: { opacity: 0, y: 6 },
 }
 
+export const pageTransition = {
+  initial: { opacity: 0, y: 10 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.28, ease: easeOutExpo },
+  },
+  exit: {
+    opacity: 0,
+    y: -6,
+    transition: { duration: 0.16, ease: easeOutExpo },
+  },
+}
+
 export const staggerContainer = {
   animate: {
-    transition: { staggerChildren: 0.03, delayChildren: 0.03 },
+    transition: { staggerChildren: 0.035, delayChildren: 0.04 },
   },
 }
 
@@ -32,5 +53,14 @@ export const staggerItem = {
     opacity: 1,
     y: 0,
     transition: { duration: 0.35, ease: easeOutExpo },
+  },
+}
+
+export const scaleIn = {
+  initial: { opacity: 0, scale: 0.96 },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.28, ease: easeOutExpo },
   },
 }

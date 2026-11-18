@@ -8,9 +8,9 @@ export function ExperiencePrefsCard() {
   const setDefaultAdd = usePrefsStore((state) => state.setDefaultAdd)
 
   return (
-    <section className="space-y-4 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+    <section className="panel space-y-4 rounded-[var(--radius-2xl)] p-4">
       <div>
-        <h2 className="text-base font-semibold">Experience</h2>
+        <h2 className="font-display text-base font-semibold tracking-tight">Experience</h2>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
           Per-user · synced to your other devices
         </p>

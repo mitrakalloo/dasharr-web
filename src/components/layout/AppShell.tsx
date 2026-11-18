@@ -1,6 +1,5 @@
-import { Outlet } from 'react-router-dom'
-
 import { BottomTabBar } from '@/components/layout/BottomTabBar'
+import { PageTransition } from '@/components/layout/PageTransition'
 import { QueueSidebar } from '@/components/layout/QueueSidebar'
 import { SideNavRail } from '@/components/layout/SideNavRail'
 import { TopBar } from '@/components/layout/TopBar'
@@ -16,7 +15,7 @@ export function AppShell() {
   const shell = useAppShell()
 
   return (
-    <div className="flex h-dvh max-h-dvh overflow-hidden bg-[var(--color-background)] text-[var(--color-foreground)]">
+    <div className="flex h-dvh max-h-dvh overflow-hidden bg-transparent text-[var(--color-foreground)]">
       {!shell.hideSideNav ? (
         <SideNavRail
           collapsed={shell.railCollapsed}
@@ -27,8 +26,8 @@ export function AppShell() {
 
       <div
         className={cn(
-          'app-shell flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-background)]',
-          'mx-auto w-full max-w-[var(--shell-max)] border-x border-[var(--color-border)] lg:mx-0 lg:max-w-none lg:border-x-0',
+          'app-shell flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden',
+          'mx-auto w-full max-w-[var(--shell-max)] border-x border-[var(--color-hairline)] bg-[var(--color-background)]/80 backdrop-blur-sm lg:mx-0 lg:max-w-none lg:border-x-0 lg:bg-transparent lg:backdrop-blur-none',
         )}
         data-sheet-open={sheetOpen ? 'true' : 'false'}
       >
@@ -55,7 +54,7 @@ export function AppShell() {
                   : 'pb-4',
               )}
             >
-              <Outlet />
+              <PageTransition />
             </main>
 
             {!shell.hideBottomNav ? (

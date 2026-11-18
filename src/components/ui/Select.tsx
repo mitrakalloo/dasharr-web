@@ -15,11 +15,16 @@ export function Select({ className, label, options, id, ...props }: SelectProps)
 
   return (
     <label className="flex flex-col gap-1.5 text-sm">
-      {label ? <span className="font-medium text-[var(--color-muted-foreground)]">{label}</span> : null}
+      {label ? (
+        <span className="font-medium tracking-tight text-[var(--color-muted-foreground)]">
+          {label}
+        </span>
+      ) : null}
       <select
         id={selectId}
         className={cn(
-          'min-h-[var(--tap)] cursor-pointer rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 text-base text-[var(--color-foreground)] outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)]',
+          'min-h-[var(--tap)] cursor-pointer rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-muted)] px-3.5 text-base text-[var(--color-foreground)] outline-none transition-[border-color,box-shadow,background-color] duration-[var(--duration-base)] ease-[var(--ease-out-expo)]',
+          'focus:border-[var(--color-ring)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[var(--color-primary-muted)]',
           className,
         )}
         {...props}

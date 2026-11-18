@@ -69,7 +69,7 @@ export function SettingsPage() {
             <InvitesCard />
             <AuditCard />
             <LayoutTransferCard />
-            <section className="flex flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+            <section className="flex flex-wrap gap-2 panel rounded-[var(--radius-2xl)] p-4">
               <Button variant="secondary" onClick={handleExport}>
                 Export service metadata
               </Button>

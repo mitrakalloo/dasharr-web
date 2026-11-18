@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
+import { PageHeader } from '@/components/ui/PageHeader'
 import { PosterThumb } from '@/components/ui/PosterThumb'
-import { Badge } from '@/components/ui/Badge'
 import { titlePath } from '@/data/demoTitles'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useLibraryBrowse } from '@/hooks/useLibraryBrowse'
@@ -27,13 +28,11 @@ export function LibraryPage() {
   }
 
   return (
-    <div className="space-y-4 px-4 pt-4 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Library</h1>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Browse titles already in Sonarr, Radarr, and Lidarr
-        </p>
-      </div>
+    <div className="page-pad space-y-4">
+      <PageHeader
+        title="Library"
+        description="Browse titles already in Sonarr, Radarr, and Lidarr"
+      />
 
       <Input
         label="Filter"
