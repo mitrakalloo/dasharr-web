@@ -43,20 +43,7 @@ interface ConfigState {
   settings: AppSettings
   services: ServiceConfig[]
   hydrated: boolean
-  vaultPhase: 'booting' | 'locked' | 'setup' | 'ready'
-  hasVault: boolean
-  vaultLocked: boolean
   hydrateFromServer: () => Promise<void>
-  /** @deprecated local vault path removed — no-op for compatibility */
-  bootstrap: () => Promise<void>
-  unlock: (passphrase: string) => Promise<void>
-  unlockWithBiometric: () => Promise<void>
-  setupVault: (passphrase: string) => Promise<void>
-  changePassphrase: (current: string, next: string) => Promise<void>
-  enableBiometricUnlock: () => Promise<void>
-  disableBiometricUnlock: () => void
-  lock: () => void
-  persistVault: () => Promise<void>
   updateSettings: (patch: Partial<AppSettings>) => void
   addService: (input: Omit<ServiceConfig, 'id'>) => Promise<ServiceConfig>
   updateService: (id: string, patch: Partial<ServiceConfig>) => Promise<void>
@@ -71,34 +58,15 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   settings: { ...DEFAULT_CONFIG.settings, connectionMode: 'proxy' },
   services: [],
   hydrated: false,
-  vaultPhase: 'booting',
-  hasVault: false,
-  vaultLocked: false,
 
   hydrateFromServer: async () => {
     const payload = await apiJson<{ services: PublicServicePayload[] }>('/api/services')
     set({
       services: payload.services.map(toClientService),
       hydrated: true,
-      hasVault: true,
-      vaultPhase: 'ready',
-      vaultLocked: false,
       settings: { ...DEFAULT_CONFIG.settings, connectionMode: 'proxy' },
     })
   },
-
-  bootstrap: async () => {
-    // AccountGate owns bootstrap now
-    set({ hydrated: true, vaultPhase: 'ready' })
-  },
-  unlock: async () => undefined,
-  unlockWithBiometric: async () => undefined,
-  setupVault: async () => undefined,
-  changePassphrase: async () => undefined,
-  enableBiometricUnlock: async () => undefined,
-  disableBiometricUnlock: () => undefined,
-  lock: () => undefined,
-  persistVault: async () => undefined,
 
   updateSettings: (patch) => {
     set((state) => ({ settings: { ...state.settings, ...patch } }))
@@ -138,7 +106,6 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   exportConfig: () => ({
     version: 1,
     settings: get().settings,
-    // Secrets are never present client-side
     services: get().services,
   }),
 
