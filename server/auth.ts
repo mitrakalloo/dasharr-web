@@ -1,11 +1,17 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { genericOAuth } from 'better-auth/plugins/generic-oauth'
 
 import { db } from './db/client'
 import * as schema from './db/schema'
 import { getAppEnv, getTrustedOrigins } from './lib/env'
 
 const env = getAppEnv()
+
+const oidcClientId = process.env.OIDC_CLIENT_ID?.trim()
+const oidcClientSecret = process.env.OIDC_CLIENT_SECRET?.trim()
+const oidcDiscoveryUrl = process.env.OIDC_DISCOVERY_URL?.trim()
+const oidcEnabled = Boolean(oidcClientId && oidcClientSecret && oidcDiscoveryUrl)
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -22,7 +28,6 @@ export const auth = betterAuth({
   trustedOrigins: getTrustedOrigins(),
   emailAndPassword: {
     enabled: true,
-    // Public sign-up is closed; first admin + invites create accounts server-side.
     disableSignUp: true,
   },
   session: {
@@ -51,6 +56,21 @@ export const auth = betterAuth({
       },
     },
   },
+  plugins: oidcEnabled
+    ? [
+        genericOAuth({
+          config: [
+            {
+              providerId: 'oidc',
+              discoveryUrl: oidcDiscoveryUrl!,
+              clientId: oidcClientId!,
+              clientSecret: oidcClientSecret!,
+              scopes: ['openid', 'email', 'profile'],
+            },
+          ],
+        }),
+      ]
+    : [],
 })
 
 export type SessionUser = {
@@ -59,3 +79,5 @@ export type SessionUser = {
   email: string
   role?: string | null
 }
+
+export const oidcConfigured = oidcEnabled

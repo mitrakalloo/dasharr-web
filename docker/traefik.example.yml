@@ -1,0 +1,14 @@
+# Example Traefik labels for the app service (merge into docker-compose):
+#
+# services:
+#   app:
+#     labels:
+#       - traefik.enable=true
+#       - traefik.http.routers.dasharr.rule=Host(`dasharr.example.com`)
+#       - traefik.http.routers.dasharr.entrypoints=websecure
+#       - traefik.http.routers.dasharr.tls.certresolver=letsencrypt
+#       - traefik.http.services.dasharr.loadbalancer.server.port=8787
+#
+# Also set:
+#   BETTER_AUTH_URL=https://dasharr.example.com
+#   TRUSTED_ORIGINS=https://dasharr.example.com

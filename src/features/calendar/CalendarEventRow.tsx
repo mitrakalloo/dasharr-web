@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Bell, BellOff } from 'lucide-react'
+import { Bell, BellOff, Search } from 'lucide-react'
 
 import { IconButton } from '@/components/ui/IconButton'
 import { PosterThumb } from '@/components/ui/PosterThumb'
@@ -11,6 +11,7 @@ import { serviceAccent } from '@/lib/serviceColors'
 interface CalendarEventRowProps {
   event: DemoRelease
   onToggle?: () => void
+  onSearch?: () => void
 }
 
 function availability(event: DemoRelease): { label: string; color: string } {
@@ -19,7 +20,7 @@ function availability(event: DemoRelease): { label: string; color: string } {
   return { label: 'Unmonitored', color: '#a1a1aa' }
 }
 
-export function CalendarEventRow({ event, onToggle }: CalendarEventRowProps) {
+export function CalendarEventRow({ event, onToggle, onSearch }: CalendarEventRowProps) {
   const accent = serviceAccent(event.service)
   const status = availability(event)
   const body = (
@@ -55,7 +56,7 @@ export function CalendarEventRow({ event, onToggle }: CalendarEventRowProps) {
   )
 
   return (
-    <article className="flex min-h-16 items-stretch gap-3 py-2">
+    <article className="flex min-h-16 items-stretch gap-2 py-2">
       {event.titleId ? (
         <Link
           to={titlePath(event.titleId)}
@@ -66,6 +67,11 @@ export function CalendarEventRow({ event, onToggle }: CalendarEventRowProps) {
       ) : (
         <div className="flex min-w-0 flex-1 items-stretch gap-3">{body}</div>
       )}
+      {!event.hasFile && onSearch ? (
+        <IconButton label="Search releases" onClick={onSearch}>
+          <Search className="size-4" />
+        </IconButton>
+      ) : null}
       <IconButton
         label={event.monitored ? 'Unmonitor' : 'Monitor'}
         tone={event.monitored ? 'accent' : 'default'}

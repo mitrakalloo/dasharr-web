@@ -33,6 +33,7 @@ export function mapSonarrEpisode(
   const code = `S${pad(episode.seasonNumber)}E${pad(episode.episodeNumber)}`
   return {
     id: `sonarr-ep-${episode.id}`,
+    searchId: episode.id,
     titleId: (() => {
       const seriesId = episode.series?.id ?? episode.seriesId
       return seriesId ? liveTitleId('sonarr', seriesId) : undefined
@@ -63,6 +64,7 @@ export function mapRadarrMovie(movie: RadarrCalendarMovie, baseUrl: string): Dem
   const day = airDate?.slice(0, 10)
   return {
     id: `radarr-${movie.id}-${day ?? movie.id}`,
+    searchId: movie.id,
     titleId: liveTitleId('radarr', movie.id),
     title: movie.title,
     subtitle: movie.year ? `${movie.year} · ${releaseKind}` : releaseKind,

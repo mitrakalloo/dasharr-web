@@ -4,12 +4,14 @@ import { Toaster } from 'sonner'
 import { AppRouter } from '@/app/AppRouter'
 import { AccountGate } from '@/features/auth/AccountGate'
 import { useQueueNotifications } from '@/hooks/useQueueNotifications'
+import { useStateSync } from '@/hooks/useStateSync'
 import { usePrefsStore } from '@/stores/prefsStore'
 
 function PrefsEffects() {
   const experience = usePrefsStore((state) => state.experience)
   const hydrated = usePrefsStore((state) => state.hydrated)
   useQueueNotifications()
+  useStateSync(hydrated)
 
   useEffect(() => {
     if (!hydrated) return

@@ -62,6 +62,8 @@ export type DemoQueueItem = {
 export type DemoRelease = {
   id: string
   titleId?: string
+  /** Sonarr episode id / Radarr movie id for targeted search */
+  searchId?: number
   title: string
   subtitle?: string
   /** Absolute local date/time for calendar placement */

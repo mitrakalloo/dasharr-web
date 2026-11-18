@@ -1,7 +1,9 @@
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import { EmptyState } from '@/components/ui/EmptyState'
 import { Badge } from '@/components/ui/Badge'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { Select } from '@/components/ui/Select'
 import { titlePath } from '@/data/demoTitles'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
@@ -11,6 +13,23 @@ export function HistoryPage() {
   const navigate = useNavigate()
   const { isDemo, hydrated } = useConfiguredStack()
   const history = useDownloadHistory(!isDemo)
+  const [serviceFilter, setServiceFilter] = useState('all')
+  const [eventFilter, setEventFilter] = useState('all')
+
+  const eventTypes = useMemo(() => {
+    const set = new Set(history.items.map((item) => item.eventType))
+    return Array.from(set).sort()
+  }, [history.items])
+
+  const filtered = useMemo(
+    () =>
+      history.items.filter((item) => {
+        if (serviceFilter !== 'all' && item.service !== serviceFilter) return false
+        if (eventFilter !== 'all' && item.eventType !== eventFilter) return false
+        return true
+      }),
+    [history.items, serviceFilter, eventFilter],
+  )
 
   if (!hydrated) {
     return <div className="px-4 pt-8 text-sm text-[var(--color-muted-foreground)]">Loading…</div>
@@ -25,6 +44,30 @@ export function HistoryPage() {
         </p>
       </div>
 
+      {!isDemo && history.hasSources ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Select
+            label="Service"
+            value={serviceFilter}
+            options={[
+              { value: 'all', label: 'All services' },
+              { value: 'sonarr', label: 'Sonarr' },
+              { value: 'radarr', label: 'Radarr' },
+            ]}
+            onChange={(event) => setServiceFilter(event.target.value)}
+          />
+          <Select
+            label="Event"
+            value={eventFilter}
+            options={[
+              { value: 'all', label: 'All events' },
+              ...eventTypes.map((type) => ({ value: type, label: type })),
+            ]}
+            onChange={(event) => setEventFilter(event.target.value)}
+          />
+        </div>
+      ) : null}
+
       {isDemo ? (
         <EmptyState
           title="Demo mode"
@@ -36,11 +79,11 @@ export function HistoryPage() {
         <p className="text-sm text-[var(--color-muted-foreground)]">Loading history…</p>
       ) : history.status === 'error' ? (
         <EmptyState title="Couldn’t load history" description={history.error} />
-      ) : history.items.length === 0 ? (
-        <EmptyState title="No history yet" description="Activity will show after grabs and imports." />
+      ) : filtered.length === 0 ? (
+        <EmptyState title="No matching history" description="Try clearing filters." />
       ) : (
         <div className="panel divide-y divide-[var(--color-border)] overflow-hidden rounded-2xl">
-          {history.items.map((item) => (
+          {filtered.map((item) => (
             <button
               key={item.id}
               type="button"

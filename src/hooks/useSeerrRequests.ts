@@ -113,7 +113,14 @@ export function useSeerrRequests(enabled: boolean) {
     async (id: string) => {
       if (!seerr) return
       await approveSeerrRequest(settings, seerr, Number(id))
-      toast.success('Request approved')
+      toast.success('Approved — Seerr will hand off to *arr', {
+        action: {
+          label: 'Open queue',
+          onClick: () => {
+            window.location.assign('/queue')
+          },
+        },
+      })
       refresh()
     },
     [seerr, settings, refresh],

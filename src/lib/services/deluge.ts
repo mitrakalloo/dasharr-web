@@ -77,5 +77,7 @@ export async function delugeRemove(
   service: ServiceConfig,
   hashes: string[],
 ) {
-  await delugeRpc(settings, service, 'core.remove_torrent', [hashes[0], false])
+  for (const hash of hashes) {
+    await delugeRpc(settings, service, 'core.remove_torrent', [hash, false])
+  }
 }

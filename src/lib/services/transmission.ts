@@ -12,6 +12,7 @@ export interface TransmissionTorrent {
   hashString: string
 }
 
+/** Session id is server-scoped via BFF cookies; keep a soft client cache for 409 retries. */
 let sessionId = ''
 
 async function rpc(
@@ -24,9 +25,7 @@ async function rpc(
     'Content-Type': 'application/json',
   }
   if (sessionId) headers['X-Transmission-Session-Id'] = sessionId
-  if (service.username || service.password) {
-    headers.Authorization = `Basic ${btoa(`${service.username ?? ''}:${service.password ?? ''}`)}`
-  }
+  // Credentials are injected by the BFF — never send Basic auth from the browser.
 
   const response = await serviceFetchUnchecked(settings, service, '/transmission/rpc', {
     method: 'POST',
@@ -54,7 +53,16 @@ export async function getTransmissionTorrents(
   service: ServiceConfig,
 ) {
   const data = (await rpc(settings, service, 'torrent-get', {
-    fields: ['id', 'name', 'status', 'percentDone', 'rateDownload', 'eta', 'totalSize', 'hashString'],
+    fields: [
+      'id',
+      'name',
+      'status',
+      'percentDone',
+      'rateDownload',
+      'eta',
+      'totalSize',
+      'hashString',
+    ],
   })) as { torrents?: TransmissionTorrent[] }
   return data.torrents ?? []
 }

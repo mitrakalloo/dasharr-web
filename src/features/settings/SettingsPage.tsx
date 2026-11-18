@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import { SubpageHeader } from '@/components/layout/SubpageHeader'
 import { Button } from '@/components/ui/Button'
 import { AccountCard } from '@/features/settings/AccountCard'
+import { AuditCard } from '@/features/settings/AuditCard'
 import { ExperiencePrefsCard } from '@/features/settings/ExperiencePrefsCard'
 import { InvitesCard } from '@/features/settings/InvitesCard'
 import { LayoutTransferCard } from '@/features/settings/LayoutTransferCard'
@@ -38,6 +39,7 @@ export function SettingsPage() {
       <section className="space-y-6 px-4 pb-10 pt-4">
         <AccountCard />
         <InvitesCard />
+        <AuditCard />
         <ExperiencePrefsCard />
         <LayoutTransferCard />
         <ServiceImportCard />

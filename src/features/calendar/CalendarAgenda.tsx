@@ -12,6 +12,7 @@ interface CalendarAgendaProps {
   loading?: boolean
   onJumpToday: () => void
   onToggle: (id: string) => void
+  onSearch: (id: string) => void
 }
 
 export function CalendarAgenda({
@@ -23,6 +24,7 @@ export function CalendarAgenda({
   loading = false,
   onJumpToday,
   onToggle,
+  onSearch,
 }: CalendarAgendaProps) {
   return (
     <section className="space-y-2">
@@ -66,6 +68,7 @@ export function CalendarAgenda({
               key={event.id}
               event={event}
               onToggle={() => onToggle(event.id)}
+              onSearch={() => onSearch(event.id)}
             />
           ))}
         </div>

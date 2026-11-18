@@ -9,8 +9,10 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { auth } from './auth'
+import { auth, oidcConfigured } from './auth'
 import { getAppEnv, getTrustedOrigins } from './lib/env'
+import { accountRoutes } from './routes/account'
+import { healthRoutes } from './routes/health'
 import { inviteRoutes } from './routes/invites'
 import { proxyRoutes } from './routes/proxy'
 import { serviceRoutes } from './routes/services'
@@ -39,6 +41,7 @@ app.get('/api/health', (c) =>
     ok: true,
     mode: env.isProd ? 'production' : 'development',
     auth: true,
+    oidc: oidcConfigured,
   }),
 )
 
@@ -46,11 +49,11 @@ app.on(['POST', 'GET'], '/api/auth/*', (c) => auth.handler(c.req.raw))
 
 app.route('/api/setup', setupRoutes)
 app.route('/api/invites', inviteRoutes)
+app.route('/api/account', accountRoutes)
+app.route('/api/services/health', healthRoutes)
 app.route('/api/services', serviceRoutes)
 app.route('/api/state', stateRoutes)
 app.route('/api/proxy', proxyRoutes)
-
-/** Legacy open proxy is intentionally removed. */
 
 if (env.isProd) {
   const distDir = path.resolve(__dirname, '../dist')

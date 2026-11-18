@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 
+import { usePolling } from '@/hooks/usePolling'
 import { liveTitleId } from '@/lib/liveTitleId'
 import { getRadarrHistory } from '@/lib/services/radarr'
 import { getSonarrHistory } from '@/lib/services/sonarr'
-import { usePolling } from '@/hooks/usePolling'
 import { useConfigStore } from '@/stores/configStore'
 
 export interface HistoryItem {
@@ -13,6 +13,7 @@ export interface HistoryItem {
   subtitle: string
   eventType: string
   date: string
+  dateMs: number
   service: 'sonarr' | 'radarr'
 }
 
@@ -45,6 +46,7 @@ export function useDownloadHistory(enabled: boolean) {
                 title: record.series?.title ?? record.sourceTitle ?? 'Sonarr event',
                 subtitle: record.sourceTitle ?? record.eventType,
                 eventType: record.eventType,
+                dateMs: new Date(record.date).getTime(),
                 date: new Date(record.date).toLocaleString(),
                 service: 'sonarr',
               }),
@@ -58,6 +60,7 @@ export function useDownloadHistory(enabled: boolean) {
               title: record.movie?.title ?? record.sourceTitle ?? 'Radarr event',
               subtitle: record.sourceTitle ?? record.eventType,
               eventType: record.eventType,
+              dateMs: new Date(record.date).getTime(),
               date: new Date(record.date).toLocaleString(),
               service: 'radarr',
             }),
@@ -66,7 +69,7 @@ export function useDownloadHistory(enabled: boolean) {
       )
       return settled
         .flatMap((result) => (result.status === 'fulfilled' ? result.value : []))
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort((a, b) => b.dateMs - a.dateMs)
     },
     30_000,
     enabled && sources.length > 0,

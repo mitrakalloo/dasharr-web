@@ -1,0 +1,27 @@
+# HTTPS reverse proxy overlay:
+#   docker compose -f docker-compose.yml -f docker-compose.proxy.yml up --build
+#
+# Set in .env:
+#   DASHARR_DOMAIN=dasharr.example.com
+#   BETTER_AUTH_URL=https://dasharr.example.com
+#   TRUSTED_ORIGINS=https://dasharr.example.com
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DASHARR_DOMAIN: ${DASHARR_DOMAIN:-localhost}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:
