@@ -112,7 +112,9 @@ export function ServiceForm() {
         >
           {form.test.status === 'loading' ? 'Testing…' : 'Test connection'}
         </Button>
-        <Button type="submit">Save service</Button>
+        <Button type="submit" disabled={form.busy}>
+          {form.busy ? 'Saving…' : 'Save service'}
+        </Button>
       </div>
     </form>
   )

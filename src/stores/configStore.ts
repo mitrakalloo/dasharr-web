@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import { createVaultActions } from '@/stores/configStore.vault'
+import { apiJson } from '@/lib/api/server'
 import {
   DEFAULT_CONFIG,
   type AppConfig,
@@ -9,6 +9,36 @@ import {
   type ServiceType,
 } from '@/types/config'
 
+type PublicServicePayload = {
+  id: string
+  type: ServiceType
+  name: string
+  baseUrl: string
+  localUrl?: string
+  remoteUrl?: string
+  urlMode?: ServiceConfig['urlMode']
+  enabled: boolean
+  username?: string
+  hasApiKey: boolean
+  hasPassword: boolean
+}
+
+function toClientService(row: PublicServicePayload): ServiceConfig {
+  return {
+    id: row.id,
+    type: row.type,
+    name: row.name,
+    baseUrl: row.baseUrl,
+    localUrl: row.localUrl,
+    remoteUrl: row.remoteUrl,
+    urlMode: row.urlMode ?? 'auto',
+    apiKey: '',
+    username: row.username,
+    password: undefined,
+    enabled: row.enabled,
+  }
+}
+
 interface ConfigState {
   settings: AppSettings
   services: ServiceConfig[]
@@ -16,6 +46,8 @@ interface ConfigState {
   vaultPhase: 'booting' | 'locked' | 'setup' | 'ready'
   hasVault: boolean
   vaultLocked: boolean
+  hydrateFromServer: () => Promise<void>
+  /** @deprecated local vault path removed — no-op for compatibility */
   bootstrap: () => Promise<void>
   unlock: (passphrase: string) => Promise<void>
   unlockWithBiometric: () => Promise<void>
@@ -26,55 +58,78 @@ interface ConfigState {
   lock: () => void
   persistVault: () => Promise<void>
   updateSettings: (patch: Partial<AppSettings>) => void
-  addService: (input: Omit<ServiceConfig, 'id'>) => ServiceConfig
-  updateService: (id: string, patch: Partial<ServiceConfig>) => void
-  removeService: (id: string) => void
+  addService: (input: Omit<ServiceConfig, 'id'>) => Promise<ServiceConfig>
+  updateService: (id: string, patch: Partial<ServiceConfig>) => Promise<void>
+  removeService: (id: string) => Promise<void>
   getServicesByType: (type: ServiceType) => ServiceConfig[]
   exportConfig: () => AppConfig
   importConfig: (config: AppConfig) => void
   resetConfig: () => void
 }
 
-function createId(): string {
-  return crypto.randomUUID()
-}
-
 export const useConfigStore = create<ConfigState>((set, get) => ({
-  settings: DEFAULT_CONFIG.settings,
-  services: DEFAULT_CONFIG.services,
+  settings: { ...DEFAULT_CONFIG.settings, connectionMode: 'proxy' },
+  services: [],
   hydrated: false,
   vaultPhase: 'booting',
   hasVault: false,
   vaultLocked: false,
-  ...createVaultActions(set, get),
+
+  hydrateFromServer: async () => {
+    const payload = await apiJson<{ services: PublicServicePayload[] }>('/api/services')
+    set({
+      services: payload.services.map(toClientService),
+      hydrated: true,
+      hasVault: true,
+      vaultPhase: 'ready',
+      vaultLocked: false,
+      settings: { ...DEFAULT_CONFIG.settings, connectionMode: 'proxy' },
+    })
+  },
+
+  bootstrap: async () => {
+    // AccountGate owns bootstrap now
+    set({ hydrated: true, vaultPhase: 'ready' })
+  },
+  unlock: async () => undefined,
+  unlockWithBiometric: async () => undefined,
+  setupVault: async () => undefined,
+  changePassphrase: async () => undefined,
+  enableBiometricUnlock: async () => undefined,
+  disableBiometricUnlock: () => undefined,
+  lock: () => undefined,
+  persistVault: async () => undefined,
 
   updateSettings: (patch) => {
     set((state) => ({ settings: { ...state.settings, ...patch } }))
-    void get().persistVault()
   },
 
-  addService: (input) => {
-    if (!get().hasVault) throw new Error('Create a vault passphrase before saving services')
-    const service: ServiceConfig = { ...input, id: createId() }
+  addService: async (input) => {
+    const created = await apiJson<{ service: PublicServicePayload }>('/api/services', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    })
+    const service = toClientService(created.service)
     set((state) => ({ services: [...state.services, service] }))
-    void get().persistVault()
     return service
   },
 
-  updateService: (id, patch) => {
+  updateService: async (id, patch) => {
+    const updated = await apiJson<{ service: PublicServicePayload }>(`/api/services/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    })
+    const service = toClientService(updated.service)
     set((state) => ({
-      services: state.services.map((service) =>
-        service.id === id ? { ...service, ...patch } : service,
-      ),
+      services: state.services.map((entry) => (entry.id === id ? service : entry)),
     }))
-    void get().persistVault()
   },
 
-  removeService: (id) => {
+  removeService: async (id) => {
+    await apiJson(`/api/services/${id}`, { method: 'DELETE' })
     set((state) => ({
       services: state.services.filter((service) => service.id !== id),
     }))
-    void get().persistVault()
   },
 
   getServicesByType: (type) =>
@@ -83,16 +138,18 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
   exportConfig: () => ({
     version: 1,
     settings: get().settings,
+    // Secrets are never present client-side
     services: get().services,
   }),
 
-  importConfig: (config) => {
-    if (config.version !== 1) throw new Error('Unsupported config version')
-    if (!get().hasVault) throw new Error('Create a vault passphrase before importing')
+  importConfig: () => {
+    throw new Error('Use Settings → Import service for individual services (secrets via API)')
+  },
+
+  resetConfig: () => {
     set({
-      settings: { ...DEFAULT_CONFIG.settings, ...config.settings },
-      services: config.services ?? [],
+      settings: { ...DEFAULT_CONFIG.settings, connectionMode: 'proxy' },
+      services: [],
     })
-    void get().persistVault()
   },
 }))

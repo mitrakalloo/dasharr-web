@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: dasharr
+      POSTGRES_PASSWORD: dasharr
+      POSTGRES_DB: dasharr
+    volumes:
+      - dasharr_pg:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dasharr -d dasharr']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '8787:8787'
+    environment:
+      NODE_ENV: production
+      PORT: '8787'
+      DATABASE_URL: postgres://dasharr:dasharr@db:5432/dasharr
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?set BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:8787}
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:?set DATA_ENCRYPTION_KEY}
+      SETUP_TOKEN: ${SETUP_TOKEN:?set SETUP_TOKEN}
+      TRUSTED_ORIGINS: ${TRUSTED_ORIGINS:-http://localhost:8787}
+
+volumes:
+  dasharr_pg:

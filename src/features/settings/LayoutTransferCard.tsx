@@ -39,7 +39,7 @@ export function LayoutTransferCard() {
       <div>
         <h2 className="text-base font-semibold">Layout transfer</h2>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Share dashboards and experience prefs without API keys
+          Backup or restore layout. Live edits already sync via your account.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">

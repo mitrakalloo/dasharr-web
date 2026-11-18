@@ -58,7 +58,7 @@ const links = [
   {
     to: '/settings',
     label: 'Settings',
-    hint: 'Services, vault, connection',
+    hint: 'Account, services, invites',
     icon: Settings,
     need: null,
   },

@@ -10,8 +10,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8787
 COPY package.json package-lock.json* ./
-RUN npm install --omit=dev
+RUN npm install
 COPY --from=build /app/dist ./dist
 COPY server ./server
+COPY drizzle.config.ts ./
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 EXPOSE 8787
-CMD ["npx", "tsx", "server/index.ts"]
+ENTRYPOINT ["/entrypoint.sh"]

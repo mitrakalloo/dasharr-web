@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { probeService } from '@/lib/services/probe'
+import { apiJson } from '@/lib/api/server'
 import { useConfigStore } from '@/stores/configStore'
 import {
   SERVICE_META,
@@ -17,7 +17,6 @@ export type TestState =
   | { status: 'error'; message: string }
 
 export function useServiceForm() {
-  const settings = useConfigStore((s) => s.settings)
   const addService = useConfigStore((s) => s.addService)
   const [type, setType] = useState<ServiceType>('sonarr')
   const [name, setName] = useState('Sonarr')
@@ -29,10 +28,11 @@ export function useServiceForm() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [test, setTest] = useState<TestState>({ status: 'idle' })
+  const [busy, setBusy] = useState(false)
 
   const meta = SERVICE_META[type]
 
-  function buildDraft(): ServiceConfig | null {
+  function buildDraft(): Omit<ServiceConfig, 'id'> | null {
     if (!baseUrl.trim()) {
       toast.error('Base URL is required')
       return null
@@ -47,7 +47,6 @@ export function useServiceForm() {
     }
 
     return {
-      id: 'draft',
       type,
       name: name.trim() || meta.label,
       baseUrl: baseUrl.trim().replace(/\/+$/, ''),
@@ -75,9 +74,12 @@ export function useServiceForm() {
 
     setTest({ status: 'loading' })
     try {
-      const version = await probeService(settings, draft)
-      setTest({ status: 'success', version })
-      toast.success(`Connected · v${version}`)
+      const result = await apiJson<{ version: string }>('/api/services/probe', {
+        method: 'POST',
+        body: JSON.stringify(draft),
+      })
+      setTest({ status: 'success', version: result.version })
+      toast.success(`Connected · v${result.version}`)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unreachable'
       setTest({ status: 'error', message })
@@ -85,17 +87,23 @@ export function useServiceForm() {
     }
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const draft = buildDraft()
     if (!draft) return
 
-    const { id: _id, ...input } = draft
-    addService(input)
-    toast.success(`${meta.label} saved locally`)
-    setApiKey('')
-    setPassword('')
-    setTest({ status: 'idle' })
+    setBusy(true)
+    try {
+      await addService(draft)
+      toast.success(`${meta.label} saved (secrets encrypted on server)`)
+      setApiKey('')
+      setPassword('')
+      setTest({ status: 'idle' })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Save failed')
+    } finally {
+      setBusy(false)
+    }
   }
 
   function touchField<T>(setter: (value: T) => void) {
@@ -117,6 +125,7 @@ export function useServiceForm() {
     username,
     password,
     test,
+    busy,
     setName,
     setBaseUrl: touchField(setBaseUrl),
     setLocalUrl: touchField(setLocalUrl),

@@ -49,7 +49,7 @@ export function ServiceList() {
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="font-medium">{service.name}</h3>
               <Badge color={serviceAccent(service.type)}>
-                {SERVICE_META[service.type].label}
+                {SERVICE_META[service.type]?.label ?? service.type}
               </Badge>
               <Badge color={service.enabled ? '#34d399' : undefined}>
                 {service.enabled ? 'Enabled' : 'Disabled'}
@@ -71,7 +71,11 @@ export function ServiceList() {
             </Button>
             <Button
               variant="secondary"
-              onClick={() => updateService(service.id, { enabled: !service.enabled })}
+              onClick={() =>
+                void updateService(service.id, { enabled: !service.enabled }).catch((error) =>
+                  toast.error(error instanceof Error ? error.message : 'Update failed'),
+                )
+              }
             >
               {service.enabled ? 'Disable' : 'Enable'}
             </Button>
@@ -79,8 +83,11 @@ export function ServiceList() {
               label={`Remove ${service.name}`}
               tone="danger"
               onClick={() => {
-                removeService(service.id)
-                toast.message('Service removed')
+                void removeService(service.id)
+                  .then(() => toast.message('Service removed'))
+                  .catch((error) =>
+                    toast.error(error instanceof Error ? error.message : 'Remove failed'),
+                  )
               }}
             >
               <Trash2 className="size-4" />

@@ -12,7 +12,7 @@ export function ExperiencePrefsCard() {
       <div>
         <h2 className="text-base font-semibold">Experience</h2>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Density, region, and default add behavior
+          Synced across devices · density, region, and default add behavior
         </p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">

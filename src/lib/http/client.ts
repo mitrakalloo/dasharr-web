@@ -1,5 +1,4 @@
-import { joinUrl } from '@/lib/format'
-import { effectiveServiceUrl, type AppSettings, type ServiceConfig } from '@/types/config'
+import type { AppSettings, ServiceConfig } from '@/types/config'
 
 export class ServiceRequestError extends Error {
   status: number
@@ -9,41 +8,6 @@ export class ServiceRequestError extends Error {
     this.name = 'ServiceRequestError'
     this.status = status
   }
-}
-
-interface ProxyPayload {
-  url: string
-  method: string
-  headers: Record<string, string>
-  body?: string
-}
-
-function authHeaders(service: ServiceConfig): Record<string, string> {
-  const headers: Record<string, string> = {}
-
-  if (
-    service.type === 'qbittorrent' ||
-    service.type === 'transmission' ||
-    service.type === 'nzbget' ||
-    service.type === 'deluge'
-  ) {
-    return headers
-  }
-
-  if (service.apiKey) {
-    if (service.type === 'sabnzbd' || service.type === 'tautulli') {
-      // API key is passed as a query param by the service module
-    } else if (service.type === 'bazarr') {
-      headers['X-API-KEY'] = service.apiKey
-    } else if (service.type === 'unraid') {
-      headers.Authorization = `Bearer ${service.apiKey}`
-      headers['Content-Type'] = 'application/json'
-    } else {
-      headers['X-Api-Key'] = service.apiKey
-    }
-  }
-
-  return headers
 }
 
 function mergeHeaders(
@@ -76,31 +40,28 @@ async function parseError(response: Response): Promise<string> {
   }
 }
 
+/**
+ * All live service traffic goes through the authenticated BFF.
+ * API keys never leave the server.
+ */
 async function serviceFetchRaw(
-  settings: AppSettings,
+  _settings: AppSettings,
   service: ServiceConfig,
   path: string,
   init: RequestInit = {},
 ): Promise<Response> {
-  let url = joinUrl(effectiveServiceUrl(service), path)
-
-  if (service.type === 'sabnzbd' && service.apiKey) {
-    const separator = url.includes('?') ? '&' : '?'
-    url = `${url}${separator}apikey=${encodeURIComponent(service.apiKey)}`
+  if (!path.startsWith('/')) {
+    throw new ServiceRequestError('Service path must be relative', 400)
   }
 
-  const headers = mergeHeaders(authHeaders(service), init.headers)
   const method = init.method ?? 'GET'
-
-  if (settings.connectionMode === 'direct') {
-    return fetch(url, {
-      ...init,
-      method,
-      headers,
-      credentials:
-        service.type === 'qbittorrent' || service.type === 'deluge' ? 'include' : 'omit',
-    })
-  }
+  const headers = mergeHeaders({}, init.headers)
+  // Strip anything that could smuggle credentials from the browser
+  delete headers['X-Api-Key']
+  delete headers['x-api-key']
+  delete headers['X-API-KEY']
+  delete headers.Authorization
+  delete headers.authorization
 
   const bodyValue =
     typeof init.body === 'string'
@@ -109,24 +70,17 @@ async function serviceFetchRaw(
         ? String(init.body)
         : undefined
 
-  const payload: ProxyPayload = {
-    url,
-    method,
-    headers,
-    body: bodyValue,
-  }
-
-  const proxyHeaders: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-  if (settings.proxySecret) {
-    proxyHeaders['X-Proxy-Secret'] = settings.proxySecret
-  }
-
-  return fetch(settings.proxyUrl || '/api/proxy', {
+  return fetch('/api/proxy', {
     method: 'POST',
-    headers: proxyHeaders,
-    body: JSON.stringify(payload),
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      serviceId: service.id,
+      path,
+      method,
+      headers,
+      body: bodyValue,
+    }),
   })
 }
 
@@ -143,7 +97,6 @@ export async function serviceFetch(
   return response
 }
 
-/** Like serviceFetch but returns non-2xx responses (e.g. Transmission 409 session). */
 export async function serviceFetchUnchecked(
   settings: AppSettings,
   service: ServiceConfig,

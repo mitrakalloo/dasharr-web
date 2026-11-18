@@ -1,0 +1,78 @@
+import { useState } from 'react'
+import { toast } from 'sonner'
+
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { apiJson } from '@/lib/api/server'
+
+interface BootstrapScreenProps {
+  onDone: () => void
+}
+
+export function BootstrapScreen({ onDone }: BootstrapScreenProps) {
+  const [setupToken, setSetupToken] = useState('')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault()
+    setBusy(true)
+    try {
+      await apiJson('/api/setup/bootstrap', {
+        method: 'POST',
+        body: JSON.stringify({ setupToken, name, email, password }),
+      })
+      toast.success('Admin account created — sign in')
+      onDone()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Setup failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-4 py-10">
+      <h1 className="font-display text-2xl font-extrabold tracking-tight">Set up Dasharr</h1>
+      <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+        Create the first admin account. You’ll need the <code>SETUP_TOKEN</code> from your server
+        environment.
+      </p>
+      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
+        <Input
+          label="Setup token"
+          type="password"
+          value={setupToken}
+          onChange={(event) => setSetupToken(event.target.value)}
+          required
+        />
+        <Input
+          label="Name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          required
+        />
+        <Input
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
+        <Input
+          label="Password (12+ chars)"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+          minLength={12}
+        />
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? 'Creating…' : 'Create admin'}
+        </Button>
+      </form>
+    </div>
+  )
+}

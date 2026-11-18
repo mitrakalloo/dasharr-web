@@ -27,8 +27,9 @@ export interface TautulliSession {
 }
 
 function cmdPath(service: ServiceConfig, cmd: string, extra = ''): string {
-  const key = encodeURIComponent(service.apiKey)
-  return `/api/v2?apikey=${key}&cmd=${cmd}${extra}`
+  // API key is injected by the server BFF — never send it from the browser.
+  void service
+  return `/api/v2?cmd=${cmd}${extra}`
 }
 
 export async function getTautulliVersion(settings: AppSettings, service: ServiceConfig) {

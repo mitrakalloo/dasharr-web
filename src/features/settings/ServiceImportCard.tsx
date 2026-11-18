@@ -9,23 +9,19 @@ import { SERVICE_META, type ServiceType } from '@/types/config'
 /** Paste a dasharr://add?… deep link or JSON service row (no camera). */
 export function ServiceImportCard() {
   const addService = useConfigStore((state) => state.addService)
-  const hasVault = useConfigStore((state) => state.hasVault)
   const [raw, setRaw] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  function handleImport() {
-    if (!hasVault) {
-      toast.error('Create a vault first')
-      return
-    }
+  async function handleImport() {
     const trimmed = raw.trim()
     if (!trimmed) return
-
+    setBusy(true)
     try {
       if (trimmed.startsWith('dasharr://add')) {
         const url = new URL(trimmed.replace('dasharr://', 'https://dasharr.local/'))
         const type = (url.searchParams.get('type') ?? 'sonarr') as ServiceType
         if (!(type in SERVICE_META)) throw new Error(`Unknown type ${type}`)
-        addService({
+        await addService({
           type,
           name: url.searchParams.get('name') || SERVICE_META[type].label,
           baseUrl: url.searchParams.get('url') || url.searchParams.get('baseUrl') || '',
@@ -42,7 +38,7 @@ export function ServiceImportCard() {
       const parsed = JSON.parse(trimmed) as Record<string, unknown>
       const type = String(parsed.type ?? 'sonarr') as ServiceType
       if (!(type in SERVICE_META)) throw new Error(`Unknown type ${type}`)
-      addService({
+      await addService({
         type,
         name: String(parsed.name ?? SERVICE_META[type].label),
         baseUrl: String(parsed.baseUrl ?? parsed.url ?? ''),
@@ -57,6 +53,8 @@ export function ServiceImportCard() {
       setRaw('')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Import failed')
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -72,10 +70,10 @@ export function ServiceImportCard() {
         label="Link or JSON"
         value={raw}
         onChange={(event) => setRaw(event.target.value)}
-        placeholder='dasharr://add?type=sonarr&url=…&apiKey=…'
+        placeholder="dasharr://add?type=sonarr&url=…&apiKey=…"
       />
-      <Button variant="secondary" onClick={handleImport}>
-        Import service
+      <Button variant="secondary" disabled={busy} onClick={() => void handleImport()}>
+        {busy ? 'Importing…' : 'Import service'}
       </Button>
     </section>
   )

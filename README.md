@@ -1,63 +1,48 @@
 # Dasharr Web
 
-Mobile-first companion dashboard for your *arr stack — inspired by [Dasharr](../dasharr) and [nzb360](https://nzb360.com/). Configs live in an encrypted local vault (no accounts, no DB).
+Mobile-first companion dashboard for your *arr stack. **Invite-only accounts**, Postgres-backed config, and **server-side encrypted API keys** — safe to expose behind HTTPS.
 
-## UI
+## Security model
 
-- Mobile: sticky bottom tabs (Overview · Queue · Calendar · Search)
-- Desktop (`lg+`): collapsible left rail, command palette (`⌘K`), live queue sidebar
-- OLED dark theme with *arr accent badges
-- Screens: Requests, Library, Wanted, History, title detail, Settings
+- Browser never receives service API keys or passwords
+- All *arr / download-client traffic goes through an authenticated BFF (`POST /api/proxy` with `serviceId` + relative `path` only)
+- Secrets stored with AES-256-GCM (`DATA_ENCRYPTION_KEY`)
+- Closed signup: first admin via `SETUP_TOKEN`, then household invites
+- Audit log for bootstrap, invites, and service changes
 
-## Supported services
+## Docker (recommended)
 
-Sonarr, Radarr, Lidarr, SABnzbd, qBittorrent, Seerr, Prowlarr
+```bash
+cp .env.example .env
+# fill BETTER_AUTH_SECRET, DATA_ENCRYPTION_KEY, SETUP_TOKEN (openssl rand -base64 32)
 
-## Connection modes
+docker compose up --build
+```
 
-| Mode | When to use |
-| --- | --- |
-| **Proxy** (default) | Self-host Dasharr. Avoids CORS via `/api/proxy`. |
-| **Direct** | Static hosting only; each service must allow browser CORS. |
+Open http://localhost:8787 → create admin with your `SETUP_TOKEN`.
 
 ## Develop
 
 ```bash
+cp .env.example .env
+docker compose up db -d
 npm install
+npm run db:push
 npm run dev
 ```
 
-- Web UI: http://localhost:5173
-- Proxy API: http://127.0.0.1:8787
+- Web UI: http://localhost:5173  
+- API: http://127.0.0.1:8787  
 
-## Production
+## Environment
 
-```bash
-npm run build && npm start
-```
-
-Or Docker — see `Dockerfile`. Set `PROXY_SECRET` if exposing beyond LAN.
-
-**Secure context:** the vault needs Web Crypto, so open Dasharr on `https://` or `http://localhost`. Plain `http://192.168.x.x` will block encryption (and passkeys).
-
-**PWA:** production builds register a service worker for installable standalone use.
-
-### CI image (linux/amd64)
-
-On `main` / `v*` tags, `.github/workflows/docker.yml` builds **linux/amd64** and pushes to:
-
-- **GHCR:** `ghcr.io/<owner>/dasharr-web:latest`
-- **Docker Hub:** `<dockerhub-user>/dasharr-web:latest` (when secrets are set)
-
-Add these repo secrets for Docker Hub:
-
-| Secret | Value |
+| Variable | Purpose |
 | --- | --- |
-| `DOCKERHUB_USERNAME` | Your Docker Hub username |
-| `DOCKERHUB_TOKEN` | Access token from [Docker Hub](https://hub.docker.com/settings/security) |
+| `DATABASE_URL` | Postgres connection string |
+| `BETTER_AUTH_SECRET` | Session signing secret |
+| `BETTER_AUTH_URL` | Public app URL |
+| `DATA_ENCRYPTION_KEY` | Encrypts service secrets at rest |
+| `SETUP_TOKEN` | One-time first-admin bootstrap |
+| `TRUSTED_ORIGINS` | Allowed CORS origins (comma-separated) |
 
-```bash
-docker pull <dockerhub-user>/dasharr-web:latest
-# or
-docker pull ghcr.io/<owner>/dasharr-web:latest
-```
+Put Dasharr behind HTTPS (Caddy/Traefik/nginx) when exposed to the internet. Do not publish Postgres ports publicly.

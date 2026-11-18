@@ -2,19 +2,22 @@ import { useEffect } from 'react'
 import { Toaster } from 'sonner'
 
 import { AppRouter } from '@/app/AppRouter'
-import { VaultGate } from '@/features/vault/VaultGate'
+import { AccountGate } from '@/features/auth/AccountGate'
 import { useQueueNotifications } from '@/hooks/useQueueNotifications'
 import { usePrefsStore } from '@/stores/prefsStore'
 
 function PrefsEffects() {
   const experience = usePrefsStore((state) => state.experience)
+  const hydrated = usePrefsStore((state) => state.hydrated)
   useQueueNotifications()
 
   useEffect(() => {
+    if (!hydrated) return
     document.documentElement.dataset.density = experience.uiDensity
-  }, [experience.uiDensity])
+  }, [experience.uiDensity, hydrated])
 
   useEffect(() => {
+    if (!hydrated) return
     const root = document.documentElement
     const preferLight = () => window.matchMedia('(prefers-color-scheme: light)').matches
     const apply = () => {
@@ -29,24 +32,18 @@ function PrefsEffects() {
     const media = window.matchMedia('(prefers-color-scheme: light)')
     media.addEventListener('change', apply)
     return () => media.removeEventListener('change', apply)
-  }, [experience.themePreference])
+  }, [experience.themePreference, hydrated])
 
   return null
 }
 
 export function App() {
-  const hydratePrefs = usePrefsStore((state) => state.hydrate)
-
-  useEffect(() => {
-    hydratePrefs()
-  }, [hydratePrefs])
-
   return (
     <>
-      <PrefsEffects />
-      <VaultGate>
+      <AccountGate>
+        <PrefsEffects />
         <AppRouter />
-      </VaultGate>
+      </AccountGate>
       <Toaster theme="dark" richColors position="bottom-right" />
     </>
   )

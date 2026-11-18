@@ -8,14 +8,20 @@ import {
   type ExperiencePrefs,
 } from '@/lib/prefs/prefs.types'
 import { useDashboardStore } from '@/stores/dashboardStore'
+import { applyPreferencesImport } from '@/stores/prefsStore.import'
+import {
+  loadPrefsFromServer,
+  schedulePrefsPut,
+  type PrefsPayload,
+} from '@/stores/prefsStore.sync'
 
-const STORAGE_KEY = 'dasharr.preferences.v1'
 export const PREFERENCES_EXPORT_KIND = 'dasharr.preferences' as const
 
 interface PrefsState {
   defaultAdd: DefaultAddPrefs
   experience: ExperiencePrefs
   hydrated: boolean
+  hydrateFromServer: () => Promise<void>
   hydrate: () => void
   setDefaultAdd: (patch: Partial<DefaultAddPrefs>) => void
   setExperience: (patch: Partial<ExperiencePrefs>) => void
@@ -23,34 +29,13 @@ interface PrefsState {
   importPreferences: (raw: string) => void
 }
 
-function persist(state: Pick<PrefsState, 'defaultAdd' | 'experience'>) {
-  const payload = {
-    version: 1 as const,
-    defaultAdd: state.defaultAdd,
-    experience: state.experience,
+function sync(get: () => PrefsState) {
+  const payload: PrefsPayload = {
+    version: 1,
+    defaultAdd: get().defaultAdd,
+    experience: get().experience,
   }
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
-  } catch {
-    // ignore
-  }
-}
-
-function load(): { defaultAdd: DefaultAddPrefs; experience: ExperiencePrefs } | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return null
-    const parsed = JSON.parse(raw) as Partial<{
-      defaultAdd: DefaultAddPrefs
-      experience: ExperiencePrefs
-    }>
-    return {
-      defaultAdd: { ...DEFAULT_ADD_PREFS, ...parsed.defaultAdd },
-      experience: { ...DEFAULT_EXPERIENCE, ...parsed.experience },
-    }
-  } catch {
-    return null
-  }
+  schedulePrefsPut(payload)
 }
 
 export const usePrefsStore = create<PrefsState>((set, get) => ({
@@ -58,23 +43,25 @@ export const usePrefsStore = create<PrefsState>((set, get) => ({
   experience: DEFAULT_EXPERIENCE,
   hydrated: false,
 
-  hydrate: () => {
-    const stored = load()
+  hydrateFromServer: async () => {
+    const next = await loadPrefsFromServer()
     set({
-      defaultAdd: stored?.defaultAdd ?? DEFAULT_ADD_PREFS,
-      experience: stored?.experience ?? DEFAULT_EXPERIENCE,
+      defaultAdd: next.defaultAdd,
+      experience: next.experience,
       hydrated: true,
     })
   },
 
+  hydrate: () => undefined,
+
   setDefaultAdd: (patch) => {
     set((state) => ({ defaultAdd: { ...state.defaultAdd, ...patch } }))
-    persist(get())
+    sync(get)
   },
 
   setExperience: (patch) => {
     set((state) => ({ experience: { ...state.experience, ...patch } }))
-    persist(get())
+    sync(get)
   },
 
   exportPreferences: () => {
@@ -93,72 +80,6 @@ export const usePrefsStore = create<PrefsState>((set, get) => ({
   },
 
   importPreferences: (raw) => {
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    const prefs =
-      parsed.kind === PREFERENCES_EXPORT_KIND && parsed.preferences
-        ? (parsed.preferences as Record<string, unknown>)
-        : parsed.kind === PREFERENCES_EXPORT_KIND
-          ? parsed
-          : parsed
-
-    if (prefs.defaultAdd && typeof prefs.defaultAdd === 'object') {
-      set((state) => ({
-        defaultAdd: { ...state.defaultAdd, ...(prefs.defaultAdd as DefaultAddPrefs) },
-      }))
-    }
-    if (prefs.experience && typeof prefs.experience === 'object') {
-      set((state) => ({
-        experience: { ...state.experience, ...(prefs.experience as ExperiencePrefs) },
-      }))
-    } else {
-      // bare native-style fields
-      const experiencePatch: Partial<ExperiencePrefs> = {}
-      for (const key of Object.keys(DEFAULT_EXPERIENCE) as Array<keyof ExperiencePrefs>) {
-        if (key in prefs) {
-          ;(experiencePatch as Record<string, unknown>)[key] = prefs[key]
-        }
-      }
-      if (Object.keys(experiencePatch).length > 0) {
-        set((state) => ({ experience: { ...state.experience, ...experiencePatch } }))
-      }
-      if (prefs.defaultAdd == null && 'monitored' in prefs) {
-        set((state) => ({
-          defaultAdd: {
-            ...state.defaultAdd,
-            ...(prefs as Partial<DefaultAddPrefs>),
-          },
-        }))
-      }
-    }
-
-    if (Array.isArray(prefs.dashboards)) {
-      const dash = useDashboardStore.getState()
-      // rehydrate dashboards via reset + set — use store API
-      const list = prefs.dashboards as ReturnType<typeof useDashboardStore.getState>['dashboards']
-      const active =
-        typeof prefs.activeDashboardId === 'string'
-          ? prefs.activeDashboardId
-          : list[0]?.id
-      useDashboardStore.setState({
-        dashboards: list,
-        activeDashboardId: active ?? dash.activeDashboardId,
-        hydrated: true,
-      })
-      try {
-        localStorage.setItem(
-          'dasharr.dashboards.v1',
-          JSON.stringify({
-            version: 1,
-            layoutVersion: prefs.dashboardLayoutVersion ?? dash.layoutVersion,
-            dashboards: list,
-            activeDashboardId: active,
-          }),
-        )
-      } catch {
-        // ignore
-      }
-    }
-
-    persist(get())
+    applyPreferencesImport(raw, set, get)
   },
 }))
