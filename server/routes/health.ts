@@ -22,7 +22,7 @@ const STATUS_PATH: Record<string, string> = {
   transmission: '/transmission/rpc',
   nzbget: '/jsonrpc',
   deluge: '/json',
-  unraid: '/api/graphql',
+  unraid: '/graphql',
 }
 
 export const healthRoutes = new Hono<{ Variables: AppVariables }>()
@@ -49,7 +49,10 @@ healthRoutes.get('/', async (c) => {
       }
       try {
         const method =
-          row.type === 'nzbget' || row.type === 'deluge' || row.type === 'transmission'
+          row.type === 'nzbget' ||
+          row.type === 'deluge' ||
+          row.type === 'transmission' ||
+          row.type === 'unraid'
             ? 'POST'
             : 'GET'
         let body: string | undefined
@@ -59,6 +62,8 @@ healthRoutes.get('/', async (c) => {
           body = JSON.stringify({ method: 'web.connected', params: [], id: 1 })
         } else if (row.type === 'transmission') {
           body = JSON.stringify({ method: 'session-get' })
+        } else if (row.type === 'unraid') {
+          body = JSON.stringify({ query: '{ online }' })
         }
 
         const upstream = await forwardUpstream({
@@ -83,7 +88,22 @@ healthRoutes.get('/', async (c) => {
         let version = 'ok'
         try {
           const json = JSON.parse(text) as Record<string, unknown>
-          version = String(json.version ?? json.bazarr_version ?? json.result ?? 'ok')
+          if (row.type === 'unraid') {
+            const errors = json.errors as Array<{ message?: string }> | undefined
+            if (errors?.length) {
+              return {
+                id: row.id,
+                type: row.type,
+                name: row.name,
+                status: 'error' as const,
+                error: errors[0]?.message ?? 'Unraid GraphQL error',
+              }
+            }
+            const data = json.data as { online?: boolean } | undefined
+            version = data?.online === false ? 'offline' : 'ok'
+          } else {
+            version = String(json.version ?? json.bazarr_version ?? json.result ?? 'ok')
+          }
         } catch {
           version = text.replace(/^"|"$/g, '').slice(0, 40) || 'ok'
         }

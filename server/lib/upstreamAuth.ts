@@ -21,7 +21,8 @@ export function upstreamAuthHeaders(
   if (type === 'bazarr') {
     headers['X-API-KEY'] = secrets.apiKey
   } else if (type === 'unraid') {
-    headers.Authorization = `Bearer ${secrets.apiKey}`
+    // Unraid GraphQL expects x-api-key. Bearer falls through to cookie/CSRF auth.
+    headers['x-api-key'] = secrets.apiKey
   } else {
     headers['X-Api-Key'] = secrets.apiKey
   }

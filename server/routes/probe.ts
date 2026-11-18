@@ -21,7 +21,7 @@ const STATUS_PATH: Record<string, string> = {
   transmission: '/transmission/rpc',
   nzbget: '/jsonrpc',
   deluge: '/json',
-  unraid: '/api/graphql',
+  unraid: '/graphql',
 }
 
 export const probeRoutes = new Hono<{ Variables: AppVariables }>()
@@ -65,15 +65,23 @@ probeRoutes.post('/', async (c) => {
   const headers = new Headers(upstreamAuthHeaders(body.type, secrets, body.username))
 
   try {
+    if (body.type === 'unraid') {
+      headers.set('Content-Type', 'application/json')
+    }
     const upstream = await fetch(target, {
-      method: body.type === 'nzbget' || body.type === 'deluge' ? 'POST' : 'GET',
+      method:
+        body.type === 'nzbget' || body.type === 'deluge' || body.type === 'unraid'
+          ? 'POST'
+          : 'GET',
       headers,
       body:
         body.type === 'nzbget'
           ? JSON.stringify({ method: 'version', params: [], id: 1 })
           : body.type === 'deluge'
             ? JSON.stringify({ method: 'web.connected', params: [], id: 1 })
-            : undefined,
+            : body.type === 'unraid'
+              ? JSON.stringify({ query: '{ online }' })
+              : undefined,
     })
     if (!upstream.ok) {
       return c.json({ error: `Upstream HTTP ${upstream.status}` }, 502)
@@ -82,7 +90,16 @@ probeRoutes.post('/', async (c) => {
     let version = 'ok'
     try {
       const json = JSON.parse(text) as Record<string, unknown>
-      version = String(json.version ?? json.bazarr_version ?? json.result ?? 'ok')
+      if (body.type === 'unraid') {
+        const errors = json.errors as Array<{ message?: string }> | undefined
+        if (errors?.length) {
+          return c.json({ error: errors[0]?.message ?? 'Unraid GraphQL error' }, 502)
+        }
+        const data = json.data as { online?: boolean } | undefined
+        version = data?.online === false ? 'offline' : 'ok'
+      } else {
+        version = String(json.version ?? json.bazarr_version ?? json.result ?? 'ok')
+      }
     } catch {
       version = text.replace(/^"|"$/g, '').slice(0, 40) || 'ok'
     }

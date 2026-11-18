@@ -102,15 +102,20 @@ export async function forwardUpstream(input: ProxyCallInput): Promise<Response> 
     }
   }
 
+  // Unraid API-key auth must not carry WebGUI cookies — those force CSRF checks.
   const key = jarKey(input.userId, input.row.id)
-  const jar = cookieJar.get(key)
-  if (jar && jar.size > 0) {
-    headers.set(
-      'Cookie',
-      Array.from(jar.entries())
-        .map(([name, value]) => `${name}=${value}`)
-        .join('; '),
-    )
+  if (input.row.type === 'unraid') {
+    cookieJar.delete(key)
+  } else {
+    const jar = cookieJar.get(key)
+    if (jar && jar.size > 0) {
+      headers.set(
+        'Cookie',
+        Array.from(jar.entries())
+          .map(([name, value]) => `${name}=${value}`)
+          .join('; '),
+      )
+    }
   }
 
   const upstream = await fetch(target, {

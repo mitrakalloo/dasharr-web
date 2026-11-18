@@ -25,7 +25,13 @@ async function unraidGraphql(
     body: JSON.stringify({ query }),
   })
   if (payload.errors?.length && !payload.data) {
-    throw new Error(payload.errors[0].message)
+    const message = payload.errors[0].message
+    if (/csrf/i.test(message)) {
+      throw new Error(
+        'Unraid rejected the request (Invalid CSRF token). Re-create the API key under Settings → Management Access → API Keys and ensure the service base URL points at the GraphQL root (…/graphql).',
+      )
+    }
+    throw new Error(message)
   }
   return payload.data
 }
