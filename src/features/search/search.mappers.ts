@@ -18,8 +18,15 @@ function tmdbPoster(path?: string): string {
 export function mapSeerrResult(item: SeerrSearchResult): MediaSearchItem {
   const title = item.title ?? item.name ?? item.originalTitle ?? item.originalName ?? 'Untitled'
   const date = item.releaseDate ?? item.firstAirDate
+  const externalId = Number(item.mediaInfo?.externalServiceId)
+  const mediaType = item.mediaInfo?.mediaType ?? item.mediaType
+  const titleId =
+    Number.isFinite(externalId) && externalId > 0
+      ? liveTitleId(mediaType === 'tv' ? 'sonarr' : 'radarr', externalId)
+      : undefined
   return {
     id: `seerr-${item.mediaType}-${item.id}`,
+    titleId,
     title,
     year: date ? Number(date.slice(0, 4)) || 0 : 0,
     type: item.mediaType === 'tv' ? 'series' : 'movie',
@@ -101,6 +108,7 @@ export function mapRadarrLookup(item: RadarrMovie, baseUrl: string): MediaSearch
 export function mapLidarrLookup(item: LidarrAlbum, baseUrl: string): MediaSearchItem {
   return {
     id: `lookup-lidarr-${item.id || item.title}`,
+    titleId: item.id ? liveTitleId('lidarr', item.id) : undefined,
     title: item.title,
     year: item.releaseDate ? Number(item.releaseDate.slice(0, 4)) || 0 : 0,
     type: 'album',

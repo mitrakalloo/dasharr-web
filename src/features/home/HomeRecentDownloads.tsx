@@ -31,10 +31,13 @@ export function HomeRecentDownloads() {
             <button
               key={item.id}
               type="button"
+              disabled={!item.titleId}
               onClick={() => {
                 if (item.titleId) navigate(titlePath(item.titleId))
               }}
-              className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-3 text-left transition active:scale-[0.99]"
+              className={`flex w-full items-center justify-between gap-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-3 text-left transition ${
+                item.titleId ? 'cursor-pointer active:scale-[0.99]' : 'cursor-default opacity-80'
+              }`}
             >
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium">{item.title}</span>

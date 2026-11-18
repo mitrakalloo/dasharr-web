@@ -40,7 +40,8 @@ export function AppShell() {
                 healthTone={shell.stackHealth.tone}
                 downloadSpeed={shell.downloadSpeed}
                 onHealthClick={() => shell.setHealthOpen(true)}
-                onAddClick={() => shell.setCommandOpen(true)}
+                onAddMedia={() => shell.setAddOpen(true)}
+                onCommand={() => shell.setCommandOpen(true)}
                 scrollTarget={shell.scrollEl}
               />
             ) : null}
@@ -57,7 +58,9 @@ export function AppShell() {
               <Outlet />
             </main>
 
-            {!shell.hideBottomNav ? <BottomTabBar queueBadge={shell.activeQueue} /> : null}
+            {!shell.hideBottomNav ? (
+              <BottomTabBar queueBadge={shell.activeQueue} requestsBadge={shell.pendingRequests} />
+            ) : null}
           </div>
 
           {shell.showQueueSidebar ? <QueueSidebar /> : null}

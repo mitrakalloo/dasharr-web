@@ -13,7 +13,8 @@ interface TopBarProps {
   healthTone: 'ok' | 'warning'
   downloadSpeed?: number
   onHealthClick: () => void
-  onAddClick: () => void
+  onAddMedia: () => void
+  onCommand: () => void
   scrollTarget?: HTMLElement | null
 }
 
@@ -22,7 +23,8 @@ export function TopBar({
   healthTone,
   downloadSpeed = 0,
   onHealthClick,
-  onAddClick,
+  onAddMedia,
+  onCommand,
   scrollTarget = null,
 }: TopBarProps) {
   const scrolled = useScrollY(24, scrollTarget) > 0
@@ -81,22 +83,17 @@ export function TopBar({
 
         <button
           type="button"
-          onClick={onAddClick}
+          onClick={onCommand}
           className="hidden min-h-[var(--tap)] cursor-pointer items-center gap-2 rounded-xl border border-[var(--color-border)] bg-white/5 px-3 text-xs font-medium text-[var(--color-muted-foreground)] transition hover:bg-white/8 hover:text-[var(--color-foreground)] active:scale-95 md:inline-flex"
           aria-label="Open command palette"
         >
-          <span>Command</span>
+          <span>Jump to</span>
           <kbd className="rounded border border-[var(--color-border)] px-1.5 py-0.5 text-[10px]">
             ⌘K
           </kbd>
         </button>
 
-        <IconButton
-          label="Open command palette"
-          tone="accent"
-          onClick={onAddClick}
-          className="md:hidden"
-        >
+        <IconButton label="Add media" tone="accent" onClick={onAddMedia}>
           <Plus className="size-5" />
         </IconButton>
         <Link

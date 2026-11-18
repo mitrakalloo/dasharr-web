@@ -1,21 +1,33 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'motion/react'
 
+import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { HomeDashboardSwitcher } from '@/features/home/HomeDashboardSwitcher'
 import { HomeWidgetRenderer } from '@/features/home/HomeWidgetRenderer'
+import { OnboardingHome } from '@/features/home/OnboardingHome'
 import { useHomePage } from '@/features/home/useHomePage'
 import { QueueItemSheet } from '@/features/queue/QueueItemSheet'
 import { SeerrRequestSheet } from '@/features/seerr/SeerrRequestSheet'
+import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { titlePath } from '@/data/demoTitles'
 import { staggerContainer, staggerItem } from '@/lib/motion'
 
 export function OverviewPage() {
   const navigate = useNavigate()
+  const { needsSetup, hydrated } = useConfiguredStack()
   const home = useHomePage()
   const o = home.overview
 
-  if (!home.ready || !home.active) {
-    return <div className="px-4 pt-8 text-sm text-[var(--color-muted-foreground)]">Loading…</div>
+  if (!hydrated || !home.ready || !home.active) {
+    return <PageSkeleton rows={5} />
+  }
+
+  if (needsSetup) {
+    return (
+      <div className="space-y-5 px-4 pt-4 lg:px-6 lg:pt-6">
+        <OnboardingHome />
+      </div>
+    )
   }
 
   return (
@@ -64,8 +76,8 @@ export function OverviewPage() {
         request={home.seerrRequest}
         onClose={() => home.setSeerrRequest(null)}
         onOpenTitle={(titleId) => navigate(titlePath(titleId))}
-        onApprove={o.isDemo ? undefined : home.seerr.approve}
-        onDecline={o.isDemo ? undefined : home.seerr.decline}
+        onApprove={home.seerr.approve}
+        onDecline={home.seerr.decline}
       />
     </motion.div>
   )

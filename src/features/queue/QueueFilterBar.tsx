@@ -4,6 +4,15 @@ import type { QueueFilter } from '@/features/queue/useQueuePage'
 import { spring } from '@/lib/motion'
 import { cn } from '@/lib/cn'
 
+const FILTER_LABELS: Record<QueueFilter, string> = {
+  all: 'All',
+  downloading: 'Downloads',
+  paused: 'Paused',
+  queued: 'Queued',
+  requests: 'Waiting approval',
+  watching: 'Now playing',
+}
+
 interface QueueFilterBarProps {
   filters: readonly QueueFilter[]
   value: QueueFilter
@@ -20,7 +29,7 @@ export function QueueFilterBar({ filters, value, onChange }: QueueFilterBarProps
             type="button"
             onClick={() => onChange(filter)}
             className={cn(
-              'relative min-h-[var(--tap)] shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium capitalize transition active:scale-95',
+              'relative min-h-[var(--tap)] shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium transition active:scale-95',
               value === filter
                 ? 'border-transparent text-[var(--color-on-primary-container)]'
                 : 'border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-muted-foreground)]',
@@ -33,7 +42,7 @@ export function QueueFilterBar({ filters, value, onChange }: QueueFilterBarProps
                 transition={spring}
               />
             ) : null}
-            <span className="relative z-10">{filter}</span>
+            <span className="relative z-10">{FILTER_LABELS[filter]}</span>
           </button>
         ))}
       </div>

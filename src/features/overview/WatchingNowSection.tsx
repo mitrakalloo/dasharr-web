@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { QueueItemCard } from '@/features/queue/QueueItemCard'
 import type { DemoQueueItem } from '@/data/demoDashboard'
+import { titlePath } from '@/data/demoTitles'
 import { useTautulliSessions } from '@/hooks/useTautulliSessions'
 
 interface WatchingNowSectionProps {
@@ -10,6 +11,7 @@ interface WatchingNowSectionProps {
 }
 
 export function WatchingNowSection({ enabled }: WatchingNowSectionProps) {
+  const navigate = useNavigate()
   const watching = useTautulliSessions(enabled)
 
   if (!enabled) return null
@@ -18,7 +20,10 @@ export function WatchingNowSection({ enabled }: WatchingNowSectionProps) {
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold">Watching now</h2>
-        <Link to="/queue" className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]">
+        <Link
+          to="/queue?filter=watching"
+          className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]"
+        >
           Queue
         </Link>
       </div>
@@ -31,7 +36,9 @@ export function WatchingNowSection({ enabled }: WatchingNowSectionProps) {
               key={item.id}
               item={item}
               dense
-              onOpen={() => undefined}
+              onOpen={
+                item.titleId ? () => navigate(titlePath(item.titleId!)) : undefined
+              }
               onRemove={item.canRemove ? () => void watching.terminate(item) : undefined}
             />
           ))}

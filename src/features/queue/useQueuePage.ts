@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { mapSeerrRequestItem } from '@/features/queue/queue.mappers'
 import { DEMO_QUEUE, type DemoQueueItem } from '@/data/demoDashboard'
@@ -30,14 +30,32 @@ function dedupeQueue(items: DemoQueueItem[]): DemoQueueItem[] {
   })
 }
 
+function isQueueFilter(value: string | null): value is QueueFilter {
+  return Boolean(value && (QUEUE_FILTERS as readonly string[]).includes(value))
+}
+
 export function useQueuePage() {
   const navigate = useNavigate()
-  const { isDemo, hydrated, has } = useConfiguredStack()
+  const [params, setParams] = useSearchParams()
+  const { isDemo, hydrated, has, needsSetup } = useConfiguredStack()
   const live = useDownloadQueue(!isDemo)
   const requests = useSeerrRequests(!isDemo && has('seerr'))
   const watching = useTautulliSessions(!isDemo && has('tautulli'))
-  const [filter, setFilter] = useState<QueueFilter>('all')
+  const [filter, setFilterState] = useState<QueueFilter>('all')
   const [selected, setSelected] = useState<DemoQueueItem | null>(null)
+
+  useEffect(() => {
+    const fromUrl = params.get('filter')
+    if (isQueueFilter(fromUrl)) setFilterState(fromUrl)
+  }, [params])
+
+  function setFilter(value: QueueFilter) {
+    setFilterState(value)
+    const next = new URLSearchParams(params)
+    if (value === 'all') next.delete('filter')
+    else next.set('filter', value)
+    setParams(next, { replace: true })
+  }
 
   const requestItems = useMemo(() => {
     if (isDemo || requests.status !== 'success') return []
@@ -99,6 +117,7 @@ export function useQueuePage() {
 
   return {
     isDemo,
+    needsSetup,
     hydrated,
     live,
     filter,

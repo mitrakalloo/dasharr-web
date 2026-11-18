@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 import { EmptyState } from '@/components/ui/EmptyState'
 import { CalendarAgenda } from '@/features/calendar/CalendarAgenda'
 import { CalendarDayStrip } from '@/features/calendar/CalendarDayStrip'
@@ -51,12 +49,9 @@ export function CalendarPage() {
         <EmptyState
           title="No calendar sources"
           description="Add Sonarr, Radarr, or Lidarr in Settings to see upcoming releases."
+          actionLabel="Add service"
+          actionTo="/settings?focus=services"
         />
-        <p className="text-center text-xs text-[var(--color-muted-foreground)]">
-          <Link to="/settings" className="text-[var(--color-accent)]">
-            Open Settings
-          </Link>
-        </p>
       </div>
     )
   }

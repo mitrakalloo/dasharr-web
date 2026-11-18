@@ -15,7 +15,7 @@ import { cn } from '@/lib/cn'
 
 interface QueueItemCardProps {
   item: DemoQueueItem
-  onOpen: () => void
+  onOpen?: () => void
   onPause?: () => void
   onRemove?: () => void
   onRetry?: () => void
@@ -64,7 +64,11 @@ export function QueueItemCard({
         <button
           type="button"
           onClick={onOpen}
-          className="flex w-full cursor-pointer gap-3 text-left transition active:scale-[0.97]"
+          disabled={!onOpen}
+          className={cn(
+            'flex w-full gap-3 text-left transition',
+            onOpen ? 'cursor-pointer active:scale-[0.97]' : 'cursor-default',
+          )}
         >
           <PosterThumb
             src={item.poster}

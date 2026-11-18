@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { useConfigStore } from '@/stores/configStore'
 import type { ServiceType } from '@/types/config'
 
-/** Demo UI only when Settings has zero enabled services (after persist hydrate). */
+/** Stack connectivity helpers. Demo data is never auto-shown. */
 export function useConfiguredStack() {
   const hydrated = useConfigStore((state) => state.hydrated)
   const services = useConfigStore((state) => state.services)
@@ -11,13 +11,15 @@ export function useConfiguredStack() {
   return useMemo(() => {
     const enabled = services.filter((service) => service.enabled)
     const types = new Set(enabled.map((service) => service.type))
-    const isDemo = hydrated && enabled.length === 0
+    const needsSetup = hydrated && enabled.length === 0
 
     return {
       hydrated,
       services: enabled,
       types,
-      isDemo,
+      needsSetup,
+      /** @deprecated Always false — kept so call sites compile while migrating */
+      isDemo: false as const,
       has: (type: ServiceType) => types.has(type),
       hasAny: (...list: ServiceType[]) => list.some((type) => types.has(type)),
     }

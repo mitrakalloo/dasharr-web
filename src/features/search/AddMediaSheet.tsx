@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { Input } from '@/components/ui/Input'
-import { DEMO_SEARCH } from '@/data/demoDashboard'
 import { titlePath } from '@/data/demoTitles'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useMediaSearch } from '@/hooks/useMediaSearch'
@@ -17,23 +17,9 @@ interface AddMediaSheetProps {
 
 export function AddMediaSheet({ open, onClose }: AddMediaSheetProps) {
   const navigate = useNavigate()
-  const { isDemo, has } = useConfiguredStack()
+  const { has, needsSetup } = useConfiguredStack()
   const [query, setQuery] = useState('')
-  const live = useMediaSearch(!isDemo && open, query)
-
-  const demoList = (query
-    ? DEMO_SEARCH.filter((item) =>
-        item.title.toLowerCase().includes(query.trim().toLowerCase()),
-      )
-    : DEMO_SEARCH
-  ).map((item) => ({
-    id: item.id,
-    titleId: item.titleId,
-    title: item.title,
-    year: item.year,
-    type: item.type,
-    rating: item.rating,
-  }))
+  const live = useMediaSearch(open && !needsSetup, query)
 
   return (
     <BottomSheet open={open} onClose={onClose} title="Add media" size="lg">
@@ -44,40 +30,16 @@ export function AddMediaSheet({ open, onClose }: AddMediaSheetProps) {
         onChange={(event) => setQuery(event.target.value)}
       />
 
-      {isDemo ? (
-        <div className="mt-4 space-y-2">
-          {demoList.map((item) => (
-            <div
-              key={item.id}
-              className="flex min-h-[var(--tap)] items-center justify-between gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-card-elevated)] px-3"
-            >
-              <button
-                type="button"
-                onClick={() => {
-                  onClose()
-                  navigate(titlePath(item.titleId))
-                }}
-                className="min-w-0 flex-1 cursor-pointer py-2 text-left"
-              >
-                <p className="text-sm font-medium">
-                  {item.title}{' '}
-                  <span className="text-[var(--color-muted-foreground)]">({item.year})</span>
-                </p>
-              </button>
-              <Button variant="soft" className="min-h-10 px-3 text-xs">
-                Add
-              </Button>
-            </div>
-          ))}
-        </div>
-      ) : !live.canSearch ? (
+      {needsSetup || !live.canSearch ? (
         <div className="mt-4 space-y-3">
           <EmptyState
             title="No search sources"
             description="Add Seerr or an *arr app in Settings."
+            actionLabel="Open Settings"
+            actionTo="/settings?focus=services"
           />
           <Link
-            to="/settings"
+            to="/settings?focus=services"
             onClick={onClose}
             className="inline-flex min-h-[var(--tap)] w-full items-center justify-center text-sm font-medium text-[var(--color-accent)]"
           >
@@ -97,9 +59,16 @@ export function AddMediaSheet({ open, onClose }: AddMediaSheetProps) {
               <button
                 type="button"
                 onClick={() => {
-                  if (!item.titleId) return
-                  onClose()
-                  navigate(titlePath(item.titleId))
+                  if (item.titleId) {
+                    onClose()
+                    navigate(titlePath(item.titleId))
+                    return
+                  }
+                  if (!item.alreadyAdded) {
+                    void live.beginAdd(item)
+                    return
+                  }
+                  toast.message('Title isn’t linked to a library id yet')
                 }}
                 className="min-w-0 flex-1 cursor-pointer py-2 text-left"
               >
@@ -111,15 +80,27 @@ export function AddMediaSheet({ open, onClose }: AddMediaSheetProps) {
                 </p>
                 <p className="text-xs capitalize text-[var(--color-muted-foreground)]">
                   {item.type} · {item.source}
+                  {item.titleId ? ' · Open details' : ''}
                 </p>
               </button>
               {!item.alreadyAdded ? (
                 <Button
                   variant="soft"
                   className="min-h-10 px-3 text-xs"
-                  onClick={() => void live.addItem(item)}
+                  onClick={() => void live.beginAdd(item)}
                 >
                   {has('seerr') && item.source === 'seerr' ? 'Request' : 'Add'}
+                </Button>
+              ) : item.titleId ? (
+                <Button
+                  variant="soft"
+                  className="min-h-10 px-3 text-xs"
+                  onClick={() => {
+                    onClose()
+                    navigate(titlePath(item.titleId!))
+                  }}
+                >
+                  Open
                 </Button>
               ) : null}
             </div>

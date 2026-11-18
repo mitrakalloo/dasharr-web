@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom'
 
+import { Button } from '@/components/ui/Button'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
+import { usePrefsStore } from '@/stores/prefsStore'
 import type { ServiceType } from '@/types/config'
 
 const tips: Array<{
   id: string
   label: string
   done: (has: (type: ServiceType) => boolean) => boolean
+  optional?: boolean
 }> = [
   {
     id: 'arr',
@@ -27,20 +30,39 @@ const tips: Array<{
     id: 'seerr',
     label: 'Optional: Seerr for requests',
     done: (has) => has('seerr'),
+    optional: true,
   },
 ]
 
 export function HomeChecklist() {
-  const { isDemo, has, services } = useConfiguredStack()
-  if (isDemo || services.length >= 2) return null
+  const { needsSetup, has } = useConfiguredStack()
+  const dismissed = usePrefsStore((state) => state.experience.checklistDismissed)
+  const setExperience = usePrefsStore((state) => state.setExperience)
+
+  if (needsSetup || dismissed) return null
+
+  const requiredDone = tips.filter((tip) => !tip.optional).every((tip) => tip.done(has))
+  if (requiredDone && tips.every((tip) => tip.done(has) || tip.optional)) {
+    // Keep showing until Seerr optional is done OR user dismisses — hide when all required done
+  }
+  if (requiredDone) return null
 
   return (
     <div className="panel space-y-3 rounded-2xl p-4">
-      <div>
-        <h2 className="text-sm font-semibold">Get set up</h2>
-        <p className="mt-0.5 text-xs text-[var(--color-muted-foreground)]">
-          A few services unlock the full home desk.
-        </p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-semibold">Get set up</h2>
+          <p className="mt-0.5 text-xs text-[var(--color-muted-foreground)]">
+            Finish these to unlock the full home desk.
+          </p>
+        </div>
+        <Button
+          variant="ghost"
+          className="min-h-8 px-2 text-xs"
+          onClick={() => setExperience({ checklistDismissed: true })}
+        >
+          Dismiss
+        </Button>
       </div>
       <ul className="space-y-2">
         {tips.map((tip) => {
@@ -59,7 +81,7 @@ export function HomeChecklist() {
         })}
       </ul>
       <Link
-        to="/settings"
+        to="/settings?focus=services"
         className="inline-flex min-h-[var(--tap)] items-center text-sm font-medium text-[var(--color-accent)]"
       >
         Open Settings

@@ -48,21 +48,21 @@ export function useHomePage() {
 
   const ribbon = [
     {
-      label: 'Queue',
+      label: 'Downloads',
       value: String(overview.queuePreview.length),
-      to: '/queue',
+      to: '/queue?filter=downloading',
       accent: '#60A5FA',
     },
     {
-      label: 'Requests',
+      label: 'Waiting approval',
       value: String(pendingRequests),
-      to: '/requests',
+      to: '/queue?filter=requests',
       accent: '#F59E0B',
     },
     {
-      label: 'Watching',
+      label: 'Now playing',
       value: String(watching.items.length),
-      to: '/queue',
+      to: '/queue?filter=watching',
       accent: '#2DD4BF',
     },
     {

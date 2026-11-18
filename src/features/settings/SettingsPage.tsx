@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { SubpageHeader } from '@/components/layout/SubpageHeader'
@@ -13,7 +15,16 @@ import { ServiceList } from '@/features/settings/ServiceList'
 import { useConfigStore } from '@/stores/configStore'
 
 export function SettingsPage() {
+  const navigate = useNavigate()
+  const [params] = useSearchParams()
   const exportConfig = useConfigStore((s) => s.exportConfig)
+  const [showAdvanced, setShowAdvanced] = useState(false)
+
+  useEffect(() => {
+    if (params.get('focus') === 'services') {
+      document.getElementById('settings-services')?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [params])
 
   function handleExport() {
     const blob = new Blob([JSON.stringify(exportConfig(), null, 2)], {
@@ -32,29 +43,39 @@ export function SettingsPage() {
     <div>
       <SubpageHeader
         title="Settings"
-        subtitle="Account-backed · secrets encrypted on the server"
-        backTo="/more"
+        subtitle="Connect stack · secrets stay on the server"
+        onBack={() => navigate(-1)}
       />
 
       <section className="space-y-6 px-4 pb-10 pt-4">
-        <AccountCard />
-        <InvitesCard />
-        <AuditCard />
+        <div id="settings-services" className="space-y-4">
+          <ServiceForm />
+          <section className="space-y-3">
+            <h2 className="text-base font-semibold">Configured services</h2>
+            <ServiceList />
+          </section>
+          <ServiceImportCard />
+        </div>
+
         <ExperiencePrefsCard />
-        <LayoutTransferCard />
-        <ServiceImportCard />
-        <ServiceForm />
 
-        <section className="space-y-3">
-          <h2 className="text-base font-semibold">Configured services</h2>
-          <ServiceList />
-        </section>
+        <Button variant="secondary" onClick={() => setShowAdvanced((value) => !value)}>
+          {showAdvanced ? 'Hide household admin' : 'Household admin'}
+        </Button>
 
-        <section className="flex flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-          <Button variant="secondary" onClick={handleExport}>
-            Export service metadata
-          </Button>
-        </section>
+        {showAdvanced ? (
+          <>
+            <AccountCard />
+            <InvitesCard />
+            <AuditCard />
+            <LayoutTransferCard />
+            <section className="flex flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+              <Button variant="secondary" onClick={handleExport}>
+                Export service metadata
+              </Button>
+            </section>
+          </>
+        ) : null}
       </section>
     </div>
   )

@@ -7,10 +7,11 @@ import { cn } from '@/lib/cn'
 
 interface BottomTabBarProps {
   queueBadge?: number
+  requestsBadge?: number
 }
 
 /** Floating glass dock in normal document flow (not fixed) for iOS Safari stability. */
-export function BottomTabBar({ queueBadge }: BottomTabBarProps) {
+export function BottomTabBar({ queueBadge, requestsBadge }: BottomTabBarProps) {
   const location = useLocation()
 
   return (
@@ -28,6 +29,12 @@ export function BottomTabBar({ queueBadge }: BottomTabBarProps) {
               const active = end
                 ? location.pathname === to
                 : location.pathname === to || location.pathname.startsWith(`${to}/`)
+              const badge =
+                label === 'Queue'
+                  ? queueBadge
+                  : label === 'More'
+                    ? requestsBadge
+                    : undefined
 
               return (
                 <NavLink
@@ -53,9 +60,9 @@ export function BottomTabBar({ queueBadge }: BottomTabBarProps) {
                       className={cn('size-5', active ? 'stroke-[2.25]' : 'stroke-2')}
                       aria-hidden
                     />
-                    {label === 'Queue' && queueBadge && queueBadge > 0 ? (
+                    {badge && badge > 0 ? (
                       <span className="absolute -right-2.5 -top-1.5 min-w-3.5 rounded-full bg-[var(--color-destructive)] px-1 text-center text-[9px] font-bold leading-[14px] text-white">
-                        {queueBadge > 9 ? '9+' : queueBadge}
+                        {badge > 9 ? '9+' : badge}
                       </span>
                     ) : null}
                   </span>

@@ -2,31 +2,27 @@ import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { PageSkeleton } from '@/components/ui/PageSkeleton'
 import { QueueFilterBar } from '@/features/queue/QueueFilterBar'
 import { QueueItemCard } from '@/features/queue/QueueItemCard'
 import { QueueItemSheet } from '@/features/queue/QueueItemSheet'
 import { useQueuePage } from '@/features/queue/useQueuePage'
-import { DEMO_QUEUE } from '@/data/demoDashboard'
 
 export function QueuePage() {
   const q = useQueuePage()
 
-  if (!q.hydrated) {
-    return <div className="px-4 pt-8 text-sm text-[var(--color-muted-foreground)]">Loading…</div>
-  }
+  if (!q.hydrated) return <PageSkeleton rows={4} />
 
   return (
     <div className="space-y-4 px-4 pt-4">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Queue</h1>
         <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          {q.isDemo
-            ? `Downloads · ${DEMO_QUEUE.length} jobs · demo`
-            : `${q.source.length} item${q.source.length === 1 ? '' : 's'}${
-                q.live.updatedAt
-                  ? ` · updated ${new Date(q.live.updatedAt).toLocaleTimeString()}`
-                  : ''
-              }`}
+          {`${q.source.length} item${q.source.length === 1 ? '' : 's'}${
+            q.live.updatedAt
+              ? ` · updated ${new Date(q.live.updatedAt).toLocaleTimeString()}`
+              : ''
+          }`}
         </p>
       </div>
 
@@ -34,6 +30,8 @@ export function QueuePage() {
         <EmptyState
           title="Nothing in the queue"
           description="Add a download client, Seerr, or Tautulli in Settings."
+          actionLabel="Add service"
+          actionTo="/settings?focus=services"
         />
       ) : (
         <>

@@ -7,6 +7,7 @@ import { useAggregateDownloadSpeed } from '@/hooks/useAggregateDownloadSpeed'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useDownloadQueue } from '@/hooks/useDownloadQueue'
 import { useIsDesktop } from '@/hooks/useMediaQuery'
+import { useSeerrRequests } from '@/hooks/useSeerrRequests'
 import { useStackHealth } from '@/hooks/useStackHealth'
 
 const QUEUE_SIDEBAR_PATHS = new Set(['/', '/queue', '/calendar', '/requests', '/wanted', '/more'])
@@ -16,8 +17,9 @@ export function useAppShell() {
   const navigate = useNavigate()
   const isDesktop = useIsDesktop()
   const stackHealth = useStackHealth()
-  const { isDemo } = useConfiguredStack()
+  const { isDemo, has } = useConfiguredStack()
   const liveQueue = useDownloadQueue(!isDemo)
+  const seerr = useSeerrRequests(!isDemo && has('seerr'))
   const downloadSpeed = useAggregateDownloadSpeed()
 
   const [healthOpen, setHealthOpen] = useState(false)
@@ -52,6 +54,14 @@ export function useAppShell() {
         ? DEMO_QUEUE.filter((item) => item.status !== 'paused').length
         : liveQueue.activeCount,
     [isDemo, liveQueue.activeCount],
+  )
+
+  const pendingRequests = useMemo(
+    () =>
+      seerr.status === 'success'
+        ? seerr.data.filter((item) => item.status === 'pending').length
+        : 0,
+    [seerr],
   )
 
   useEffect(() => {
@@ -96,6 +106,7 @@ export function useAppShell() {
     railCollapsed,
     setRailCollapsed,
     activeQueue,
+    pendingRequests,
     downloadSpeed,
     stackHealth,
   }

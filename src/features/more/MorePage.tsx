@@ -15,6 +15,7 @@ import {
 import { ArrOpsCard } from '@/features/more/ArrOpsCard'
 import { MoreServicesList } from '@/features/more/MoreServicesList'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
+import { useSeerrRequests } from '@/hooks/useSeerrRequests'
 
 const links = [
   {
@@ -66,6 +67,11 @@ const links = [
 
 export function MorePage() {
   const { isDemo, has } = useConfiguredStack()
+  const seerr = useSeerrRequests(has('seerr'))
+  const pending =
+    seerr.status === 'success'
+      ? seerr.data.filter((item) => item.status === 'pending').length
+      : 0
   const visible = links.filter(
     (link) => link.need == null || isDemo || has(link.need),
   )
@@ -97,7 +103,10 @@ export function MorePage() {
                 <Icon className="size-5" aria-hidden />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-semibold">{link.label}</span>
+                <span className="block text-sm font-semibold">
+                  {link.label}
+                  {link.to === '/requests' && pending > 0 ? ` (${pending})` : ''}
+                </span>
                 <span className="block text-xs text-[var(--color-muted-foreground)]">
                   {link.hint}
                 </span>

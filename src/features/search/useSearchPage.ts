@@ -16,7 +16,7 @@ export const SEARCH_SCOPES = ['All', 'Series', 'Movies', 'Music', 'Books'] as co
 export type SearchScope = (typeof SEARCH_SCOPES)[number]
 
 export function useSearchPage() {
-  const { isDemo, has, hydrated } = useConfiguredStack()
+  const { isDemo, has, hydrated, needsSetup } = useConfiguredStack()
   const [query, setQuery] = useState('')
   const [scope, setScope] = useState<SearchScope>('All')
   const [serviceFilter, setServiceFilter] = useState<SearchServiceFilter>('all')
@@ -82,6 +82,7 @@ export function useSearchPage() {
 
   return {
     isDemo,
+    needsSetup,
     has,
     hydrated,
     query,

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { DemoSeerrRequest } from '@/data/demoDashboard'
+import { liveTitleId } from '@/lib/liveTitleId'
 import {
   approveSeerrRequest,
   declineSeerrRequest,
@@ -76,8 +77,15 @@ export function useSeerrRequests(enabled: boolean) {
               }
             }
 
+            const externalId = Number(request.media?.externalServiceId)
+            const titleId =
+              Number.isFinite(externalId) && externalId > 0
+                ? liveTitleId(request.type === 'tv' ? 'sonarr' : 'radarr', externalId)
+                : undefined
+
             const mapped: DemoSeerrRequest = {
               id: String(request.id),
+              titleId,
               title,
               year,
               type: request.type === 'tv' ? 'tv' : 'movie',

@@ -11,8 +11,8 @@ import { serviceAccent } from '@/lib/serviceColors'
 
 export function HistoryPage() {
   const navigate = useNavigate()
-  const { isDemo, hydrated } = useConfiguredStack()
-  const history = useDownloadHistory(!isDemo)
+  const { hydrated } = useConfiguredStack()
+  const history = useDownloadHistory(true)
   const [serviceFilter, setServiceFilter] = useState('all')
   const [eventFilter, setEventFilter] = useState('all')
 
@@ -44,7 +44,7 @@ export function HistoryPage() {
         </p>
       </div>
 
-      {!isDemo && history.hasSources ? (
+      {history.hasSources ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <Select
             label="Service"
@@ -68,13 +68,13 @@ export function HistoryPage() {
         </div>
       ) : null}
 
-      {isDemo ? (
+      {!history.hasSources ? (
         <EmptyState
-          title="Demo mode"
-          description="Add Sonarr or Radarr in Settings to load history."
+          title="No *arr services"
+          description="Configure Sonarr or Radarr first."
+          actionLabel="Add service"
+          actionTo="/settings?focus=services"
         />
-      ) : !history.hasSources ? (
-        <EmptyState title="No *arr services" description="Configure Sonarr or Radarr first." />
       ) : history.status === 'loading' ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">Loading history…</p>
       ) : history.status === 'error' ? (
@@ -87,10 +87,15 @@ export function HistoryPage() {
             <button
               key={item.id}
               type="button"
+              disabled={!item.titleId}
               onClick={() => {
                 if (item.titleId) navigate(titlePath(item.titleId))
               }}
-              className="flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-left transition hover:bg-white/5 active:scale-[0.99]"
+              className={`flex w-full items-start gap-3 px-4 py-3 text-left transition ${
+                item.titleId
+                  ? 'cursor-pointer hover:bg-white/5 active:scale-[0.99]'
+                  : 'cursor-default'
+              }`}
             >
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex flex-wrap gap-2">

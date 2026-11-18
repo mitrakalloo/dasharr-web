@@ -5,6 +5,9 @@ export interface SeerrMedia {
   status: number
   tmdbId?: number
   tvdbId?: number
+  /** Sonarr/Radarr library id when synced */
+  externalServiceId?: number | string
+  mediaType?: 'movie' | 'tv'
 }
 
 export interface SeerrRequest {
