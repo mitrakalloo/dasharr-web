@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { cn } from '@/lib/cn'
+import { withAlpha } from '@/lib/serviceColors'
 
 interface PosterThumbProps {
   src?: string
@@ -9,18 +10,26 @@ interface PosterThumbProps {
   className?: string
 }
 
-export function PosterThumb({ src, label, accent = '#3f3f46', className }: PosterThumbProps) {
+export function PosterThumb({ src, label, accent = '#5b9dff', className }: PosterThumbProps) {
   const [failed, setFailed] = useState(!src)
+
+  useEffect(() => {
+    setFailed(!src)
+  }, [src])
+
   const initial = label.trim().charAt(0).toUpperCase() || '?'
 
-  if (failed) {
+  if (failed || !src) {
     return (
       <div
         className={cn(
-          'flex shrink-0 items-center justify-center rounded-md text-xs font-semibold text-white/90',
+          'flex shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] font-display text-sm font-semibold',
           className,
         )}
-        style={{ backgroundColor: `${accent}55` }}
+        style={{
+          color: accent,
+          background: `linear-gradient(145deg, ${withAlpha(accent, '26')}, ${withAlpha(accent, '0c')})`,
+        }}
         aria-hidden
       >
         {initial}
@@ -32,7 +41,10 @@ export function PosterThumb({ src, label, accent = '#3f3f46', className }: Poste
     <img
       src={src}
       alt=""
-      className={cn('shrink-0 rounded-md object-cover', className)}
+      className={cn(
+        'shrink-0 rounded-[var(--radius-md)] border border-[var(--color-hairline)] bg-[var(--color-muted)] object-cover',
+        className,
+      )}
       loading="lazy"
       onError={() => setFailed(true)}
     />

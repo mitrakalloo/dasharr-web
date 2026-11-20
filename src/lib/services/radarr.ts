@@ -12,6 +12,7 @@ export interface RadarrMovie {
   id: number
   title: string
   year?: number
+  added?: string
   status: string
   overview?: string
   path?: string
@@ -21,6 +22,7 @@ export interface RadarrMovie {
   runtime?: number
   genres?: string[]
   tmdbId?: number
+  imdbId?: string
   titleSlug?: string
   qualityProfileId?: number
   rootFolderPath?: string
@@ -127,6 +129,30 @@ export async function getRadarrWantedMissing(
     }>
   }>(settings, service, '/api/v3/wanted/missing?page=1&pageSize=50&sortDirection=descending')
   return data.records
+}
+
+export async function getRadarrWantedCutoff(
+  settings: AppSettings,
+  service: ServiceConfig,
+) {
+  const data = await serviceJson<{
+    records: Array<{
+      id: number
+      title: string
+      year?: number
+      hasFile: boolean
+      isAvailable?: boolean
+    }>
+  }>(settings, service, '/api/v3/wanted/cutoff?page=1&pageSize=50&sortDirection=descending')
+  return data.records
+}
+
+export async function getRadarrHealth(settings: AppSettings, service: ServiceConfig) {
+  return serviceJson<import('@/lib/services/sonarr.types').ArrHealthWarning[]>(
+    settings,
+    service,
+    '/api/v3/health',
+  )
 }
 
 export async function getRadarrHistory(settings: AppSettings, service: ServiceConfig) {

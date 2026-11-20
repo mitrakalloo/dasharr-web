@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { DEMO_SEARCH } from '@/data/demoDashboard'
@@ -17,7 +18,14 @@ export type SearchScope = (typeof SEARCH_SCOPES)[number]
 
 export function useSearchPage() {
   const { isDemo, has, hydrated, needsSetup } = useConfiguredStack()
-  const [query, setQuery] = useState('')
+  const [params, setParams] = useSearchParams()
+  const query = params.get('q') ?? ''
+  const setQuery = (next: string) => {
+    const nextParams = new URLSearchParams(params)
+    if (next) nextParams.set('q', next)
+    else nextParams.delete('q')
+    setParams(nextParams, { replace: true })
+  }
   const [scope, setScope] = useState<SearchScope>('All')
   const [serviceFilter, setServiceFilter] = useState<SearchServiceFilter>('all')
   const [sheetOpen, setSheetOpen] = useState(false)

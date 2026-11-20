@@ -1,6 +1,8 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { Tv } from 'lucide-react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { QueueItemCard } from '@/features/queue/QueueItemCard'
 import type { DemoQueueItem } from '@/data/demoDashboard'
 import { titlePath } from '@/data/demoTitles'
@@ -18,20 +20,17 @@ export function WatchingNowSection({ enabled }: WatchingNowSectionProps) {
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Watching now</h2>
-        <Link
-          to="/queue?filter=watching"
-          className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]"
-        >
-          Queue
-        </Link>
-      </div>
+      <SectionHeader
+        title="Watching now"
+        count={watching.items.length}
+        actionLabel="Queue"
+        actionTo="/queue?filter=watching"
+      />
       {watching.status === 'loading' ? (
-        <p className="text-sm text-[var(--color-muted-foreground)]">Loading streams…</p>
+        <div className="skeleton h-24 rounded-[var(--radius-2xl)]" />
       ) : watching.items.length > 0 ? (
-        <div className="space-y-3">
-          {watching.items.slice(0, 3).map((item: DemoQueueItem) => (
+        <div className="grid gap-3 md:grid-cols-2">
+          {watching.items.slice(0, 4).map((item: DemoQueueItem) => (
             <QueueItemCard
               key={item.id}
               item={item}
@@ -44,7 +43,12 @@ export function WatchingNowSection({ enabled }: WatchingNowSectionProps) {
           ))}
         </div>
       ) : (
-        <EmptyState title="Nobody watching" description="No active Plex streams." />
+        <EmptyState
+          compact
+          icon={<Tv className="size-5" aria-hidden />}
+          title="Nobody watching"
+          description="Active Plex streams from Tautulli appear here."
+        />
       )}
     </section>
   )

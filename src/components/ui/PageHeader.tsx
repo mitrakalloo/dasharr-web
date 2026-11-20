@@ -3,15 +3,27 @@ import { cn } from '@/lib/cn'
 interface PageHeaderProps {
   title: string
   description?: string
+  eyebrow?: string
   actions?: React.ReactNode
   className?: string
 }
 
-export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  description,
+  eyebrow,
+  actions,
+  className,
+}: PageHeaderProps) {
   return (
-    <div className={cn('flex items-start justify-between gap-3', className)}>
-      <div className="min-w-0">
-        <h1 className="font-display text-2xl font-semibold tracking-tight lg:text-[1.75rem]">
+    <div className={cn('flex flex-wrap items-end justify-between gap-3', className)}>
+      <div className="min-w-0 flex-1">
+        {eyebrow ? (
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-primary)]">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h1 className="font-display truncate text-2xl font-semibold tracking-tight lg:text-[1.8rem]">
           {title}
         </h1>
         {description ? (

@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom'
-import { LayoutGroup, motion } from 'motion/react'
+import { SlidersHorizontal } from 'lucide-react'
 
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import type { HomeDashboard } from '@/lib/dashboard/dashboard.types'
-import { spring } from '@/lib/motion'
-import { cn } from '@/lib/cn'
 
 interface HomeDashboardSwitcherProps {
   dashboards: HomeDashboard[]
@@ -17,47 +16,25 @@ export function HomeDashboardSwitcher({
   onSelect,
 }: HomeDashboardSwitcherProps) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">
-          Dashboards
-        </p>
-        <Link
-          to="/edit-home"
-          className="inline-flex min-h-[var(--tap)] items-center text-sm font-medium text-[var(--color-primary)]"
-        >
-          Edit
-        </Link>
-      </div>
-      <LayoutGroup id="home-desks">
-        <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
-          {dashboards.map((dashboard) => {
-            const selected = dashboard.id === activeId
-            return (
-              <button
-                key={dashboard.id}
-                type="button"
-                onClick={() => onSelect(dashboard.id)}
-                className={cn(
-                  'relative min-h-9 shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium tracking-tight transition active:scale-95',
-                  selected
-                    ? 'border-transparent text-[var(--color-on-primary-container)]'
-                    : 'border-[var(--color-border)] bg-[var(--color-card)]/80 text-[var(--color-muted-foreground)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-foreground)]',
-                )}
-              >
-                {selected ? (
-                  <motion.span
-                    layoutId="home-desk-pill"
-                    className="absolute inset-0 rounded-full bg-[var(--color-primary-container)]"
-                    transition={spring}
-                  />
-                ) : null}
-                <span className="relative z-10">{dashboard.name}</span>
-              </button>
-            )
-          })}
-        </div>
-      </LayoutGroup>
+    <div className="flex flex-wrap items-center justify-between gap-2.5">
+      <SegmentedControl
+        ariaLabel="Dashboards"
+        value={activeId}
+        onChange={onSelect}
+        bleedMobile
+        className="min-w-0 flex-1"
+        options={dashboards.map((dashboard) => ({
+          value: dashboard.id,
+          label: dashboard.name,
+        }))}
+      />
+      <Link
+        to="/edit-home"
+        className="inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 text-xs font-semibold text-[var(--color-muted-foreground)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-card-elevated)] hover:text-[var(--color-foreground)] active:scale-95"
+      >
+        <SlidersHorizontal className="size-3.5" aria-hidden />
+        <span>Customize</span>
+      </Link>
     </div>
   )
 }

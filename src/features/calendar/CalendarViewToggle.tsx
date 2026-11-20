@@ -1,4 +1,4 @@
-import { cn } from '@/lib/cn'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import type { CalendarViewMode } from '@/features/calendar/calendar.helpers'
 
 interface CalendarViewToggleProps {
@@ -13,31 +13,13 @@ const OPTIONS: Array<{ value: CalendarViewMode; label: string }> = [
 
 export function CalendarViewToggle({ value, onChange }: CalendarViewToggleProps) {
   return (
-    <div
-      role="tablist"
-      aria-label="Calendar view"
-      className="inline-flex rounded-xl border border-[var(--color-border-strong)] bg-[var(--color-muted)] p-0.5"
-    >
-      {OPTIONS.map((option) => {
-        const active = value === option.value
-        return (
-          <button
-            key={option.value}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={() => onChange(option.value)}
-            className={cn(
-              'min-h-10 min-w-[72px] cursor-pointer rounded-lg px-3 text-sm font-medium transition active:scale-95',
-              active
-                ? 'bg-white text-black'
-                : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-            )}
-          >
-            {option.label}
-          </button>
-        )
-      })}
-    </div>
+    <SegmentedControl
+      ariaLabel="Calendar view"
+      variant="segmented"
+      size="sm"
+      value={value}
+      onChange={onChange}
+      options={OPTIONS}
+    />
   )
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Check, Copy, UserPlus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
@@ -12,12 +13,14 @@ export function InvitesCard() {
   const [email, setEmail] = useState('')
   const [token, setToken] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   if (!isAdmin) return null
 
   async function createInvite() {
     setBusy(true)
     setToken(null)
+    setCopied(false)
     try {
       const result = await apiJson<{ token: string }>('/api/invites', {
         method: 'POST',
@@ -32,12 +35,26 @@ export function InvitesCard() {
     }
   }
 
+  async function copyToken() {
+    if (!token) return
+    try {
+      await navigator.clipboard.writeText(token)
+      setCopied(true)
+      toast.success('Invite token copied')
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error('Could not copy to clipboard')
+    }
+  }
+
   return (
-    <section className="space-y-3 panel rounded-[var(--radius-2xl)] p-4">
+    <section className="panel space-y-3.5 rounded-[var(--radius-2xl)] p-5">
       <div>
-        <h2 className="text-base font-semibold">Household invites</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Invite-only signup. Tokens are shown once.
+        <h2 className="font-display text-base font-semibold tracking-tight text-[var(--color-foreground)]">
+          Household invites
+        </h2>
+        <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+          Invite-only signup. Generated tokens are shown only once.
         </p>
       </div>
       <Input
@@ -47,11 +64,25 @@ export function InvitesCard() {
         onChange={(event) => setEmail(event.target.value)}
         placeholder="member@example.com"
       />
-      <Button variant="secondary" disabled={busy} onClick={() => void createInvite()}>
-        {busy ? 'Creating…' : 'Create invite'}
+      <Button size="sm" variant="secondary" loading={busy} onClick={() => void createInvite()}>
+        <UserPlus className="size-3.5" />
+        Create invite
       </Button>
       {token ? (
-        <p className="break-all rounded-xl bg-[var(--color-muted)] p-3 font-mono text-xs">{token}</p>
+        <div className="space-y-2 rounded-[var(--radius-xl)] border border-[var(--color-primary)]/30 bg-[var(--color-primary-muted)]/40 p-3">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
+              One-time invite token
+            </span>
+            <Button size="sm" variant="secondary" onClick={() => void copyToken()}>
+              {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+              {copied ? 'Copied' : 'Copy'}
+            </Button>
+          </div>
+          <p className="select-all break-all font-mono text-xs text-[var(--color-foreground)]">
+            {token}
+          </p>
+        </div>
       ) : null}
     </section>
   )

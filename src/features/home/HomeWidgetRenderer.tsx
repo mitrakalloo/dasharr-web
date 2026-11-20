@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom'
-
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { HomeChecklist } from '@/features/home/HomeChecklist'
 import { HomeDiscoverSection } from '@/features/home/HomeDiscoverSection'
 import { HomeHeroBlock } from '@/features/home/HomeHeroBlock'
@@ -87,17 +86,17 @@ export function HomeWidgetRenderer({
     case 'upcoming':
       return o.showCalendar ? (
         <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Airing & releasing soon</h2>
-            <Link
-              to="/calendar"
-              className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]"
-            >
-              Calendar
-            </Link>
-          </div>
+          <SectionHeader
+            title="Airing & releasing soon"
+            count={o.upcoming.length}
+            actionLabel="Calendar"
+            actionTo="/calendar"
+          />
           {o.calendarStatus === 'loading' ? (
-            <p className="text-sm text-[var(--color-muted-foreground)]">Loading calendar…</p>
+            <div className="space-y-2">
+              <div className="skeleton h-16 rounded-[var(--radius-xl)]" />
+              <div className="skeleton h-16 rounded-[var(--radius-xl)]" />
+            </div>
           ) : o.calendarStatus === 'error' ? (
             <EmptyState title="Couldn’t load calendar" description={o.calendarError ?? ''} />
           ) : (

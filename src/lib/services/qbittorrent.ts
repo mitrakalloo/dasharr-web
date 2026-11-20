@@ -17,6 +17,14 @@ export interface QbitTorrent {
   ratio: number
 }
 
+export interface QbitTransferInfo {
+  dl_info_speed: number
+  up_info_speed: number
+  dl_rate_limit: number
+  up_rate_limit: number
+  connection_status: string
+}
+
 export async function qbitLogin(settings: AppSettings, service: ServiceConfig) {
   const body = new URLSearchParams({
     username: service.username ?? '',
@@ -30,24 +38,51 @@ export async function qbitLogin(settings: AppSettings, service: ServiceConfig) {
   })
 }
 
-export async function getQbitTorrents(settings: AppSettings, service: ServiceConfig) {
+async function withQbitAuth<T>(
+  settings: AppSettings,
+  service: ServiceConfig,
+  fn: () => Promise<T>,
+): Promise<T> {
   try {
-    return await serviceJson<QbitTorrent[]>(settings, service, '/api/v2/torrents/info')
+    return await fn()
   } catch {
     await qbitLogin(settings, service)
-    return serviceJson<QbitTorrent[]>(settings, service, '/api/v2/torrents/info')
+    return fn()
   }
 }
 
+export async function getQbitTorrents(settings: AppSettings, service: ServiceConfig) {
+  return withQbitAuth(settings, service, () =>
+    serviceJson<QbitTorrent[]>(settings, service, '/api/v2/torrents/info'),
+  )
+}
+
 export async function getQbitVersion(settings: AppSettings, service: ServiceConfig) {
-  try {
+  return withQbitAuth(settings, service, async () => {
     const response = await serviceFetch(settings, service, '/api/v2/app/version')
     return (await response.text()).replace(/^v/, '')
-  } catch {
-    await qbitLogin(settings, service)
-    const response = await serviceFetch(settings, service, '/api/v2/app/version')
-    return (await response.text()).replace(/^v/, '')
-  }
+  })
+}
+
+export async function getQbitTransferInfo(settings: AppSettings, service: ServiceConfig) {
+  return withQbitAuth(settings, service, () =>
+    serviceJson<QbitTransferInfo>(settings, service, '/api/v2/transfer/info'),
+  )
+}
+
+export async function getQbitSpeedMode(settings: AppSettings, service: ServiceConfig) {
+  return withQbitAuth(settings, service, async () => {
+    const response = await serviceFetch(settings, service, '/api/v2/transfer/speedLimitsMode')
+    return (await response.text()).trim() === '1'
+  })
+}
+
+export async function toggleQbitAltSpeed(settings: AppSettings, service: ServiceConfig) {
+  return withQbitAuth(settings, service, async () => {
+    await serviceFetch(settings, service, '/api/v2/transfer/toggleSpeedLimitsMode', {
+      method: 'POST',
+    })
+  })
 }
 
 export async function qbitPause(settings: AppSettings, service: ServiceConfig, hashes: string) {
@@ -66,6 +101,14 @@ export async function qbitResume(settings: AppSettings, service: ServiceConfig, 
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body,
   })
+}
+
+export async function qbitPauseAll(settings: AppSettings, service: ServiceConfig) {
+  return qbitPause(settings, service, 'all')
+}
+
+export async function qbitResumeAll(settings: AppSettings, service: ServiceConfig) {
+  return qbitResume(settings, service, 'all')
 }
 
 export async function qbitDelete(

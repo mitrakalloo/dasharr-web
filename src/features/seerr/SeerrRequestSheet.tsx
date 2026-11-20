@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check, ExternalLink, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/Badge'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { PosterThumb } from '@/components/ui/PosterThumb'
-import { seerrStatusColor, seerrStatusLabel } from '@/features/seerr/seerr.helpers'
+import { seerrStatusLabel, seerrStatusTone } from '@/features/seerr/seerr.helpers'
 import type { DemoSeerrRequest } from '@/data/demoDashboard'
 import { serviceAccent } from '@/lib/serviceColors'
 
@@ -26,56 +26,71 @@ export function SeerrRequestSheet({
   onDecline,
 }: SeerrRequestSheetProps) {
   const accent = serviceAccent('seerr')
-  const [busy, setBusy] = useState(false)
+  const [busyAction, setBusyAction] = useState<'approve' | 'decline' | null>(null)
 
   async function run(action: 'approve' | 'decline') {
-    if (!request) return
-    setBusy(true)
+    if (!request || busyAction) return
+    setBusyAction(action)
     try {
       if (action === 'approve') {
         if (onApprove) await onApprove(request.id)
         else toast.success(`Approved ${request.title}`)
-      } else if (onDecline) await onDecline(request.id)
-      else toast.message(`Declined ${request.title}`)
+      } else if (onDecline) {
+        await onDecline(request.id)
+      } else {
+        toast.message(`Declined ${request.title}`)
+      }
       onClose()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Action failed')
     } finally {
-      setBusy(false)
+      setBusyAction(null)
     }
   }
 
   return (
-    <BottomSheet open={Boolean(request)} onClose={onClose} title={request?.title ?? 'Request'}>
+    <BottomSheet
+      open={Boolean(request)}
+      onClose={onClose}
+      title={request?.title ?? 'Request'}
+      subtitle={
+        request ? `Requested by ${request.requestedBy} · ${request.requestedAt}` : undefined
+      }
+    >
       {request ? (
         <div className="space-y-4">
-          <div className="flex gap-3">
+          <div className="flex gap-3.5">
             <PosterThumb
               src={request.poster}
               label={request.title}
               accent={accent}
               className="h-28 w-20 rounded-xl"
             />
-            <div className="min-w-0">
-              <div className="flex flex-wrap gap-2">
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="flex flex-wrap gap-1.5">
                 <Badge color={accent}>seerr</Badge>
-                <Badge color={seerrStatusColor(request.status)}>
+                <Badge tone={seerrStatusTone(request.status)} dot>
                   {seerrStatusLabel(request.status)}
                 </Badge>
                 <Badge>{request.type === 'tv' ? 'Series' : 'Movie'}</Badge>
               </div>
-              <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-                {request.year} · {request.quality}
+              <p className="text-sm font-medium text-[var(--color-foreground)]">
+                {request.year}
+                {request.quality ? (
+                  <span className="text-[var(--color-muted-foreground)]"> · {request.quality}</span>
+                ) : null}
               </p>
-              <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+              <p className="text-xs text-[var(--color-muted-foreground)]">
                 Requested by {request.requestedBy} · {request.requestedAt}
               </p>
             </div>
           </div>
 
-          <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-            {request.overview}
-          </p>
+          {request.overview ? (
+            <p className="rounded-[var(--radius-xl)] border border-[var(--color-hairline)] bg-[var(--color-surface-subtle)] p-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+              {request.overview}
+            </p>
+          ) : null}
 
           {request.titleId ? (
             <Button
@@ -88,16 +103,17 @@ export function SeerrRequestSheet({
                 onOpenTitle?.(titleId)
               }}
             >
-              Open title
+              <ExternalLink className="size-4" />
+              Open title details
             </Button>
           ) : null}
 
           {request.status === 'pending' ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2.5">
               <Button
-                variant="secondary"
-                className="gap-1.5"
-                disabled={busy}
+                variant="primary"
+                loading={busyAction === 'approve'}
+                disabled={busyAction !== null}
                 onClick={() => void run('approve')}
               >
                 <Check className="size-4" />
@@ -105,8 +121,8 @@ export function SeerrRequestSheet({
               </Button>
               <Button
                 variant="danger"
-                className="gap-1.5"
-                disabled={busy}
+                loading={busyAction === 'decline'}
+                disabled={busyAction !== null}
                 onClick={() => void run('decline')}
               >
                 <X className="size-4" />

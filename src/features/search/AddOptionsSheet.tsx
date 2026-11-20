@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { BottomSheet } from '@/components/ui/BottomSheet'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+import { Switch } from '@/components/ui/Switch'
 import { resolveAddOptions } from '@/features/search/addOptions.resolve'
 import type { AddOptions, AddOptionsBundle } from '@/features/search/addOptions.types'
 import type { DefaultAddPrefs } from '@/lib/prefs/prefs.types'
@@ -37,14 +38,18 @@ export function AddOptionsSheet({
   if (!bundle || !options) {
     return (
       <BottomSheet open={open} onClose={onClose} title={title}>
-        <p className="pb-6 text-sm text-[var(--color-muted-foreground)]">Loading options…</p>
+        <div className="space-y-3 pb-4">
+          <div className="skeleton h-12 rounded-[var(--radius-lg)]" />
+          <div className="skeleton h-12 rounded-[var(--radius-lg)]" />
+          <div className="skeleton h-11 rounded-[var(--radius-lg)]" />
+        </div>
       </BottomSheet>
     )
   }
 
   return (
     <BottomSheet open={open} onClose={onClose} title={title}>
-      <div className="space-y-4 pb-4">
+      <div className="space-y-4 pb-2">
         {bundle.qualityProfiles.length > 0 ? (
           <Select
             label="Quality profile"
@@ -95,33 +100,27 @@ export function AddOptionsSheet({
           />
         ) : null}
 
-        <label className="flex min-h-[var(--tap)] items-center gap-3 text-sm">
-          <input
-            type="checkbox"
+        <div className="divide-y divide-[var(--color-hairline)] rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-surface-subtle)] p-1">
+          <Switch
             checked={options.monitored}
-            onChange={(event) =>
-              setOptions((prev) =>
-                prev ? { ...prev, monitored: event.target.checked } : prev,
-              )
+            onCheckedChange={(checked) =>
+              setOptions((prev) => (prev ? { ...prev, monitored: checked } : prev))
             }
+            label="Monitored"
+            description="Track future releases and upgrades automatically"
           />
-          Monitored
-        </label>
-        <label className="flex min-h-[var(--tap)] items-center gap-3 text-sm">
-          <input
-            type="checkbox"
+          <Switch
             checked={options.searchNow}
-            onChange={(event) =>
-              setOptions((prev) =>
-                prev ? { ...prev, searchNow: event.target.checked } : prev,
-              )
+            onCheckedChange={(checked) =>
+              setOptions((prev) => (prev ? { ...prev, searchNow: checked } : prev))
             }
+            label="Search immediately"
+            description="Trigger an indexer search right after adding"
           />
-          Search on add
-        </label>
+        </div>
 
         <Button className="w-full" onClick={() => onConfirm(options)}>
-          {bundle.mode === 'request' ? 'Request' : 'Add'}
+          {bundle.mode === 'request' ? 'Submit request' : 'Add to library'}
         </Button>
       </div>
     </BottomSheet>

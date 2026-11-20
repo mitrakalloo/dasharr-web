@@ -1,21 +1,25 @@
 import { useMemo } from 'react'
 
+import { usePolling } from '@/hooks/usePolling'
 import { liveTitleId } from '@/lib/liveTitleId'
 import { getLidarrWantedMissing } from '@/lib/services/lidarr'
-import { getRadarrWantedMissing } from '@/lib/services/radarr'
-import { getSonarrWantedMissing } from '@/lib/services/sonarr'
-import { usePolling } from '@/hooks/usePolling'
+import { getRadarrWantedCutoff, getRadarrWantedMissing } from '@/lib/services/radarr'
+import { getSonarrWantedCutoff, getSonarrWantedMissing } from '@/lib/services/sonarr'
 import { useConfigStore } from '@/stores/configStore'
+
+export type WantedMode = 'missing' | 'cutoff'
 
 export interface WantedItem {
   id: string
   titleId: string
+  serviceId: string
+  rawItemId: number
   title: string
   subtitle: string
   service: 'sonarr' | 'radarr' | 'lidarr'
 }
 
-export function useWantedMissing(enabled: boolean) {
+export function useWantedMissing(enabled: boolean, mode: WantedMode = 'missing') {
   const settings = useConfigStore((state) => state.settings)
   const services = useConfigStore((state) => state.services)
   const sources = useMemo(
@@ -25,23 +29,28 @@ export function useWantedMissing(enabled: boolean) {
           service.enabled &&
           (service.type === 'sonarr' ||
             service.type === 'radarr' ||
-            service.type === 'lidarr'),
+            (mode === 'missing' && service.type === 'lidarr')),
       ),
-    [services],
+    [mode, services],
   )
 
-  const key = sources.map((service) => service.id).join(',')
+  const key = `${mode}:${sources.map((service) => service.id).join(',')}`
   const state = usePolling(
     key,
     async () => {
       const settled = await Promise.allSettled(
         sources.map(async (service) => {
           if (service.type === 'sonarr') {
-            const records = await getSonarrWantedMissing(settings, service)
+            const records =
+              mode === 'cutoff'
+                ? await getSonarrWantedCutoff(settings, service)
+                : await getSonarrWantedMissing(settings, service)
             return records.map(
               (record): WantedItem => ({
-                id: `sonarr-wanted-${record.id}`,
+                id: `sonarr-${mode}-${service.id}-${record.id}`,
                 titleId: liveTitleId('sonarr', record.seriesId),
+                serviceId: service.id,
+                rawItemId: record.id,
                 title: record.series?.title ?? `Series ${record.seriesId}`,
                 subtitle: `S${String(record.seasonNumber).padStart(2, '0')}E${String(record.episodeNumber).padStart(2, '0')} · ${record.title ?? 'Episode'}`,
                 service: 'sonarr',
@@ -52,21 +61,32 @@ export function useWantedMissing(enabled: boolean) {
             const records = await getLidarrWantedMissing(settings, service)
             return records.map(
               (record): WantedItem => ({
-                id: `lidarr-wanted-${record.id}`,
+                id: `lidarr-${mode}-${service.id}-${record.id}`,
                 titleId: liveTitleId('lidarr', record.id),
+                serviceId: service.id,
+                rawItemId: record.id,
                 title: record.title,
                 subtitle: record.artist?.artistName ?? 'Album missing',
                 service: 'lidarr',
               }),
             )
           }
-          const records = await getRadarrWantedMissing(settings, service)
+          const records =
+            mode === 'cutoff'
+              ? await getRadarrWantedCutoff(settings, service)
+              : await getRadarrWantedMissing(settings, service)
           return records.map(
             (record): WantedItem => ({
-              id: `radarr-wanted-${record.id}`,
+              id: `radarr-${mode}-${service.id}-${record.id}`,
               titleId: liveTitleId('radarr', record.id),
+              serviceId: service.id,
+              rawItemId: record.id,
               title: record.title,
-              subtitle: record.year ? String(record.year) : 'Movie missing',
+              subtitle: record.year
+                ? `${record.year}${mode === 'cutoff' ? ' · Upgrade available' : ''}`
+                : mode === 'cutoff'
+                  ? 'Cutoff unmet'
+                  : 'Movie missing',
               service: 'radarr',
             }),
           )

@@ -8,7 +8,11 @@ import {
   moveWidgetToTop,
   toggleWidget,
 } from '@/lib/dashboard/dashboard.helpers'
-import type { DashboardWidgetId, HomeDashboard } from '@/lib/dashboard/dashboard.types'
+import type {
+  DashboardWidgetConfig,
+  DashboardWidgetId,
+  HomeDashboard,
+} from '@/lib/dashboard/dashboard.types'
 import {
   scheduleDashboardPut,
   toDashboardPayload,
@@ -110,6 +114,15 @@ export function createDashboardMutations(set: SetState, get: GetState) {
           item.id === dashboardId
             ? { ...item, widgets: moveWidgetToTop(item.widgets, widgetId) }
             : item,
+        ),
+      }))
+      sync(get)
+    },
+
+    setWidgetsOrder: (dashboardId: string, widgets: DashboardWidgetConfig[]) => {
+      set((state) => ({
+        dashboards: state.dashboards.map((item) =>
+          item.id === dashboardId ? { ...item, widgets } : item,
         ),
       }))
       sync(get)

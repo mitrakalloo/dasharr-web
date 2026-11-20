@@ -10,12 +10,12 @@ export function TitleMetaBadges({ title }: TitleMetaBadgesProps) {
   const accent = serviceAccent(title.service)
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-1.5">
       <Badge color={accent}>{title.status}</Badge>
-      <Badge>{title.quality}</Badge>
-      {title.hdr ? <Badge color="#38bdf8">{title.hdr}</Badge> : null}
-      <Badge className="tabular">{title.sizeOnDisk}</Badge>
-      <Badge color={title.monitored ? '#34d399' : undefined}>
+      {title.quality ? <Badge>{title.quality}</Badge> : null}
+      {title.hdr ? <Badge tone="info">{title.hdr}</Badge> : null}
+      {title.sizeOnDisk ? <Badge className="tabular">{title.sizeOnDisk}</Badge> : null}
+      <Badge tone={title.monitored ? 'success' : 'neutral'} dot>
         {title.monitored ? 'Monitored' : 'Unmonitored'}
       </Badge>
     </div>

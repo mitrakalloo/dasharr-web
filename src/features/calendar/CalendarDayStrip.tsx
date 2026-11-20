@@ -45,15 +45,15 @@ export function CalendarDayStrip({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-3 px-1">
-        <h2 className="flex-1 text-base font-semibold tracking-tight">Days</h2>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="font-display text-base font-semibold tracking-tight">Upcoming days</h2>
         <button
           type="button"
           onClick={onToday}
           className={cn(
-            'min-h-10 cursor-pointer rounded-xl border px-4 text-sm font-medium transition active:scale-95',
+            'min-h-9 cursor-pointer rounded-[var(--radius-md)] border px-3 text-xs font-semibold transition-colors active:scale-95',
             needsJump
-              ? 'border-sky-400/40 bg-sky-400/15 text-sky-200'
+              ? 'border-[var(--color-primary)]/35 bg-[var(--color-primary-muted)] text-[var(--color-primary)] hover:bg-[var(--color-primary-container)]'
               : 'border-[var(--color-border)] bg-[var(--color-muted)] text-[var(--color-muted-foreground)]',
           )}
         >

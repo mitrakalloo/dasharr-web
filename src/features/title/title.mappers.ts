@@ -33,6 +33,7 @@ export function mapSonarrTitle(
     .filter((season) => season.seasonNumber > 0)
     .map((season) => ({
       seasonNumber: season.seasonNumber,
+      monitored: season.monitored,
       episodeFileCount: season.statistics?.episodeFileCount ?? 0,
       episodeCount: season.statistics?.episodeCount ?? 0,
       sizeOnDisk: formatBytes(season.statistics?.sizeOnDisk ?? 0),
@@ -56,13 +57,19 @@ export function mapSonarrTitle(
     sizeOnDisk: formatBytes(series.statistics?.sizeOnDisk ?? 0),
     path: series.path ?? '',
     poster: sonarrPosterUrl(series, baseUrl) ?? '',
+    imdbId: series.imdbId,
+    tvdbId: series.tvdbId,
+    titleSlug: series.titleSlug,
+    qualityProfileId: series.qualityProfileId,
+    rootFolderPath: series.rootFolderPath,
     seasons,
     releases: [],
   }
 }
 
 export function mapRadarrTitle(movie: RadarrMovie, baseUrl: string): DemoTitle {
-  const rating = movie.ratings?.tmdb?.value ?? movie.ratings?.imdb?.value ?? movie.ratings?.value ?? 0
+  const rating =
+    movie.ratings?.tmdb?.value ?? movie.ratings?.imdb?.value ?? movie.ratings?.value ?? 0
   return {
     id: liveTitleId('radarr', movie.id),
     kind: 'movie',
@@ -79,6 +86,11 @@ export function mapRadarrTitle(movie: RadarrMovie, baseUrl: string): DemoTitle {
     sizeOnDisk: formatBytes(movie.sizeOnDisk ?? 0),
     path: movie.path ?? '',
     poster: radarrPosterUrl(movie, baseUrl) ?? '',
+    tmdbId: movie.tmdbId,
+    imdbId: movie.imdbId,
+    titleSlug: movie.titleSlug,
+    qualityProfileId: movie.qualityProfileId,
+    rootFolderPath: movie.rootFolderPath,
     releases: [],
   }
 }

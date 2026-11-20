@@ -23,6 +23,7 @@ export interface SabQueue {
   noofslots: number
   slots: SabQueueSlot[]
   kbpersec?: string
+  paused?: boolean
 }
 
 interface SabResponse {
@@ -56,6 +57,18 @@ export async function sabResume(settings: AppSettings, service: ServiceConfig, n
     ? `/api?mode=queue&name=resume&value=${encodeURIComponent(nzoId)}&output=json`
     : '/api?mode=resume&output=json'
   return serviceJson<SabResponse>(settings, service, path)
+}
+
+export async function sabSetSpeedLimit(
+  settings: AppSettings,
+  service: ServiceConfig,
+  percent: number,
+) {
+  return serviceJson<SabResponse>(
+    settings,
+    service,
+    `/api?mode=config&name=speedlimit&value=${encodeURIComponent(String(percent))}&output=json`,
+  )
 }
 
 export async function sabDelete(settings: AppSettings, service: ServiceConfig, nzoId: string) {

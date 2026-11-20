@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 
+import { usePolling } from '@/hooks/usePolling'
 import { liveTitleId } from '@/lib/liveTitleId'
 import { getLidarrAlbums, lidarrCoverUrl } from '@/lib/services/lidarr'
 import { getRadarrMovies, radarrPosterUrl } from '@/lib/services/radarr'
 import { getSonarrSeries, sonarrPosterUrl } from '@/lib/services/sonarr'
-import { usePolling } from '@/hooks/usePolling'
 import { useConfigStore } from '@/stores/configStore'
 
 export interface LibraryItem {
@@ -15,6 +15,14 @@ export interface LibraryItem {
   subtitle: string
   poster: string
   service: 'sonarr' | 'radarr' | 'lidarr'
+  monitored: boolean
+  hasFile: boolean
+  sizeOnDisk: number
+  added?: string
+  rating?: number
+  status?: string
+  episodeFileCount?: number
+  episodeCount?: number
 }
 
 export function useLibraryBrowse(enabled: boolean) {
@@ -41,9 +49,11 @@ export function useLibraryBrowse(enabled: boolean) {
             return series
               .slice()
               .sort((a, b) => a.title.localeCompare(b.title))
-              .slice(0, 120)
-              .map(
-                (item): LibraryItem => ({
+              .slice(0, 1000)
+              .map((item): LibraryItem => {
+                const fileCount = item.statistics?.episodeFileCount ?? 0
+                const totalCount = item.statistics?.episodeCount ?? 0
+                return {
                   id: `lib-sonarr-${item.id}`,
                   titleId: liveTitleId('sonarr', item.id),
                   title: item.title,
@@ -51,32 +61,44 @@ export function useLibraryBrowse(enabled: boolean) {
                   subtitle: 'Series',
                   poster: sonarrPosterUrl(item, service.baseUrl) ?? '',
                   service: 'sonarr',
-                }),
-              )
+                  monitored: item.monitored,
+                  hasFile: fileCount > 0 && (totalCount === 0 || fileCount >= totalCount),
+                  sizeOnDisk: item.statistics?.sizeOnDisk ?? 0,
+                  added: item.added,
+                  rating: item.ratings?.value,
+                  status: item.status,
+                  episodeFileCount: fileCount,
+                  episodeCount: totalCount,
+                }
+              })
           }
           if (service.type === 'radarr') {
             const movies = await getRadarrMovies(settings, service)
             return movies
               .slice()
               .sort((a, b) => a.title.localeCompare(b.title))
-              .slice(0, 120)
-              .map(
-                (item): LibraryItem => ({
-                  id: `lib-radarr-${item.id}`,
-                  titleId: liveTitleId('radarr', item.id),
-                  title: item.title,
-                  year: item.year,
-                  subtitle: 'Movie',
-                  poster: radarrPosterUrl(item, service.baseUrl) ?? '',
-                  service: 'radarr',
-                }),
-              )
+              .slice(0, 1000)
+              .map((item): LibraryItem => ({
+                id: `lib-radarr-${item.id}`,
+                titleId: liveTitleId('radarr', item.id),
+                title: item.title,
+                year: item.year,
+                subtitle: 'Movie',
+                poster: radarrPosterUrl(item, service.baseUrl) ?? '',
+                service: 'radarr',
+                monitored: item.monitored,
+                hasFile: item.hasFile,
+                sizeOnDisk: item.sizeOnDisk ?? 0,
+                added: item.added,
+                rating: item.ratings?.imdb?.value ?? item.ratings?.tmdb?.value ?? item.ratings?.value,
+                status: item.status,
+              }))
           }
           const albums = await getLidarrAlbums(settings, service)
           return albums
             .slice()
             .sort((a, b) => a.title.localeCompare(b.title))
-            .slice(0, 120)
+            .slice(0, 1000)
             .map(
               (item): LibraryItem => ({
                 id: `lib-lidarr-${item.id}`,
@@ -89,6 +111,10 @@ export function useLibraryBrowse(enabled: boolean) {
                   (item.artist ? lidarrCoverUrl(item.artist, service.baseUrl) : undefined) ??
                   '',
                 service: 'lidarr',
+                monitored: item.monitored,
+                hasFile: false,
+                sizeOnDisk: 0,
+                added: item.releaseDate,
               }),
             )
         }),

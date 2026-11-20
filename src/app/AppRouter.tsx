@@ -1,21 +1,24 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 import { AppShell } from '@/components/layout/AppShell'
-import { EditHomePage } from '@/features/home/EditHomePage'
-import { OverviewPage } from '@/features/overview/OverviewPage'
-import { ManualImportPage } from '@/features/library/ManualImportPage'
-import { DiscoverBrowsePage } from '@/features/search/DiscoverBrowsePage'
-import { ServiceHubPage } from '@/features/library/ServiceHubPage'
-import { QueuePage } from '@/features/queue/QueuePage'
+import { ActivityPage } from '@/features/activity/ActivityPage'
 import { CalendarPage } from '@/features/calendar/CalendarPage'
+import { EditHomePage } from '@/features/home/EditHomePage'
+import { HistoryPage } from '@/features/library/HistoryPage'
+import { LibraryPage } from '@/features/library/LibraryPage'
+import { ManualImportPage } from '@/features/library/ManualImportPage'
+import { ServiceHubPage } from '@/features/library/ServiceHubPage'
+import { WantedPage } from '@/features/library/WantedPage'
+import { MorePage } from '@/features/more/MorePage'
+import { OverviewPage } from '@/features/overview/OverviewPage'
+import { ProwlarrBrowsePage } from '@/features/prowlarr/ProwlarrBrowsePage'
+import { QueuePage } from '@/features/queue/QueuePage'
+import { DiscoverBrowsePage } from '@/features/search/DiscoverBrowsePage'
 import { SearchPage } from '@/features/search/SearchPage'
 import { SeerrRequestsPage } from '@/features/seerr/SeerrRequestsPage'
-import { LibraryPage } from '@/features/library/LibraryPage'
-import { WantedPage } from '@/features/library/WantedPage'
-import { HistoryPage } from '@/features/library/HistoryPage'
-import { MorePage } from '@/features/more/MorePage'
-import { ProwlarrBrowsePage } from '@/features/prowlarr/ProwlarrBrowsePage'
 import { SettingsPage } from '@/features/settings/SettingsPage'
+import { StoragePage } from '@/features/storage/StoragePage'
+import { SubtitlesPage } from '@/features/subtitles/SubtitlesPage'
 import { TitleDetailPage } from '@/features/title/TitleDetailPage'
 
 export function AppRouter() {
@@ -37,6 +40,9 @@ export function AppRouter() {
           <Route path="library" element={<LibraryPage />} />
           <Route path="wanted" element={<WantedPage />} />
           <Route path="history" element={<HistoryPage />} />
+          <Route path="subtitles" element={<SubtitlesPage />} />
+          <Route path="activity" element={<ActivityPage />} />
+          <Route path="storage" element={<StoragePage />} />
           <Route path="settings" element={<SettingsPage />} />
           <Route path="title/:id" element={<TitleDetailPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

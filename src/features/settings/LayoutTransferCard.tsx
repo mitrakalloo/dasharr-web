@@ -1,9 +1,12 @@
+import { useRef } from 'react'
+import { Download, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
 import { usePrefsStore } from '@/stores/prefsStore'
 
 export function LayoutTransferCard() {
+  const fileRef = useRef<HTMLInputElement>(null)
   const exportPreferences = usePrefsStore((state) => state.exportPreferences)
   const importPreferences = usePrefsStore((state) => state.importPreferences)
 
@@ -35,26 +38,35 @@ export function LayoutTransferCard() {
   }
 
   return (
-    <section className="space-y-3 panel rounded-[var(--radius-2xl)] p-4">
+    <section className="panel space-y-3.5 rounded-[var(--radius-2xl)] p-5">
       <div>
-        <h2 className="text-base font-semibold">Layout transfer</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Backup or restore layout. Live edits already sync via your account.
+        <h2 className="font-display text-base font-semibold tracking-tight text-[var(--color-foreground)]">
+          Layout backup
+        </h2>
+        <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+          Export or restore your dashboard layout JSON. Live edits already sync via your account.
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={handleExport}>
+        <Button size="sm" variant="secondary" onClick={handleExport}>
+          <Download className="size-3.5" />
           Export layout
         </Button>
-        <label className="inline-flex min-h-[var(--tap)] cursor-pointer items-center rounded-xl border border-[var(--color-border)] bg-[var(--color-card-elevated)] px-4 text-sm font-semibold">
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => fileRef.current?.click()}
+        >
+          <Upload className="size-3.5" />
           Import layout
-          <input
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={handleImport}
-          />
-        </label>
+        </Button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={handleImport}
+        />
       </div>
     </section>
   )

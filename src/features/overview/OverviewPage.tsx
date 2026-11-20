@@ -19,7 +19,7 @@ export function OverviewPage() {
   const o = home.overview
 
   if (!hydrated || !home.ready || !home.active) {
-    return <PageSkeleton rows={5} />
+    return <PageSkeleton variant="dashboard" />
   }
 
   if (needsSetup) {
@@ -32,7 +32,7 @@ export function OverviewPage() {
 
   return (
     <motion.div
-      className="page-pad space-y-5"
+      className="page-pad space-y-6"
       variants={staggerContainer}
       initial="initial"
       animate="animate"

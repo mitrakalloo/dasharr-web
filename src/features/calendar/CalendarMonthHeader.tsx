@@ -19,28 +19,28 @@ export function CalendarMonthHeader({
   onToday,
 }: CalendarMonthHeaderProps) {
   return (
-    <div className="space-y-3 border-b border-[var(--color-border)] pb-3">
-      <div className="flex items-center gap-2">
-        <IconButton label="Previous month" onClick={onPrev}>
-          <ChevronLeft className="size-5" />
+    <div className="flex items-center justify-between gap-2 border-b border-[var(--color-hairline)] pb-3">
+      <h2 className="font-display text-base font-semibold tracking-tight">{label}</h2>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onToday}
+          className={cn(
+            'min-h-9 cursor-pointer rounded-[var(--radius-md)] border px-3 text-xs font-semibold transition-colors active:scale-95',
+            isOnToday
+              ? 'border-[var(--color-border)] bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
+              : 'border-[var(--color-primary)]/35 bg-[var(--color-primary-muted)] text-[var(--color-primary)] hover:bg-[var(--color-primary-container)]',
+          )}
+        >
+          Today
+        </button>
+        <IconButton label="Previous month" size="sm" onClick={onPrev}>
+          <ChevronLeft className="size-4.5" />
         </IconButton>
-        <h2 className="flex-1 text-center text-base font-semibold tracking-tight">{label}</h2>
-        <IconButton label="Next month" onClick={onNext}>
-          <ChevronRight className="size-5" />
+        <IconButton label="Next month" size="sm" onClick={onNext}>
+          <ChevronRight className="size-4.5" />
         </IconButton>
       </div>
-      <button
-        type="button"
-        onClick={onToday}
-        className={cn(
-          'mx-auto flex min-h-10 cursor-pointer items-center justify-center rounded-xl border px-4 text-sm font-medium transition active:scale-95',
-          isOnToday
-            ? 'border-[var(--color-border)] bg-[var(--color-muted)] text-[var(--color-muted-foreground)]'
-            : 'border-sky-400/30 bg-sky-400/10 text-sky-300',
-        )}
-      >
-        Today
-      </button>
     </div>
   )
 }

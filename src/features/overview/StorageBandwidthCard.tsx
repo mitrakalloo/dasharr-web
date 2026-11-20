@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { ArrowDown, ChevronRight, HardDrive } from 'lucide-react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ProgressBar } from '@/components/ui/ProgressBar'
@@ -43,28 +45,52 @@ export function StorageBandwidthCard() {
         .reduce((sum, item) => sum + (parseSpeedMBps(item.speed) ?? 0), 0)
 
   return (
-    <section className="panel rounded-2xl p-4">
-      <div className="flex items-end justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-semibold">Storage & bandwidth</h2>
-          <p className="text-xs text-[var(--color-muted-foreground)]">
-            {isDemo ? 'Tower · last 24h' : 'From *arr disk space + active downloads'}
-          </p>
-        </div>
-        <p className="tabular text-sm font-medium text-emerald-300">
-          ↓ <SpeedValue value={liveSpeed} />
-        </p>
+    <section className="panel rounded-[var(--radius-2xl)] p-4 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          to="/storage"
+          className="group flex min-w-0 items-center gap-3 rounded-[var(--radius-md)] transition-colors hover:text-[var(--color-primary)]"
+        >
+          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-[var(--color-primary)]">
+            <HardDrive className="size-4.5" aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1">
+              <h2 className="font-display text-sm font-semibold tracking-tight group-hover:text-[var(--color-primary)]">
+                Storage & bandwidth
+              </h2>
+              <ChevronRight
+                className="size-3.5 text-[var(--color-muted-foreground)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+                aria-hidden
+              />
+            </div>
+            <p className="truncate text-xs text-[var(--color-muted-foreground)]">
+              {isDemo ? 'Tower · last 24h' : 'Disk capacity & largest media'}
+            </p>
+          </div>
+        </Link>
+        <Link
+          to="/queue"
+          className="tabular inline-flex items-center gap-1 rounded-full border border-[var(--color-success)]/25 bg-[var(--color-success-muted)] px-2.5 py-1 text-xs font-semibold text-[var(--color-success)] transition-colors hover:border-[var(--color-success)]/50"
+        >
+          <ArrowDown className="size-3" aria-hidden />
+          <SpeedValue value={liveSpeed} />
+        </Link>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-3.5">
         {!isDemo && disks.status === 'loading' ? (
-          <p className="text-sm text-[var(--color-muted-foreground)]">Loading disks…</p>
+          <div className="space-y-3">
+            <div className="skeleton h-10 rounded-[var(--radius-md)]" />
+            <div className="skeleton h-10 rounded-[var(--radius-md)]" />
+          </div>
         ) : null}
         {!isDemo && disks.status === 'error' ? (
-          <EmptyState title="Couldn’t load disks" description={disks.error} />
+          <EmptyState compact title="Couldn’t load disks" description={disks.error} />
         ) : null}
         {volumes.length === 0 && disks.status !== 'loading' ? (
           <EmptyState
+            compact
             title="No disk data"
             description="Sonarr, Radarr, or Lidarr diskspace will show here."
           />
@@ -74,22 +100,23 @@ export function StorageBandwidthCard() {
           const free = Math.max(0, volume.totalTb - volume.usedTb).toFixed(2)
           return (
             <Tooltip key={volume.id} label={volumeHint(volume, pct, free)} className="block w-full">
-              <div className="w-full">
-                <div className="mb-1.5 flex items-center justify-between gap-2 text-xs">
-                  <span className="font-medium">{volume.label}</span>
-                  <span className="tabular text-[var(--color-muted-foreground)]">
-                    {volume.usedTb.toFixed(1)} / {volume.totalTb} TB
+              <Link
+                to="/storage"
+                className="block w-full rounded-[var(--radius-lg)] border border-[var(--color-hairline)] bg-[var(--color-surface-subtle)] p-3 transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-hover)]"
+              >
+                <div className="mb-2 flex items-center justify-between gap-2 text-xs">
+                  <span className="truncate font-semibold text-[var(--color-foreground)]">
+                    {volume.label}
+                  </span>
+                  <span className="tabular shrink-0 text-[var(--color-muted-foreground)]">
+                    {volume.usedTb.toFixed(1)} / {volume.totalTb} TB ({Math.round(pct)}%)
                   </span>
                 </div>
-                <ProgressBar
-                  value={mounted ? pct : 0}
-                  animated
-                  color={volumeTone(pct)}
-                />
-                <p className="mt-1 tabular text-[11px] text-[var(--color-muted-foreground)]">
+                <ProgressBar value={mounted ? pct : 0} animated color={volumeTone(pct)} />
+                <p className="mt-1.5 truncate tabular text-[11px] text-[var(--color-muted-foreground)]">
                   {free} TB free · {volume.path}
                 </p>
-              </div>
+              </Link>
             </Tooltip>
           )
         })}

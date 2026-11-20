@@ -1,5 +1,11 @@
+import { useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { CalendarDays } from 'lucide-react'
+
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { PageSkeleton } from '@/components/ui/PageSkeleton'
+import { DEMO_RELEASES } from '@/data/demoDashboard'
 import { CalendarAgenda } from '@/features/calendar/CalendarAgenda'
 import { CalendarDayStrip } from '@/features/calendar/CalendarDayStrip'
 import { CalendarMonthGrid } from '@/features/calendar/CalendarMonthGrid'
@@ -8,9 +14,9 @@ import { CalendarViewToggle } from '@/features/calendar/CalendarViewToggle'
 import { formatMonthLabel } from '@/features/calendar/calendar.helpers'
 import { useCalendarActions } from '@/features/calendar/useCalendarActions'
 import { useCalendarState } from '@/features/calendar/useCalendarState'
-import { DEMO_RELEASES } from '@/data/demoDashboard'
 import { useCalendarReleases } from '@/hooks/useCalendarReleases'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
+import { cn } from '@/lib/cn'
 import { serviceAccent } from '@/lib/serviceColors'
 import { useConfigStore } from '@/stores/configStore'
 
@@ -18,10 +24,28 @@ export function CalendarPage() {
   const { isDemo, hasAny, hydrated, has } = useConfiguredStack()
   const settings = useConfigStore((state) => state.settings)
   const services = useConfigStore((state) => state.services)
+  const [params, setParams] = useSearchParams()
   const canShow = isDemo || hasAny('sonarr', 'radarr', 'lidarr')
   const live = useCalendarReleases(!isDemo && canShow)
-  const events = isDemo ? DEMO_RELEASES : live.status === 'success' ? live.data : []
-  const cal = useCalendarState(events)
+  const rawEvents = useMemo(
+    () => (isDemo ? DEMO_RELEASES : live.status === 'success' ? live.data : []),
+    [isDemo, live],
+  )
+  const serviceFilter = params.get('source') ?? 'all'
+
+  function setServiceFilter(next: string) {
+    const nextParams = new URLSearchParams(params)
+    if (next === 'all') nextParams.delete('source')
+    else nextParams.set('source', next)
+    setParams(nextParams, { replace: true })
+  }
+
+  const filteredEvents = useMemo(() => {
+    if (serviceFilter === 'all') return rawEvents
+    return rawEvents.filter((event) => event.service === serviceFilter)
+  }, [rawEvents, serviceFilter])
+
+  const cal = useCalendarState(filteredEvents)
   const { handleToggle, handleSearch } = useCalendarActions({
     isDemo,
     settings,
@@ -35,17 +59,18 @@ export function CalendarPage() {
   )
 
   if (!hydrated) {
-    return <div className="px-4 pt-8 text-sm text-[var(--color-muted-foreground)]">Loading…</div>
+    return <PageSkeleton variant="calendar" />
   }
 
   if (!canShow) {
     return (
-      <div className="page-pad space-y-4 pb-2">
+      <div className="page-pad space-y-5">
         <PageHeader
-          title="Calendar"
-          description="Universal schedule across Sonarr, Radarr, and Lidarr"
+          title="Schedule"
+          description="Universal calendar across Sonarr, Radarr, and Lidarr"
         />
         <EmptyState
+          icon={<CalendarDays className="size-5" aria-hidden />}
           title="No calendar sources"
           description="Add Sonarr, Radarr, or Lidarr in Settings to see upcoming releases."
           actionLabel="Add service"
@@ -58,15 +83,15 @@ export function CalendarPage() {
   const subtitle = isDemo
     ? 'Universal schedule · demo'
     : live.status === 'loading'
-      ? 'Loading from Sonarr / Radarr…'
+      ? 'Syncing upcoming releases…'
       : live.status === 'error'
         ? live.error
-        : `${events.length} release${events.length === 1 ? '' : 's'} in range`
+        : `${filteredEvents.length} release${filteredEvents.length === 1 ? '' : 's'} in range`
 
   return (
-    <div className="page-pad space-y-4 pb-2">
+    <div className="page-pad space-y-5">
       <PageHeader
-        title="Calendar"
+        title="Schedule"
         description={subtitle}
         actions={<CalendarViewToggle value={cal.view} onChange={cal.setView} />}
       />
@@ -74,8 +99,8 @@ export function CalendarPage() {
       {!isDemo && live.status === 'error' ? (
         <EmptyState title="Couldn’t load calendar" description={live.error} />
       ) : (
-        <>
-          <section className="panel rounded-[var(--radius-2xl)] p-3">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(340px,430px)] lg:items-start">
+          <section className="panel rounded-[var(--radius-2xl)] p-4">
             {cal.view === 'month' ? (
               <>
                 <CalendarMonthHeader
@@ -104,17 +129,45 @@ export function CalendarPage() {
               />
             )}
 
-            <div className="mt-3 flex flex-wrap gap-3 border-t border-[var(--color-border)] pt-3 text-[11px] text-[var(--color-muted-foreground)]">
-              {legend.map((kind) => (
-                <span key={kind} className="inline-flex items-center gap-1.5 capitalize">
-                  <span
-                    className="size-1.5 rounded-full"
-                    style={{ backgroundColor: serviceAccent(kind) }}
-                  />
-                  {kind}
-                </span>
-              ))}
-            </div>
+            {legend.length > 0 ? (
+              <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-[var(--color-hairline)] pt-3.5">
+                <button
+                  type="button"
+                  onClick={() => setServiceFilter('all')}
+                  className={cn(
+                    'inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors',
+                    serviceFilter === 'all'
+                      ? 'border-[var(--color-primary)]/40 bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                      : 'border-[var(--color-border)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                  )}
+                >
+                  All sources
+                </button>
+                {legend.map((kind) => {
+                  const active = serviceFilter === kind
+                  const accent = serviceAccent(kind)
+                  return (
+                    <button
+                      key={kind}
+                      type="button"
+                      onClick={() => setServiceFilter(active ? 'all' : kind)}
+                      className={cn(
+                        'inline-flex min-h-8 cursor-pointer items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium capitalize transition-colors',
+                        active
+                          ? 'border-[var(--color-border-strong)] bg-[var(--color-card-elevated)] text-[var(--color-foreground)]'
+                          : 'border-[var(--color-border)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                      )}
+                    >
+                      <span
+                        className="size-2 rounded-full"
+                        style={{ backgroundColor: accent }}
+                      />
+                      {kind}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : null}
           </section>
 
           <CalendarAgenda
@@ -128,7 +181,7 @@ export function CalendarPage() {
             onToggle={handleToggle}
             onSearch={(id) => void handleSearch(id)}
           />
-        </>
+        </div>
       )}
     </div>
   )

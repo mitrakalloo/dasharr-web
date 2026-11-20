@@ -23,13 +23,13 @@ export function UpcomingReleaseRow({
   const todayKey = toDateKey(new Date())
   const content = (
     <>
-      <span className="mt-0.5 size-2.5 shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+      <span className="size-2.5 shrink-0 rounded-full" style={{ backgroundColor: accent }} />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">
+        <p className="truncate text-sm font-medium tracking-tight">
           {release.title}
           {release.subtitle ? ` · ${release.subtitle}` : ''}
         </p>
-        <p className="truncate text-xs text-[var(--color-muted-foreground)]">
+        <p className="mt-0.5 truncate text-xs text-[var(--color-muted-foreground)]">
           {relativeWhenLabel(release.airDate, todayKey)} · {release.meta}
         </p>
       </div>
@@ -39,8 +39,8 @@ export function UpcomingReleaseRow({
   return (
     <div
       className={cn(
-        'flex min-h-[64px] items-center gap-3 px-3 py-2',
-        bordered && 'border-b border-[var(--color-border)]',
+        'flex min-h-[62px] items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--color-hover)]',
+        bordered && 'border-b border-[var(--color-hairline)]',
       )}
     >
       {release.titleId ? (
@@ -53,13 +53,16 @@ export function UpcomingReleaseRow({
       ) : (
         <div className="flex min-w-0 flex-1 items-center gap-3">{content}</div>
       )}
-      <IconButton
-        label={release.monitored ? 'Unmonitor' : 'Monitor'}
-        tone={release.monitored ? 'accent' : 'default'}
-        onClick={onToggle}
-      >
-        {release.monitored ? <Bell className="size-4" /> : <BellOff className="size-4" />}
-      </IconButton>
+      {onToggle ? (
+        <IconButton
+          label={release.monitored ? 'Unmonitor' : 'Monitor'}
+          tone={release.monitored ? 'accent' : 'default'}
+          size="sm"
+          onClick={onToggle}
+        >
+          {release.monitored ? <Bell className="size-4" /> : <BellOff className="size-4" />}
+        </IconButton>
+      ) : null}
     </div>
   )
 }

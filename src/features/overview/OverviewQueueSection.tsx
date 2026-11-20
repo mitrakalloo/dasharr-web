@@ -1,6 +1,5 @@
-import { Link } from 'react-router-dom'
-
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { QueueItemCard } from '@/features/queue/QueueItemCard'
 import type { DemoQueueItem } from '@/data/demoDashboard'
 
@@ -21,14 +20,14 @@ export function OverviewQueueSection({
 }: OverviewQueueSectionProps) {
   return (
     <section className="space-y-3 xl:hidden">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Live queue</h2>
-        <Link to="/queue" className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]">
-          See all
-        </Link>
-      </div>
+      <SectionHeader
+        title="Live queue"
+        count={items.length}
+        actionLabel="See all"
+        actionTo="/queue"
+      />
       {items.length > 0 ? (
-        <div className="space-y-3">
+        <div className="grid gap-3 md:grid-cols-2">
           {items.map((item) => (
             <QueueItemCard
               key={item.id}
@@ -41,7 +40,7 @@ export function OverviewQueueSection({
           ))}
         </div>
       ) : (
-        <EmptyState title="Queue is empty" description="Nothing downloading right now." />
+        <EmptyState compact title="Queue is clear" description="Nothing downloading right now." />
       )}
     </section>
   )

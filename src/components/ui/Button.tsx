@@ -3,27 +3,27 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/cn'
 
 const buttonVariants = cva(
-  'inline-flex min-h-[var(--tap)] cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-lg)] px-5 text-sm font-semibold tracking-tight transition-[transform,background-color,box-shadow,border-color,opacity,color] duration-[var(--duration-base)] ease-[var(--ease-out-expo)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)] disabled:pointer-events-none disabled:opacity-45',
+  'inline-flex min-h-[var(--tap)] cursor-pointer items-center justify-center gap-2 rounded-[var(--radius-lg)] px-4 text-sm font-semibold tracking-tight transition-[transform,background-color,box-shadow,border-color,opacity,color,filter] duration-[var(--duration-base)] ease-[var(--ease-out-expo)] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)] disabled:pointer-events-none disabled:opacity-45',
   {
     variants: {
       variant: {
         primary:
-          'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-[var(--elevation-glow)] hover:brightness-110',
+          'bg-[var(--color-primary)] text-[var(--color-on-primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.22),var(--elevation-glow)] hover:brightness-110',
         secondary:
-          'border border-[var(--color-border)] bg-[var(--color-card-elevated)] text-[var(--color-foreground)] shadow-[var(--elevation-sm)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-muted)]',
+          'border border-[var(--color-border)] bg-[var(--color-card-elevated)] text-[var(--color-foreground)] shadow-[var(--panel-highlight),var(--elevation-sm)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-hover)]',
         ghost:
-          'bg-transparent text-[var(--color-foreground)] hover:bg-white/5',
+          'bg-transparent text-[var(--color-muted-foreground)] hover:bg-[var(--color-hover)] hover:text-[var(--color-foreground)]',
         danger:
-          'bg-[var(--color-destructive)] text-white shadow-[0_8px_24px_rgba(255,107,122,0.28)] hover:brightness-110',
+          'bg-[var(--color-destructive)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_6px_20px_-4px_rgba(225,29,72,0.38)] hover:brightness-110',
         soft:
-          'bg-[var(--color-primary-muted)] text-[var(--color-secondary)] hover:bg-[var(--color-primary)]/20',
+          'border border-[var(--color-primary)]/20 bg-[var(--color-primary-muted)] text-[var(--color-primary)] hover:bg-[var(--color-primary-container)]',
         accent:
-          'bg-[var(--color-accent)] text-[var(--color-on-accent)] shadow-[0_8px_24px_rgba(245,185,66,0.28)] hover:brightness-105',
+          'bg-[var(--color-accent)] text-[var(--color-on-accent)] shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_6px_20px_-4px_rgba(245,185,66,0.34)] hover:brightness-105',
       },
       size: {
-        default: 'min-h-[var(--tap)] px-5',
-        sm: 'min-h-9 rounded-[var(--radius-md)] px-3.5 text-xs',
-        lg: 'min-h-14 rounded-[var(--radius-xl)] px-6 text-base',
+        default: 'min-h-[var(--tap)] px-4.5',
+        sm: 'min-h-9 rounded-[var(--radius-md)] px-3 text-xs',
+        lg: 'min-h-12 rounded-[var(--radius-xl)] px-6 text-[15px]',
       },
     },
     defaultVariants: { variant: 'primary', size: 'default' },

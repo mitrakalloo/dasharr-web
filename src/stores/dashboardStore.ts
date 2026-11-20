@@ -4,7 +4,11 @@ import {
   DASHBOARD_LAYOUT_VERSION,
   defaultDashboards,
 } from '@/lib/dashboard/dashboard.defaults'
-import type { DashboardWidgetId, HomeDashboard } from '@/lib/dashboard/dashboard.types'
+import type {
+  DashboardWidgetConfig,
+  DashboardWidgetId,
+  HomeDashboard,
+} from '@/lib/dashboard/dashboard.types'
 import { createDashboardMutations } from '@/stores/dashboardStore.actions'
 import { loadDashboardFromServer } from '@/stores/dashboardStore.sync'
 
@@ -22,6 +26,7 @@ interface DashboardState {
   deleteDashboard: (id: string) => void
   reorderWidget: (dashboardId: string, widgetId: DashboardWidgetId, direction: 'up' | 'down') => void
   moveWidgetToTop: (dashboardId: string, widgetId: DashboardWidgetId) => void
+  setWidgetsOrder: (dashboardId: string, widgets: DashboardWidgetConfig[]) => void
   toggleWidget: (dashboardId: string, widgetId: DashboardWidgetId) => void
   resetDashboards: () => void
 }

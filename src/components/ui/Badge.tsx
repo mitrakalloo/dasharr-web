@@ -5,25 +5,35 @@ interface BadgeProps {
   children: React.ReactNode
   color?: string
   className?: string
-  tone?: 'neutral' | 'success' | 'warning' | 'danger' | 'info'
+  tone?: 'neutral' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
+  dot?: boolean
 }
 
 const toneStyles = {
-  neutral: '',
+  neutral:
+    'border-[var(--color-border)] bg-[var(--color-surface-subtle)] text-[var(--color-muted-foreground)]',
+  primary:
+    'border-[var(--color-primary)]/30 bg-[var(--color-primary-muted)] text-[var(--color-primary)]',
   success:
-    'border-[var(--color-success)]/30 bg-[var(--color-success)]/12 text-[var(--color-success)]',
+    'border-[var(--color-success)]/30 bg-[var(--color-success-muted)] text-[var(--color-success)]',
   warning:
-    'border-[var(--color-warning)]/30 bg-[var(--color-warning)]/12 text-[var(--color-warning)]',
+    'border-[var(--color-warning)]/30 bg-[var(--color-warning-muted)] text-[var(--color-warning)]',
   danger:
-    'border-[var(--color-destructive)]/30 bg-[var(--color-destructive)]/12 text-[var(--color-destructive)]',
-  info: 'border-[var(--color-info)]/30 bg-[var(--color-info)]/12 text-[var(--color-info)]',
+    'border-[var(--color-destructive)]/30 bg-[var(--color-destructive-muted)] text-[var(--color-destructive)]',
+  info: 'border-[var(--color-info)]/30 bg-[var(--color-info-muted)] text-[var(--color-info)]',
 }
 
-export function Badge({ children, color, className, tone = 'neutral' }: BadgeProps) {
+export function Badge({
+  children,
+  color,
+  className,
+  tone = 'neutral',
+  dot = false,
+}: BadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-white/5 px-2 py-0.5 text-[11px] font-medium capitalize tracking-wide text-[var(--color-muted-foreground)]',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium capitalize tracking-wide',
         !color && toneStyles[tone],
         className,
       )}
@@ -31,12 +41,19 @@ export function Badge({ children, color, className, tone = 'neutral' }: BadgePro
         color
           ? {
               color,
-              borderColor: withAlpha(color, '55'),
-              backgroundColor: withAlpha(color, '18'),
+              borderColor: withAlpha(color, '45'),
+              backgroundColor: withAlpha(color, '16'),
             }
           : undefined
       }
     >
+      {dot ? (
+        <span
+          className="size-1.5 shrink-0 rounded-full"
+          style={{ backgroundColor: color ?? 'currentColor' }}
+          aria-hidden
+        />
+      ) : null}
       {children}
     </span>
   )

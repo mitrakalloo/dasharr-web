@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Import } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/Button'
@@ -59,21 +60,31 @@ export function ServiceImportCard() {
   }
 
   return (
-    <section className="space-y-3 panel rounded-[var(--radius-2xl)] p-4">
+    <section className="panel space-y-3.5 rounded-[var(--radius-2xl)] p-4">
       <div>
-        <h2 className="text-base font-semibold">Import service</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Paste a <code className="text-xs">dasharr://add</code> link or service JSON
+        <h2 className="font-display text-base font-semibold tracking-tight text-[var(--color-foreground)]">
+          Quick import
+        </h2>
+        <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+          Paste a <code className="rounded bg-[var(--color-surface-subtle)] px-1 py-0.5 font-mono text-[11px]">dasharr://add</code> link or service JSON object.
         </p>
       </div>
       <Input
-        label="Link or JSON"
+        label="Deep link or JSON"
         value={raw}
         onChange={(event) => setRaw(event.target.value)}
+        onClear={() => setRaw('')}
         placeholder="dasharr://add?type=sonarr&url=…&apiKey=…"
       />
-      <Button variant="secondary" disabled={busy} onClick={() => void handleImport()}>
-        {busy ? 'Importing…' : 'Import service'}
+      <Button
+        size="sm"
+        variant="secondary"
+        loading={busy}
+        disabled={!raw.trim()}
+        onClick={() => void handleImport()}
+      >
+        <Import className="size-3.5" />
+        Import service
       </Button>
     </section>
   )

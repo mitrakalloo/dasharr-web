@@ -11,6 +11,19 @@ export function seerrStatusColor(status: DemoSeerrRequest['status']): string {
   }
 }
 
+export function seerrStatusTone(
+  status: DemoSeerrRequest['status'],
+): 'warning' | 'success' | 'danger' {
+  switch (status) {
+    case 'pending':
+      return 'warning'
+    case 'approved':
+      return 'success'
+    case 'declined':
+      return 'danger'
+  }
+}
+
 export function seerrStatusLabel(status: DemoSeerrRequest['status']): string {
   switch (status) {
     case 'pending':

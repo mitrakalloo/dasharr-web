@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom'
-
 import { EmptyState } from '@/components/ui/EmptyState'
 import { UpcomingReleaseRow } from '@/features/calendar/UpcomingReleaseRow'
 import { groupUpcomingReleases } from '@/features/overview/upcoming.helpers'
@@ -15,7 +13,11 @@ export function UpcomingGroupedList({ releases, onToggle }: UpcomingGroupedListP
 
   if (groups.length === 0) {
     return (
-      <EmptyState title="No upcoming releases" description="Nothing monitored is airing soon." />
+      <EmptyState
+        compact
+        title="No upcoming releases"
+        description="Nothing monitored is airing soon."
+      />
     )
   }
 
@@ -23,15 +25,15 @@ export function UpcomingGroupedList({ releases, onToggle }: UpcomingGroupedListP
     <div className="space-y-4">
       {groups.map((group) => (
         <section key={group.id} className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">
+          <div className="flex items-center justify-between px-0.5">
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">
               {group.label}
             </h3>
-            <span className="tabular text-[11px] text-[var(--color-muted-foreground)]">
+            <span className="tabular text-[11px] font-medium text-[var(--color-muted-foreground)]">
               {group.items.length}
             </span>
           </div>
-          <div className="panel overflow-hidden rounded-2xl">
+          <div className="panel overflow-hidden rounded-[var(--radius-2xl)]">
             {group.items.map((release, index) => (
               <UpcomingReleaseRow
                 key={release.id}
@@ -43,9 +45,6 @@ export function UpcomingGroupedList({ releases, onToggle }: UpcomingGroupedListP
           </div>
         </section>
       ))}
-      <Link to="/calendar" className="inline-flex min-h-[var(--tap)] items-center text-sm text-[var(--color-accent)]">
-        Open calendar
-      </Link>
     </div>
   )
 }

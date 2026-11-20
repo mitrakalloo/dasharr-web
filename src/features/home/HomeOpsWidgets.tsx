@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { ChevronRight, Compass, HardDrive, Tv } from 'lucide-react'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ProgressBar } from '@/components/ui/ProgressBar'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useDownloadQueue } from '@/hooks/useDownloadQueue'
 import { useTautulliSessions } from '@/hooks/useTautulliSessions'
+import { serviceAccent } from '@/lib/serviceColors'
 import { getUnraidSnapshot } from '@/lib/services/unraid'
+import { titlePath } from '@/data/demoTitles'
 import { useConfigStore } from '@/stores/configStore'
 
 export function HomeTorrentQueueWidget() {
@@ -26,27 +31,49 @@ export function HomeTorrentQueueWidget() {
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Torrent queue</h2>
-        <Link to="/queue" className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]">
-          Queue
-        </Link>
-      </div>
+      <SectionHeader
+        title="Torrent queue"
+        count={torrents.length}
+        actionLabel="Queue"
+        actionTo="/queue"
+      />
       {torrents.length === 0 ? (
-        <EmptyState title="No active torrents" description="Torrent clients are idle." />
+        <EmptyState compact title="No active torrents" description="Torrent clients are idle." />
       ) : (
-        <div className="space-y-2">
-          {torrents.map((item) => (
-            <div
-              key={item.id}
-              className="panel rounded-[var(--radius-2xl)] px-3 py-2.5"
-            >
-              <p className="truncate text-sm font-medium">{item.title}</p>
-              <p className="tabular text-xs text-[var(--color-muted-foreground)]">
-                {item.progress}% · {item.speed}
-              </p>
-            </div>
-          ))}
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {torrents.map((item) => {
+            const target = item.titleId ? titlePath(item.titleId) : '/queue?filter=downloading'
+            return (
+              <Link
+                key={item.id}
+                to={target}
+                className="magnetic panel group block space-y-2 rounded-[var(--radius-xl)] px-3.5 py-3 active:scale-[0.99]"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-sm font-medium group-hover:text-[var(--color-primary)]">
+                    {item.title}
+                  </p>
+                  <span className="tabular shrink-0 text-xs font-semibold text-[var(--color-primary)]">
+                    {item.progress}%
+                  </span>
+                </div>
+                <ProgressBar
+                  value={item.progress}
+                  color={serviceAccent(item.service)}
+                  live={item.status === 'downloading'}
+                />
+                <div className="flex items-center justify-between gap-2">
+                  <p className="tabular text-xs text-[var(--color-muted-foreground)]">
+                    {item.speed} · {item.eta}
+                  </p>
+                  <ChevronRight
+                    className="size-3.5 text-[var(--color-muted-foreground)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+                    aria-hidden
+                  />
+                </div>
+              </Link>
+            )
+          })}
         </div>
       )}
     </section>
@@ -58,13 +85,31 @@ export function HomeTautulliStatsWidget() {
   const watching = useTautulliSessions(!isDemo && has('tautulli'))
   if (isDemo || !has('tautulli')) return null
   return (
-    <div className="panel flex items-center justify-between rounded-2xl px-4 py-3">
-      <div>
-        <h2 className="text-sm font-semibold">Tautulli</h2>
-        <p className="text-xs text-[var(--color-muted-foreground)]">Active streams</p>
+    <Link
+      to="/activity"
+      className="magnetic panel group flex items-center justify-between gap-4 rounded-[var(--radius-2xl)] px-4 py-3.5 active:scale-[0.99]"
+    >
+      <div className="flex items-center gap-3">
+        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-info)]/25 bg-[var(--color-info-muted)] text-[var(--color-info)]">
+          <Tv className="size-4.5" aria-hidden />
+        </span>
+        <div>
+          <h2 className="font-display text-sm font-semibold tracking-tight">Tautulli</h2>
+          <p className="text-xs text-[var(--color-muted-foreground)]">
+            Active streams, history & stats
+          </p>
+        </div>
       </div>
-      <p className="tabular text-2xl font-semibold text-teal-300">{watching.items.length}</p>
-    </div>
+      <div className="flex items-center gap-2">
+        <p className="tabular text-2xl font-semibold text-[var(--color-info)]">
+          {watching.items.length}
+        </p>
+        <ChevronRight
+          className="size-4 text-[var(--color-muted-foreground)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+          aria-hidden
+        />
+      </div>
+    </Link>
   )
 }
 
@@ -74,7 +119,12 @@ export function HomeUnraidSnapshotWidget() {
   const unraid = useConfigStore((state) =>
     state.services.find((service) => service.type === 'unraid' && service.enabled),
   )
-  const [summary, setSummary] = useState<string>('…')
+  const [snapshot, setSnapshot] = useState<{
+    state: string
+    pct: number
+    containers: number
+    error?: boolean
+  } | null>(null)
 
   useEffect(() => {
     if (!unraid || isDemo) return
@@ -85,22 +135,71 @@ export function HomeUnraidSnapshotWidget() {
         const used = Number(data.capacity?.used ?? 0)
         const total = Number(data.capacity?.total ?? 0)
         const pct = total > 0 ? Math.round((used / total) * 100) : 0
-        setSummary(`${data.state} · ${pct}% used · ${data.containers.length} containers`)
+        setSnapshot({
+          state: data.state,
+          pct,
+          containers: data.containers.length,
+        })
       })
       .catch(() => {
-        if (!cancelled) setSummary('Unavailable')
+        if (!cancelled) setSnapshot({ state: 'Unavailable', pct: 0, containers: 0, error: true })
       })
     return () => {
       cancelled = true
     }
   }, [unraid, isDemo, settings])
 
-  if (isDemo || !has('unraid')) return null
+  if (isDemo || !has('unraid') || !unraid) return null
+
   return (
-    <div className="panel rounded-2xl px-4 py-3">
-      <h2 className="text-sm font-semibold">Unraid</h2>
-      <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">{summary}</p>
-    </div>
+    <Link
+      to={`/service/${unraid.id}`}
+      className="magnetic panel group block space-y-3 rounded-[var(--radius-2xl)] p-4 active:scale-[0.99]"
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-warning)]/25 bg-[var(--color-warning-muted)] text-[var(--color-warning)]">
+            <HardDrive className="size-4.5" aria-hidden />
+          </span>
+          <div>
+            <h2 className="font-display text-sm font-semibold tracking-tight">
+              {unraid.name || 'Unraid'}
+            </h2>
+            <p className="text-xs text-[var(--color-muted-foreground)]">
+              {!snapshot
+                ? 'Checking array status…'
+                : snapshot.error
+                  ? 'Unavailable'
+                  : `${snapshot.state} · ${snapshot.containers} containers`}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {snapshot && !snapshot.error ? (
+            <span className="tabular text-sm font-semibold text-[var(--color-foreground)]">
+              {snapshot.pct}%
+            </span>
+          ) : null}
+          <ChevronRight
+            className="size-4 text-[var(--color-muted-foreground)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+            aria-hidden
+          />
+        </div>
+      </div>
+      {snapshot && !snapshot.error ? (
+        <ProgressBar
+          value={snapshot.pct}
+          animated
+          color={
+            snapshot.pct > 85
+              ? 'var(--color-destructive)'
+              : snapshot.pct > 70
+                ? 'var(--color-warning)'
+                : serviceAccent('unraid')
+          }
+        />
+      ) : null}
+    </Link>
   )
 }
 
@@ -108,17 +207,25 @@ export function HomeHouseholdRecsWidget() {
   const { isDemo, has } = useConfiguredStack()
   if (isDemo || !has('seerr') || !has('tautulli')) return null
   return (
-    <div className="panel space-y-2 rounded-2xl p-4">
-      <h2 className="text-sm font-semibold">For your household</h2>
-      <p className="text-xs text-[var(--color-muted-foreground)]">
-        Open Discover to request titles based on what the house has been watching.
-      </p>
-      <Link
-        to="/discover"
-        className="inline-flex min-h-[var(--tap)] items-center text-sm font-medium text-[var(--color-accent)]"
-      >
-        Browse Discover
-      </Link>
-    </div>
+    <Link
+      to="/discover"
+      className="magnetic panel group flex items-center justify-between gap-4 rounded-[var(--radius-2xl)] p-4 active:scale-[0.99]"
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-[var(--color-primary)]/25 bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+          <Compass className="size-4.5" aria-hidden />
+        </span>
+        <div className="min-w-0">
+          <h2 className="font-display text-sm font-semibold tracking-tight">For your household</h2>
+          <p className="mt-0.5 truncate text-xs text-[var(--color-muted-foreground)]">
+            Browse Discover to request titles inspired by recent viewing
+          </p>
+        </div>
+      </div>
+      <ChevronRight
+        className="size-4 shrink-0 text-[var(--color-muted-foreground)] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+        aria-hidden
+      />
+    </Link>
   )
 }

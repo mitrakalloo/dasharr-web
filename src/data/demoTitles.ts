@@ -13,6 +13,7 @@ export type TitleEpisode = {
 
 export type TitleSeason = {
   seasonNumber: number
+  monitored?: boolean
   episodeFileCount: number
   episodeCount: number
   sizeOnDisk: string
@@ -49,6 +50,12 @@ export type DemoTitle = {
   sizeOnDisk: string
   path: string
   poster: string
+  tmdbId?: number
+  imdbId?: string
+  tvdbId?: number
+  titleSlug?: string
+  qualityProfileId?: number
+  rootFolderPath?: string
   seasons?: TitleSeason[]
   releases: TitleRelease[]
 }

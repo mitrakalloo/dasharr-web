@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 
 import { IconButton } from '@/components/ui/IconButton'
+import { cn } from '@/lib/cn'
 import { useRefreshStore } from '@/stores/refreshStore'
 
 interface FreshnessLabelProps {
@@ -18,14 +20,24 @@ function formatAgo(updatedAt: number) {
 
 export function FreshnessLabel({ updatedAt }: FreshnessLabelProps) {
   const bump = useRefreshStore((state) => state.bump)
+  const [spinning, setSpinning] = useState(false)
+
+  function handleRefresh() {
+    bump()
+    setSpinning(true)
+    window.setTimeout(() => setSpinning(false), 600)
+  }
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <p className="text-xs text-[var(--color-muted-foreground)]">
-        {updatedAt ? `Updated ${formatAgo(updatedAt)}` : 'Waiting for data…'}
-      </p>
-      <IconButton label="Refresh all" onClick={bump} className="size-9">
-        <RefreshCw className="size-4" />
+      <div className="flex items-center gap-2 text-xs text-[var(--color-muted-foreground)]">
+        <span className="size-1.5 rounded-full bg-[var(--color-success)] beacon-pulse" aria-hidden />
+        <span className="tabular">
+          {updatedAt ? `Updated ${formatAgo(updatedAt)}` : 'Live sync'}
+        </span>
+      </div>
+      <IconButton label="Refresh data" size="sm" onClick={handleRefresh}>
+        <RefreshCw className={cn('size-3.5 transition-transform', spinning && 'animate-spin')} />
       </IconButton>
     </div>
   )

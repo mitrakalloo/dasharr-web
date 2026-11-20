@@ -2,10 +2,16 @@ export interface SonarrSeries {
   id: number
   title: string
   year?: number
+  added?: string
   status: string
   overview?: string
   network?: string
   path?: string
+  rootFolderPath?: string
+  qualityProfileId?: number
+  imdbId?: string
+  tvdbId?: number
+  titleSlug?: string
   monitored: boolean
   runtime?: number
   genres?: string[]
@@ -65,6 +71,13 @@ export interface ArrRootFolder {
 export interface ArrQualityProfile {
   id: number
   name: string
+}
+
+export interface ArrHealthWarning {
+  source: string
+  type: 'warning' | 'error' | 'notice' | string
+  message: string
+  wikiUrl?: string
 }
 
 export interface SonarrLookupSeries extends SonarrSeries {

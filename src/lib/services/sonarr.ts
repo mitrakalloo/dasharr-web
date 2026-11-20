@@ -145,6 +145,45 @@ export async function getSonarrWantedMissing(
   return data.records
 }
 
+export async function getSonarrWantedCutoff(
+  settings: AppSettings,
+  service: ServiceConfig,
+) {
+  const data = await serviceJson<{
+    records: Array<{
+      id: number
+      seriesId: number
+      seasonNumber: number
+      episodeNumber: number
+      title?: string
+      airDate?: string
+      series?: { title?: string }
+    }>
+  }>(settings, service, '/api/v3/wanted/cutoff?page=1&pageSize=50&sortDirection=descending')
+  return data.records
+}
+
+export async function getSonarrHealth(settings: AppSettings, service: ServiceConfig) {
+  return serviceJson<import('@/lib/services/sonarr.types').ArrHealthWarning[]>(
+    settings,
+    service,
+    '/api/v3/health',
+  )
+}
+
+export async function updateSonarrEpisodeMonitored(
+  settings: AppSettings,
+  service: ServiceConfig,
+  episodeIds: number[],
+  monitored: boolean,
+) {
+  return serviceJson<unknown>(settings, service, '/api/v3/episode/monitor', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ episodeIds, monitored }),
+  })
+}
+
 export async function getSonarrHistory(settings: AppSettings, service: ServiceConfig) {
   const data = await serviceJson<{
     records: Array<{

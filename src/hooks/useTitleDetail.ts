@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
+import { getDemoTitle, type DemoTitle } from '@/data/demoTitles'
 import {
   mapLidarrTitle,
   mapRadarrTitle,
   mapSonarrTitle,
 } from '@/features/title/title.mappers'
-import { getDemoTitle, type DemoTitle } from '@/data/demoTitles'
 import { parseLiveTitleId } from '@/lib/liveTitleId'
 import { getLidarrAlbum } from '@/lib/services/lidarr'
 import { getRadarrMovieById } from '@/lib/services/radarr'
@@ -18,10 +18,13 @@ type TitleState =
   | { status: 'success'; data: DemoTitle }
   | { status: 'error'; error: string }
 
-export function useTitleDetail(id: string, preferDemo: boolean): TitleState {
+export function useTitleDetail(id: string, preferDemo: boolean) {
   const settings = useConfigStore((state) => state.settings)
   const services = useConfigStore((state) => state.services)
   const [state, setState] = useState<TitleState>({ status: 'idle' })
+  const [tick, setTick] = useState(0)
+
+  const reload = useCallback(() => setTick((n) => n + 1), [])
 
   useEffect(() => {
     if (!id) {
@@ -62,7 +65,7 @@ export function useTitleDetail(id: string, preferDemo: boolean): TitleState {
     let cancelled = false
 
     async function run() {
-      setState({ status: 'loading' })
+      setState((prev) => (prev.status === 'success' ? prev : { status: 'loading' }))
       try {
         let data: DemoTitle
         if (parsed!.service === 'sonarr') {
@@ -93,7 +96,7 @@ export function useTitleDetail(id: string, preferDemo: boolean): TitleState {
     return () => {
       cancelled = true
     }
-  }, [id, preferDemo, services, settings])
+  }, [id, preferDemo, services, settings, tick])
 
-  return state
+  return { ...state, reload }
 }

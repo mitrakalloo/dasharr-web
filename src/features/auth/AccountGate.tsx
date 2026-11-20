@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { DasharrMark } from '@/components/brand/DasharrMark'
 import { BootstrapScreen } from '@/features/auth/BootstrapScreen'
 import { LoginScreen } from '@/features/auth/LoginScreen'
 import { RedeemInviteScreen } from '@/features/auth/RedeemInviteScreen'
@@ -43,10 +44,21 @@ export function AccountGate({ children }: { children: React.ReactNode }) {
 
   if (phase === 'loading') {
     return (
-      <div className="auth-canvas flex min-h-dvh flex-col items-center justify-center gap-4">
-        <div className="relative z-10 flex flex-col items-center gap-3">
-          <div className="size-10 animate-spin rounded-full border-2 border-[var(--color-primary)] border-r-transparent" />
-          <p className="text-sm text-[var(--color-muted-foreground)]">Preparing your desk…</p>
+      <div className="auth-canvas flex min-h-dvh flex-col items-center justify-center px-4">
+        <div className="relative z-10 flex flex-col items-center gap-4">
+          <div className="relative flex size-14 items-center justify-center">
+            <span
+              className="absolute inset-0 animate-spin rounded-2xl border-2 border-[var(--color-primary)]/30 border-t-[var(--color-primary)]"
+              aria-hidden
+            />
+            <DasharrMark className="size-9" />
+          </div>
+          <div className="text-center">
+            <p className="font-display text-sm font-semibold tracking-tight">Dasharr</p>
+            <p className="mt-0.5 text-xs text-[var(--color-muted-foreground)]">
+              Preparing your signal desk…
+            </p>
+          </div>
         </div>
       </div>
     )

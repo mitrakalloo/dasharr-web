@@ -1,12 +1,16 @@
-import { ArrowDown, ArrowUp, ChevronsUp } from 'lucide-react'
+import { Reorder, useDragControls } from 'motion/react'
+import { ArrowDown, ArrowUp, ChevronsUp, GripVertical } from 'lucide-react'
 
 import { IconButton } from '@/components/ui/IconButton'
+import { Switch } from '@/components/ui/Switch'
+import { cn } from '@/lib/cn'
 import { DASHBOARD_WIDGET_META } from '@/lib/dashboard/dashboard.meta'
 import type { DashboardWidgetConfig, DashboardWidgetId } from '@/lib/dashboard/dashboard.types'
-import { cn } from '@/lib/cn'
 
 interface EditHomeWidgetRowProps {
   widget: DashboardWidgetConfig
+  isFirst?: boolean
+  isLast?: boolean
   onToggle: (id: DashboardWidgetId) => void
   onMove: (id: DashboardWidgetId, direction: 'up' | 'down') => void
   onMoveToTop: (id: DashboardWidgetId) => void
@@ -14,46 +18,77 @@ interface EditHomeWidgetRowProps {
 
 export function EditHomeWidgetRow({
   widget,
+  isFirst = false,
+  isLast = false,
   onToggle,
   onMove,
   onMoveToTop,
 }: EditHomeWidgetRowProps) {
+  const dragControls = useDragControls()
   const meta = DASHBOARD_WIDGET_META.find((item) => item.id === widget.id)
 
   return (
-    <div
+    <Reorder.Item
+      value={widget}
+      dragListener={false}
+      dragControls={dragControls}
       className={cn(
-        'flex items-center gap-3 panel rounded-[var(--radius-2xl)] px-3 py-3',
-        !widget.enabled && 'opacity-55',
+        'panel flex items-center gap-2.5 rounded-[var(--radius-xl)] px-3 py-3 transition-opacity select-none',
+        !widget.enabled && 'opacity-60',
       )}
+      whileDrag={{ scale: 1.015, zIndex: 20 }}
     >
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold">{meta?.label ?? widget.id}</p>
-        <p className="text-xs text-[var(--color-muted-foreground)]">{meta?.description}</p>
-      </div>
       <button
         type="button"
-        onClick={() => onToggle(widget.id)}
-        className={cn(
-          'min-h-10 shrink-0 cursor-pointer rounded-full border px-3 text-xs font-semibold transition active:scale-95',
-          widget.enabled
-            ? 'border-[var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-secondary)]'
-            : 'border-[var(--color-border-strong)] bg-[var(--color-muted)] text-[var(--color-muted-foreground)]',
-        )}
+        aria-label={`Drag ${meta?.label ?? widget.id}`}
+        onPointerDown={(event) => dragControls.start(event)}
+        className="inline-flex size-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-muted-foreground)] transition-colors hover:bg-[var(--color-hover)] hover:text-[var(--color-foreground)] active:cursor-grabbing"
       >
-        {widget.enabled ? 'On' : 'Off'}
+        <GripVertical className="size-4" aria-hidden />
       </button>
-      <div className="flex shrink-0 gap-0.5">
-        <IconButton label="Move to top" onClick={() => onMoveToTop(widget.id)}>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold tracking-tight">
+          {meta?.label ?? widget.id}
+        </p>
+        {meta?.description ? (
+          <p className="mt-0.5 truncate text-xs text-[var(--color-muted-foreground)]">
+            {meta.description}
+          </p>
+        ) : null}
+      </div>
+
+      <Switch
+        checked={widget.enabled}
+        onCheckedChange={() => onToggle(widget.id)}
+      />
+
+      <div className="flex shrink-0 items-center gap-0.5 border-l border-[var(--color-hairline)] pl-2">
+        <IconButton
+          label="Move to top"
+          size="sm"
+          disabled={isFirst}
+          onClick={() => onMoveToTop(widget.id)}
+        >
           <ChevronsUp className="size-4" />
         </IconButton>
-        <IconButton label="Move up" onClick={() => onMove(widget.id, 'up')}>
+        <IconButton
+          label="Move up"
+          size="sm"
+          disabled={isFirst}
+          onClick={() => onMove(widget.id, 'up')}
+        >
           <ArrowUp className="size-4" />
         </IconButton>
-        <IconButton label="Move down" onClick={() => onMove(widget.id, 'down')}>
+        <IconButton
+          label="Move down"
+          size="sm"
+          disabled={isLast}
+          onClick={() => onMove(widget.id, 'down')}
+        >
           <ArrowDown className="size-4" />
         </IconButton>
       </div>
-    </div>
+    </Reorder.Item>
   )
 }

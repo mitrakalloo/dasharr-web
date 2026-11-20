@@ -1,3 +1,5 @@
+import { AlertCircle, CheckCircle2, PlugZap, Plus } from 'lucide-react'
+
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
@@ -15,19 +17,20 @@ export function ServiceForm() {
   return (
     <form
       onSubmit={form.handleSubmit}
-      className="space-y-4 panel rounded-[var(--radius-2xl)] p-4"
+      className="panel space-y-5 rounded-[var(--radius-2xl)] p-5"
     >
       <div>
-        <h2 className="font-display text-base font-semibold tracking-tight">Add service</h2>
-        <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-          Credentials never leave this browser except when calling your services (or the local
-          proxy).
+        <h2 className="font-display text-base font-semibold tracking-tight text-[var(--color-foreground)]">
+          Add service
+        </h2>
+        <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
+          Credentials are encrypted on the server and used only when communicating with your stack.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Select
-          label="Type"
+          label="Service type"
           value={form.type}
           options={typeOptions}
           onChange={(event) => form.handleTypeChange(event.target.value as ServiceType)}
@@ -38,11 +41,11 @@ export function ServiceForm() {
           onChange={(e) => form.setName(e.target.value)}
         />
         <Input
+          wrapperClassName="md:col-span-2"
           label="Base URL"
           value={form.baseUrl}
           onChange={(e) => form.setBaseUrl(e.target.value)}
           placeholder="http://192.168.1.10:8989"
-          className="md:col-span-2"
         />
         <Input
           label="Local URL (optional)"
@@ -56,27 +59,27 @@ export function ServiceForm() {
           onChange={(e) => form.setRemoteUrl(e.target.value)}
           placeholder="https://sonarr.example.com"
         />
-        <div className="md:col-span-2">
-          <Select
-            label="URL mode"
-            value={form.urlMode}
-            options={[
-              { value: 'auto', label: 'Auto' },
-              { value: 'local', label: 'Local' },
-              { value: 'remote', label: 'Remote' },
-            ]}
-            onChange={(event) =>
-              form.setUrlMode(event.target.value as 'auto' | 'local' | 'remote')
-            }
-          />
-        </div>
+        <Select
+          wrapperClassName="md:col-span-2"
+          label="URL routing mode"
+          value={form.urlMode}
+          options={[
+            { value: 'auto', label: 'Auto (prefer local when reachable)' },
+            { value: 'local', label: 'Always local' },
+            { value: 'remote', label: 'Always remote' },
+          ]}
+          onChange={(event) =>
+            form.setUrlMode(event.target.value as 'auto' | 'local' | 'remote')
+          }
+        />
         {form.meta.needsApiKey ? (
           <Input
+            wrapperClassName="md:col-span-2"
             label={form.type === 'deluge' ? 'Web password' : 'API key'}
             type="password"
             value={form.apiKey}
             onChange={(e) => form.setApiKey(e.target.value)}
-            className="md:col-span-2"
+            placeholder="Paste API key or token"
           />
         ) : null}
         {form.meta.needsBasicAuth ? (
@@ -97,23 +100,32 @@ export function ServiceForm() {
       </div>
 
       {form.test.status === 'success' ? (
-        <p className="text-sm text-emerald-300">Connected · v{form.test.version}</p>
-      ) : null}
-      {form.test.status === 'error' ? (
-        <p className="text-sm text-rose-300">{form.test.message}</p>
+        <div className="flex items-center gap-2 rounded-[var(--radius-lg)] border border-[var(--color-success)]/25 bg-[var(--color-success-muted)] px-3 py-2.5 text-xs font-medium text-[var(--color-success)]">
+          <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
+          <span>Connected · v{form.test.version}</span>
+        </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2">
+      {form.test.status === 'error' ? (
+        <div className="flex items-center gap-2 rounded-[var(--radius-lg)] border border-[var(--color-destructive)]/25 bg-[var(--color-destructive-muted)] px-3 py-2.5 text-xs font-medium text-[var(--color-destructive)]">
+          <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+          <span>{form.test.message}</span>
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center gap-2.5 pt-1">
         <Button
           type="button"
           variant="secondary"
-          disabled={form.test.status === 'loading'}
+          loading={form.test.status === 'loading'}
           onClick={() => void form.handleTest()}
         >
-          {form.test.status === 'loading' ? 'Testing…' : 'Test connection'}
+          <PlugZap className="size-4" />
+          Test connection
         </Button>
-        <Button type="submit" disabled={form.busy}>
-          {form.busy ? 'Saving…' : 'Save service'}
+        <Button type="submit" loading={form.busy}>
+          <Plus className="size-4" />
+          Save service
         </Button>
       </div>
     </form>

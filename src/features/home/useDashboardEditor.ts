@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { DashboardWidgetId } from '@/lib/dashboard/dashboard.types'
+import type { DashboardWidgetConfig, DashboardWidgetId } from '@/lib/dashboard/dashboard.types'
 import { useDashboardStore } from '@/stores/dashboardStore'
 
 export function useDashboardEditor() {
@@ -16,6 +16,7 @@ export function useDashboardEditor() {
   const deleteDashboard = useDashboardStore((state) => state.deleteDashboard)
   const reorderWidget = useDashboardStore((state) => state.reorderWidget)
   const moveWidgetToTop = useDashboardStore((state) => state.moveWidgetToTop)
+  const setWidgetsOrder = useDashboardStore((state) => state.setWidgetsOrder)
   const toggleWidget = useDashboardStore((state) => state.toggleWidget)
   const resetDashboards = useDashboardStore((state) => state.resetDashboards)
 
@@ -54,13 +55,11 @@ export function useDashboardEditor() {
 
   function onDelete() {
     if (!active || dashboards.length <= 1) return
-    if (!window.confirm(`Delete dashboard “${active.name}”?`)) return
     deleteDashboard(active.id)
     toast.success('Dashboard deleted')
   }
 
   function onReset() {
-    if (!window.confirm('Restore Tonight, Discover, and Ops presets?')) return
     resetDashboards()
     toast.success('Dashboards reset')
   }
@@ -94,6 +93,10 @@ export function useDashboardEditor() {
     moveWidgetToTop: (id: DashboardWidgetId) => {
       if (!active) return
       moveWidgetToTop(active.id, id)
+    },
+    setWidgetsOrder: (widgets: DashboardWidgetConfig[]) => {
+      if (!active) return
+      setWidgetsOrder(active.id, widgets)
     },
   }
 }

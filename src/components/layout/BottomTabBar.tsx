@@ -17,10 +17,10 @@ export function BottomTabBar({ queueBadge, requestsBadge }: BottomTabBarProps) {
   return (
     <nav
       aria-label="Primary"
-      className="shrink-0 px-3 pb-[max(10px,env(safe-area-inset-bottom,0px))] pt-1 lg:hidden"
+      className="shrink-0 px-3 pb-[max(10px,env(safe-area-inset-bottom,0px))] pt-1.5 lg:hidden"
     >
       <div
-        className="glass mx-auto max-w-[var(--shell-max)] overflow-hidden"
+        className="glass mx-auto max-w-md overflow-hidden"
         style={{ borderRadius: 'var(--radius-dock)' }}
       >
         <LayoutGroup id="bottom-tabs">
@@ -42,22 +42,22 @@ export function BottomTabBar({ queueBadge, requestsBadge }: BottomTabBarProps) {
                   to={to}
                   end={end}
                   className={cn(
-                    'relative flex min-h-[var(--tap)] cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[10px] font-medium tracking-wide transition active:scale-[0.96]',
+                    'relative flex min-h-[var(--tap)] cursor-pointer flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[10px] font-medium tracking-wide transition-colors active:scale-[0.95]',
                     active
                       ? 'text-[var(--color-primary)]'
-                      : 'text-[var(--color-muted-foreground)]',
+                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
                   )}
                 >
                   {active ? (
                     <motion.span
                       layoutId="tab-pill"
-                      className="absolute inset-0.5 rounded-full bg-[var(--color-primary-muted)]"
+                      className="absolute inset-0.5 rounded-full border border-[var(--color-primary)]/20 bg-[var(--color-primary-muted)]"
                       transition={spring}
                     />
                   ) : null}
                   <span className="relative">
                     <Icon
-                      className={cn('size-5', active ? 'stroke-[2.25]' : 'stroke-2')}
+                      className={cn('size-5', active ? 'stroke-[2.25]' : 'stroke-[1.9]')}
                       aria-hidden
                     />
                     {badge && badge > 0 ? (

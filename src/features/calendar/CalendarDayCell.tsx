@@ -18,20 +18,26 @@ export function CalendarDayCell({ day, selected, onSelect }: CalendarDayCellProp
       onClick={() => onSelect(day.dateKey)}
       aria-label={`${day.dateKey}${hasEvents ? `, ${day.events.length} releases` : ''}`}
       aria-pressed={selected}
-      className="flex min-h-12 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl transition active:scale-95"
+      className={cn(
+        'flex min-h-12 cursor-pointer flex-col items-center justify-center gap-1 rounded-[var(--radius-md)] transition-colors hover:bg-[var(--color-hover)] active:scale-95',
+        selected && 'bg-[var(--color-primary-muted)]/60',
+      )}
     >
       <span
         className={cn(
-          'flex size-8 items-center justify-center rounded-full text-sm font-medium tabular',
-          selected && 'bg-white text-black',
-          !selected && day.isToday && 'border border-sky-400 bg-sky-400/15 text-sky-200',
-          !selected && !day.isToday && day.inMonth && hasEvents && 'text-[var(--color-foreground)]',
+          'tabular flex size-8 items-center justify-center rounded-full text-sm font-medium transition-colors',
+          selected &&
+            'bg-[var(--color-primary)] font-semibold text-[var(--color-on-primary)] shadow-[var(--elevation-glow)]',
+          !selected &&
+            day.isToday &&
+            'border border-[var(--color-primary)]/45 bg-[var(--color-primary-muted)] font-semibold text-[var(--color-primary)]',
+          !selected && !day.isToday && day.inMonth && hasEvents && 'font-semibold text-[var(--color-foreground)]',
           !selected &&
             !day.isToday &&
             day.inMonth &&
             !hasEvents &&
             'text-[var(--color-muted-foreground)]',
-          !day.inMonth && 'text-[var(--color-muted-foreground)]/45',
+          !day.inMonth && 'text-[var(--color-muted-foreground)]/40',
         )}
       >
         {day.dayNumber}
@@ -40,8 +46,8 @@ export function CalendarDayCell({ day, selected, onSelect }: CalendarDayCellProp
         {kinds.map((kind) => (
           <span
             key={`${day.dateKey}-${kind}`}
-            className="size-1 rounded-full"
-            style={{ backgroundColor: serviceAccent(kind), opacity: day.inMonth ? 1 : 0.45 }}
+            className="size-1.5 rounded-full"
+            style={{ backgroundColor: serviceAccent(kind), opacity: day.inMonth ? 1 : 0.4 }}
           />
         ))}
       </span>

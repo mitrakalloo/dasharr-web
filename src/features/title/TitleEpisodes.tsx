@@ -1,34 +1,42 @@
-import { TitleEpisodeRow } from '@/features/title/TitleEpisodeRow'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { TitleEpisode } from '@/data/demoTitles'
+import { TitleEpisodeRow } from '@/features/title/TitleEpisodeRow'
 
 interface TitleEpisodesProps {
   episodes: TitleEpisode[]
   canSearch?: boolean
+  canToggleMonitor?: boolean
   onSearchEpisode?: (episode: TitleEpisode) => void
+  onToggleEpisodeMonitor?: (episode: TitleEpisode) => void
 }
 
 export function TitleEpisodes({
   episodes,
   canSearch = false,
+  canToggleMonitor = false,
   onSearchEpisode,
+  onToggleEpisodeMonitor,
 }: TitleEpisodesProps) {
   if (episodes.length === 0) {
     return (
-      <p className="rounded-2xl border border-dashed border-[var(--color-border)] px-4 py-6 text-center text-sm text-[var(--color-muted-foreground)]">
-        No episode breakdown for this season yet.
-      </p>
+      <EmptyState
+        compact
+        title="No episode breakdown"
+        description="Episode details for this season haven’t synced yet."
+      />
     )
   }
 
   return (
-    <div className="overflow-hidden panel rounded-[var(--radius-2xl)]">
-      {episodes.map((episode, index) => (
+    <div className="panel divide-y divide-[var(--color-hairline)] overflow-hidden rounded-[var(--radius-2xl)]">
+      {episodes.map((episode) => (
         <TitleEpisodeRow
           key={episode.id}
           episode={episode}
-          bordered={index < episodes.length - 1}
           canSearch={canSearch}
+          canToggleMonitor={canToggleMonitor}
           onSearch={() => onSearchEpisode?.(episode)}
+          onToggleMonitor={() => onToggleEpisodeMonitor?.(episode)}
         />
       ))}
     </div>

@@ -11,7 +11,7 @@ interface ProgressBarProps {
 
 export function ProgressBar({
   value,
-  color = 'var(--color-accent)',
+  color = 'var(--color-primary)',
   className,
   live = false,
   animated = false,
@@ -21,7 +21,7 @@ export function ProgressBar({
   return (
     <div
       className={cn(
-        'h-1.5 w-full overflow-hidden rounded-full bg-white/[0.08] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]',
+        'h-1.5 w-full overflow-hidden rounded-full bg-[var(--color-track)]',
         className,
       )}
       role="progressbar"
@@ -34,7 +34,7 @@ export function ProgressBar({
           'h-full rounded-full',
           live && 'progress-live',
           animated && 'transition-[width] duration-700 ease-[var(--ease-out-expo)]',
-          !animated && !live && 'transition-[width] duration-300',
+          !animated && !live && 'transition-[width] duration-300 ease-[var(--ease-out-expo)]',
         )}
         style={{
           width: `${clamped}%`,

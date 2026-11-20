@@ -1,9 +1,13 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { ChevronRight } from 'lucide-react'
 
+import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 import { titlePath } from '@/data/demoTitles'
 import { useConfiguredStack } from '@/hooks/useConfiguredStack'
 import { useDownloadHistory } from '@/hooks/useDownloadHistory'
+import { serviceAccent } from '@/lib/serviceColors'
 
 export function HomeRecentDownloads() {
   const navigate = useNavigate()
@@ -15,38 +19,39 @@ export function HomeRecentDownloads() {
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold">Recently downloaded</h2>
-        <Link to="/history" className="min-h-[var(--tap)] content-center text-sm text-[var(--color-accent)]">
-          History
-        </Link>
-      </div>
+      <SectionHeader
+        title="Recently downloaded"
+        count={items.length}
+        actionLabel="History"
+        actionTo="/history"
+      />
       {history.status === 'loading' ? (
-        <p className="text-sm text-[var(--color-muted-foreground)]">Loading imports…</p>
-      ) : items.length === 0 ? (
-        <EmptyState title="No recent imports" description="Grabs will show up here." />
-      ) : (
         <div className="space-y-2">
+          <div className="skeleton h-16 rounded-[var(--radius-xl)]" />
+          <div className="skeleton h-16 rounded-[var(--radius-xl)]" />
+        </div>
+      ) : items.length === 0 ? (
+        <EmptyState compact title="No recent imports" description="Grabs and imports will show up here." />
+      ) : (
+        <div className="panel divide-y divide-[var(--color-hairline)] overflow-hidden rounded-[var(--radius-2xl)]">
           {items.map((item) => (
             <button
               key={item.id}
               type="button"
-              disabled={!item.titleId}
               onClick={() => {
-                if (item.titleId) navigate(titlePath(item.titleId))
+                navigate(item.titleId ? titlePath(item.titleId) : '/history')
               }}
-              className={`flex w-full items-center justify-between gap-3 panel rounded-[var(--radius-2xl)] px-3 py-3 text-left transition ${
-                item.titleId ? 'cursor-pointer active:scale-[0.99]' : 'cursor-default opacity-80'
-              }`}
+              className="flex w-full cursor-pointer items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--color-hover)] active:scale-[0.995]"
             >
-              <span className="min-w-0">
+              <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-medium">{item.title}</span>
-                <span className="block truncate text-xs text-[var(--color-muted-foreground)]">
+                <span className="mt-0.5 block truncate text-xs text-[var(--color-muted-foreground)]">
                   {item.subtitle} · {item.eventType}
                 </span>
               </span>
-              <span className="shrink-0 text-[10px] uppercase text-[var(--color-muted-foreground)]">
-                {item.service}
+              <span className="flex shrink-0 items-center gap-2">
+                <Badge color={serviceAccent(item.service)}>{item.service}</Badge>
+                <ChevronRight className="size-4 text-[var(--color-muted-foreground)]" aria-hidden />
               </span>
             </button>
           ))}

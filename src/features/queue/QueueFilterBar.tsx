@@ -1,8 +1,5 @@
-import { LayoutGroup, motion } from 'motion/react'
-
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import type { QueueFilter } from '@/features/queue/useQueuePage'
-import { spring } from '@/lib/motion'
-import { cn } from '@/lib/cn'
 
 const FILTER_LABELS: Record<QueueFilter, string> = {
   all: 'All',
@@ -16,36 +13,22 @@ const FILTER_LABELS: Record<QueueFilter, string> = {
 interface QueueFilterBarProps {
   filters: readonly QueueFilter[]
   value: QueueFilter
+  counts?: Partial<Record<QueueFilter, number>>
   onChange: (value: QueueFilter) => void
 }
 
-export function QueueFilterBar({ filters, value, onChange }: QueueFilterBarProps) {
+export function QueueFilterBar({ filters, value, counts, onChange }: QueueFilterBarProps) {
   return (
-    <LayoutGroup id="queue-filters">
-      <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
-        {filters.map((filter) => (
-          <button
-            key={filter}
-            type="button"
-            onClick={() => onChange(filter)}
-            className={cn(
-              'relative min-h-9 shrink-0 cursor-pointer rounded-full border px-4 text-sm font-medium tracking-tight transition active:scale-95',
-              value === filter
-                ? 'border-transparent text-[var(--color-on-primary-container)]'
-                : 'border-[var(--color-border)] bg-[var(--color-card)]/80 text-[var(--color-muted-foreground)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-foreground)]',
-            )}
-          >
-            {value === filter ? (
-              <motion.span
-                layoutId="queue-filter-pill"
-                className="absolute inset-0 rounded-full bg-[var(--color-primary-container)]"
-                transition={spring}
-              />
-            ) : null}
-            <span className="relative z-10">{FILTER_LABELS[filter]}</span>
-          </button>
-        ))}
-      </div>
-    </LayoutGroup>
+    <SegmentedControl
+      ariaLabel="Queue filters"
+      value={value}
+      onChange={onChange}
+      bleedMobile
+      options={filters.map((filter) => ({
+        value: filter,
+        label: FILTER_LABELS[filter],
+        count: counts?.[filter],
+      }))}
+    />
   )
 }

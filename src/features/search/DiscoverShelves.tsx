@@ -11,7 +11,23 @@ interface DiscoverShelvesProps {
 
 export function DiscoverShelves({ shelves, status, error, onSelect }: DiscoverShelvesProps) {
   if (status === 'loading' || status === 'idle') {
-    return <p className="text-sm text-[var(--color-muted-foreground)]">Loading discover…</p>
+    return (
+      <div className="space-y-5">
+        {Array.from({ length: 2 }).map((_, row) => (
+          <div key={row} className="space-y-2.5">
+            <div className="skeleton h-4 w-32 rounded-md" />
+            <div className="flex gap-3 overflow-hidden">
+              {Array.from({ length: 6 }).map((_, col) => (
+                <div
+                  key={col}
+                  className="skeleton aspect-[2/3] w-[124px] shrink-0 rounded-[var(--radius-xl)] sm:w-[140px]"
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    )
   }
 
   if (status === 'error') {
@@ -28,7 +44,7 @@ export function DiscoverShelves({ shelves, status, error, onSelect }: DiscoverSh
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       {shelves.map((shelf) => (
         <DiscoverShelfRow
           key={shelf.id}

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Inbox } from 'lucide-react'
 
 import { Button } from '@/components/ui/Button'
+import { cn } from '@/lib/cn'
 
 interface EmptyStateProps {
   title: string
@@ -10,6 +11,8 @@ interface EmptyStateProps {
   actionTo?: string
   onAction?: () => void
   icon?: React.ReactNode
+  className?: string
+  compact?: boolean
 }
 
 export function EmptyState({
@@ -19,14 +22,26 @@ export function EmptyState({
   actionTo,
   onAction,
   icon,
+  className,
+  compact = false,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center rounded-[var(--radius-2xl)] border border-dashed border-[var(--color-border)] bg-[var(--color-card)]/50 px-5 py-10 text-center">
-      <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-[var(--color-hairline)] bg-[var(--color-muted)] text-[var(--color-muted-foreground)]">
+    <div
+      className={cn(
+        'flex flex-col items-center justify-center rounded-[var(--radius-2xl)] border border-dashed border-[var(--color-border)] bg-[var(--color-card)]/60 text-center',
+        compact ? 'px-4 py-7' : 'px-6 py-11',
+        className,
+      )}
+    >
+      <div className="mb-3.5 flex size-12 items-center justify-center rounded-[var(--radius-xl)] border border-[var(--color-border)] bg-[var(--color-muted)] text-[var(--color-muted-foreground)] shadow-[var(--panel-highlight)]">
         {icon ?? <Inbox className="size-5" aria-hidden />}
       </div>
-      <p className="font-display text-base font-semibold tracking-tight">{title}</p>
-      <p className="mt-1.5 max-w-sm text-sm text-[var(--color-muted-foreground)]">{description}</p>
+      <p className="font-display text-base font-semibold tracking-tight text-[var(--color-foreground)]">
+        {title}
+      </p>
+      <p className="mt-1.5 max-w-sm text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+        {description}
+      </p>
       {actionLabel && actionTo ? (
         <Link to={actionTo} className="mt-5 inline-flex">
           <Button variant="secondary" size="sm">

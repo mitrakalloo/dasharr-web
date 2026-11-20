@@ -12,6 +12,7 @@ interface BottomSheetProps {
   open: boolean
   onClose: () => void
   title: string
+  subtitle?: string
   children: React.ReactNode
   /** Desktop presentation: centered modal (default) or right slide-over inspector. */
   desktop?: 'modal' | 'drawer'
@@ -25,6 +26,7 @@ export function BottomSheet({
   open,
   onClose,
   title,
+  subtitle,
   children,
   desktop = 'modal',
   size = 'md',
@@ -55,7 +57,7 @@ export function BottomSheet({
     }
   }
 
-  const sizeClass = size === 'lg' ? 'md:max-w-2xl' : 'md:max-w-xl'
+  const sizeClass = size === 'lg' ? 'md:max-w-2xl' : 'md:max-w-lg'
 
   return (
     <AnimatePresence>
@@ -63,17 +65,17 @@ export function BottomSheet({
         <div
           className={cn(
             'fixed inset-0 z-50 flex justify-center',
-            asDrawer ? 'items-stretch justify-end' : 'items-end md:items-center',
+            asDrawer ? 'items-stretch justify-end' : 'items-end md:items-center md:p-4',
           )}
         >
           <motion.button
             type="button"
             aria-label="Dismiss"
-            className="absolute inset-0 bg-[var(--color-overlay)] backdrop-blur-[2px]"
+            className="absolute inset-0 cursor-default bg-[var(--color-overlay)] backdrop-blur-[4px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.22 }}
             onClick={onClose}
           />
           <motion.div
@@ -83,7 +85,7 @@ export function BottomSheet({
             className={cn(
               'relative z-10 flex max-h-[88dvh] w-full flex-col border border-[var(--color-border)] bg-[var(--color-card)] shadow-[var(--panel-highlight),var(--elevation-float)]',
               asDrawer
-                ? 'h-full max-h-none w-full max-w-[var(--queue-rail)] rounded-none border-y-0 border-r-0'
+                ? 'h-full max-h-none w-full max-w-[400px] rounded-none border-y-0 border-r-0'
                 : cn(
                     'max-w-[var(--sheet-max)] rounded-t-[var(--radius-2xl)] md:rounded-[var(--radius-2xl)]',
                     sizeClass,
@@ -95,7 +97,7 @@ export function BottomSheet({
                 : asDrawer
                   ? { x: '100%' }
                   : asModal
-                    ? { opacity: 0, y: 24, scale: 0.98 }
+                    ? { opacity: 0, y: 18, scale: 0.97 }
                     : { y: '100%' }
             }
             animate={
@@ -113,7 +115,7 @@ export function BottomSheet({
                 : asDrawer
                   ? { x: '100%' }
                   : asModal
-                    ? { opacity: 0, y: 16, scale: 0.98 }
+                    ? { opacity: 0, y: 12, scale: 0.97 }
                     : { y: '100%' }
             }
             transition={spring}
@@ -122,14 +124,23 @@ export function BottomSheet({
             dragElastic={{ top: 0.05, bottom: 0.55 }}
             onDragEnd={handleDragEnd}
           >
-            <div className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-white/20 md:hidden" />
-            <div className="flex items-center justify-between gap-3 border-b border-[var(--color-hairline)] px-4 py-2.5">
-              <h2 className="font-display text-base font-semibold tracking-tight">{title}</h2>
-              <IconButton label="Close" onClick={onClose}>
-                <X className="size-5" />
+            <div className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-[var(--color-handle)] md:hidden" />
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--color-hairline)] px-5 py-3.5">
+              <div className="min-w-0">
+                <h2 className="font-display truncate text-base font-semibold tracking-tight">
+                  {title}
+                </h2>
+                {subtitle ? (
+                  <p className="mt-0.5 truncate text-xs text-[var(--color-muted-foreground)]">
+                    {subtitle}
+                  </p>
+                ) : null}
+              </div>
+              <IconButton label="Close" size="sm" onClick={onClose}>
+                <X className="size-4" />
               </IconButton>
             </div>
-            <div className="overflow-y-auto px-4 pb-[calc(16px+env(safe-area-inset-bottom,0px))] pt-3">
+            <div className="custom-scrollbar overflow-y-auto px-5 pb-[calc(20px+env(safe-area-inset-bottom,0px))] pt-4">
               {children}
             </div>
           </motion.div>

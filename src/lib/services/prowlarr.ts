@@ -10,6 +10,7 @@ export interface ProwlarrIndexer {
   priority: number
   supportsRss: boolean
   supportsSearch: boolean
+  [key: string]: unknown
 }
 
 export async function getProwlarrStatus(settings: AppSettings, service: ServiceConfig) {
@@ -18,6 +19,19 @@ export async function getProwlarrStatus(settings: AppSettings, service: ServiceC
 
 export async function getProwlarrIndexers(settings: AppSettings, service: ServiceConfig) {
   return serviceJson<ProwlarrIndexer[]>(settings, service, '/api/v1/indexer')
+}
+
+export async function toggleProwlarrIndexer(
+  settings: AppSettings,
+  service: ServiceConfig,
+  indexer: ProwlarrIndexer,
+  enable: boolean,
+) {
+  return serviceJson<ProwlarrIndexer>(settings, service, `/api/v1/indexer/${indexer.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...indexer, enable }),
+  })
 }
 
 export interface ProwlarrRelease {
